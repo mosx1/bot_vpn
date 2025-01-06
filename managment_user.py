@@ -1,264 +1,343 @@
-import os, time, threading, pytz, config, string, secrets, requests
-from connect import db, logging, bot, form_text_markdownv2
+import time, threading, config, string, secrets, utils, controllerFastApi, requests
+from connect import db, logging, bot
 from telebot import types
-from datetime import datetime, timedelta
+from telebot.apihelper import ApiTelegramException
+
+from enum import Enum
+
+from enums.server_list import Servers, getServerNameById
+
+from psycopg2.extras import DictCursor
+
+from protocols import Protocol, getNameProtocolById
+
+from managers.subscription.renewal_of_subscription import renewalOfSubscription
+
+class StatusSearch(Enum):
+    
+    one = 0
+    all = 1
+    search = 2
 
 class UserList:
-    def __init__(self):
+    
+    def __init__(self, message = None):
         self.mes_arr = []
         self.start = 0
         self.one_active = 0
+        self.statusSearch: StatusSearch
+        if message:
+            self.search_user(message)
 
+
+    def __del__(self):
+        if len(self.mes_arr) != 0:
+            for item in self.mes_arr:
+                bot.delete_message(config.ADMINCHAT, item)
 
     def search_all_user(self, message):
-        option_where = ""
-        cur = db.cursor()
+        self.statusSearch = StatusSearch.all
+
         if self.one_active == 1:
-            option_where = " WHERE action = 1  ORDER BY datetime ASC "
+            option_where = " WHERE action = True  ORDER BY exit_date ASC "
         else:
-            option_where = " ORDER BY id DESC "
-        cur.execute("SELECT name, t_id, action, datetime FROM users_subscription " + option_where + " LIMIT " + str(self.start) + ", " + str(config.COUNT_PAGE))
-        self.manager_users_list(message, cur.fetchall())
+            option_where = " ORDER BY name ASC "
+        with db.cursor() as cursor:
+            cursor.execute("SELECT name, telegram_id, action, exit_date, server_id, paid, statistic FROM users_subscription " +
+                           option_where +
+                           " LIMIT " +
+                           str(config.COUNT_PAGE) +
+                           " OFFSET " + str(self.start))
+            self.manager_users_list(message, cursor.fetchall())
     
 
     def search_user(self, message):
+        self.statusSearch = StatusSearch.search
         option_where = ""
         search_text = str(message.text).split(" ", 1)[1]
-        cur = db.cursor()
         if self.one_active == 1:
-            option_where = ", action = 1"
-        cur.execute("SELECT name, t_id, action, datetime FROM users_subscription WHERE name LIKE '" + search_text + "%'" + option_where + " ORDER BY id DESC  LIMIT " + str(self.start) + ", " + str(config.COUNT_PAGE))
-        self.manager_users_list(message, cur.fetchall())
+            option_where = ", action = True"
+        with db.cursor() as cursor:
+            cursor.execute("SELECT name, telegram_id, action, exit_date, server_id, paid, statistic FROM users_subscription WHERE (name || telegram_id) ILIKE '%" + search_text + "%'" + option_where + " LIMIT  " + str(config.COUNT_PAGE) + " OFFSET " + str(self.start))
+            self.data_cur = cursor.fetchall()
+        self.manager_users_list(message)
 
 
-    def manager_users_list(self, message, data_cur):
+    def manager_users_list(self, message: types.Message, data_cur=None):
+
+        if data_cur:
+            self.data_cur = data_cur
         a = 0
         text_key_where = "Показать только активные"
         if self.one_active == 1:
             text_key_where = "Показать все"
-        if len(data_cur) == 0:
+        if len(self.data_cur) == 0:
             self.start -= config.COUNT_PAGE
             return
-        if len(data_cur) < config.COUNT_PAGE:
-            res = config.COUNT_PAGE - len(data_cur)
+        if len(self.data_cur) < config.COUNT_PAGE:
+            res = config.COUNT_PAGE - len(self.data_cur)
             for b in range(res):
-                data_cur.append((None, '-'))
+                self.data_cur.append((None, '-'))
             button_nav = [types.InlineKeyboardButton(text="<", callback_data='{"key": "page_client_back"}')]
         if self.start == 0:
             button_nav = [types.InlineKeyboardButton(text=">", callback_data='{"key": "page_client_next"}')]
         else:
-            button_nav = [types.InlineKeyboardButton(text="<", callback_data='{"key": "page_client_back"}'), types.InlineKeyboardButton(text=">", callback_data='{"key": "page_client_next"}')]
+            button_nav = [types.InlineKeyboardButton(text="<", callback_data='{"key": "page_client_back"}'),
+                          types.InlineKeyboardButton(text=">", callback_data='{"key": "page_client_next"}')]
         if len(self.mes_arr) == 0:
-            for i in data_cur:
-                keyboard_offer_one = types.InlineKeyboardMarkup()
-                if len(str(i[1])) > 1:
-                    if int(i[2]) == 0:
-                        keyboard_offer_one.add(types.InlineKeyboardButton(text="Включить", callback_data='{"key": "action_button", "id": "' + str(i[1]) + '"}'), types.InlineKeyboardButton(text="Данные", callback_data='{"key": "data_user", "id": "' + str(i[1]) + '"}'))
-                    else:
-                        keyboard_offer_one.add(types.InlineKeyboardButton(text="+", callback_data='{"key": "action_button", "id": "' + str(i[1]) + '"}'), types.InlineKeyboardButton(text="Отключить", callback_data='{"key": "deaction", "id": "' + str(i[1]) + '"}'), types.InlineKeyboardButton(text="Данные", callback_data='{"key": "data_user", "id": "' + str(i[1]) + '"}'))
-                if a == config.COUNT_PAGE - 1:
-                    keyboard_offer_one.row(*button_nav)
-                    keyboard_offer_one.add(types.InlineKeyboardButton(text=text_key_where, callback_data='{"key": "option_where"}'))
+            for i in self.data_cur:
+                if i[0] != None:
+                    keyboard_offer_one = self.addButtonKeyForUsersList(str(i[1]), int(i[2]), a, button_nav, text_key_where, i[4])
                 try:
-                    if int(i[2]) == 0:
-                        status = "🔴"
-                    elif int(i[2]) == 1:
-                        status = "🟢"
-                except Exception:
-                    pass
-                if i[0] == None:
-                    text = "-"
-                else:
-                    text = status + "[" + form_text_markdownv2(i[0]) + "](tg://user?id\=" + str(i[1]) + ") " + form_text_markdownv2(i[3]) + "\n"
-                m = bot.send_message(message.chat.id, text, parse_mode="MarkdownV2", reply_markup=keyboard_offer_one)
+                    status = textCheckActive(int(i[2]))
+                except:
+                    return
+                
+                if i[0] != None:
+                    if len(i) == 5:
+                        server = str(i[4])
+                    else:
+                        server = ""
+
+                m = bot.send_message(message.chat.id,
+                                    paidCheckActive(i[5]) + status + "[" + utils.form_text_markdownv2(i[0]) +
+                                    "](tg://user?id\=" + str(i[1]) + ") " +
+                                    utils.form_text_markdownv2(str(i[3])[:-3]) + server + "\n" +
+                                    utils.form_text_markdownv2(str(i[6])),
+                                    parse_mode="MarkdownV2",
+                                    reply_markup=keyboard_offer_one,
+                                    disable_notification=True)
                 self.mes_arr.append(m.id)
                 a+=1
         else:
-            for i in data_cur:
-                keyboard_offer_one = types.InlineKeyboardMarkup()
-                if len(str(i[1])) > 1:
-                    if int(i[2]) == 0:
-                        keyboard_offer_one.add(types.InlineKeyboardButton(text="Включить", callback_data='{"key": "action_button", "id": "' + str(i[1]) + '"}'), types.InlineKeyboardButton(text="Данные", callback_data='{"key": "data_user", "id": "' + str(i[1]) + '"}'))
-                    else:
-                        keyboard_offer_one.add(types.InlineKeyboardButton(text="+", callback_data='{"key": "action_button", "id": "' + str(i[1]) + '"}'), types.InlineKeyboardButton(text="Отключить", callback_data='{"key": "deaction", "id": "' + str(i[1]) + '"}'), types.InlineKeyboardButton(text="Данные", callback_data='{"key": "data_user", "id": "' + str(i[1]) + '"}'))
-                if a == config.COUNT_PAGE - 1:
-                    keyboard_offer_one.row(*button_nav)
-                    keyboard_offer_one.add(types.InlineKeyboardButton(text=text_key_where, callback_data='{"key": "option_where"}'))
+            for i in self.data_cur:
+                if i[0] != None:
+                    keyboard_offer_one = self.addButtonKeyForUsersList(str(i[1]), int(i[2]), a, button_nav, text_key_where, i[4])
                 try:
-                    if int(i[2]) == 0:
-                        status = "🔴"
-                    elif int(i[2]) == 1:
-                        status = "🟢"
+                    status = textCheckActive(int(i[2]))
                 except Exception:
                     bot.edit_message_text(chat_id=message.chat.id, message_id=self.mes_arr[a], text="\-", parse_mode="MarkdownV2", reply_markup=keyboard_offer_one)
                 try:
-                    bot.edit_message_text(chat_id=message.chat.id, message_id=self.mes_arr[a], text=status + "[" + form_text_markdownv2(i[0]) + "](tg://user?id\=" + str(i[1]) + ") " + form_text_markdownv2(i[3]) + "\n", parse_mode="MarkdownV2", reply_markup=keyboard_offer_one)
+                    if len(i) == 5:
+                        server = str(i[4])
+                    else:
+                        server = ""
+
+                    bot.edit_message_text(chat_id=message.chat.id,
+                                          message_id=self.mes_arr[a],
+                                          text = paidCheckActive(i[5]) + status + "[" +
+                                          utils.form_text_markdownv2(i[0]) +
+                                          "](tg://user?id\=" + str(i[1]) +
+                                          ") " + utils.form_text_markdownv2(str(i[3])[:-3]) + server + "\n" +
+                                          utils.form_text_markdownv2(str(i[6])),
+                                          parse_mode="MarkdownV2",
+                                          reply_markup=keyboard_offer_one)
                 except Exception as e:
-                    pass
+                    continue
                 a+=1
         
+    @classmethod
+    def addButtonKeyForUsersList(self, userId: str, userStatus: bool, a: int = 0, buttonNav: list = None, textKeyWhere: str = None, server: str = None) -> object:
+        keyboard_offer_one = types.InlineKeyboardMarkup()
+        if len(userId) > 1:
+            if userStatus:
+                if (server):
+                    inlineKeyConnect = types.InlineKeyboardButton(
+                            text="+",
+                            callback_data='{"key": "connect", "id": ' + userId + ', "serverId": ' + str(server) + '}'
+                        )
+                else:
+                    inlineKeyConnect = types.InlineKeyboardButton(
+                            text="+",
+                            callback_data='{"key": "connect", "id": ' + userId + '}'
+                        )
+                keyboard_offer_one.add(
+                    inlineKeyConnect,
+                    types.InlineKeyboardButton(text="Отключить", callback_data='{"key": "deaction", "id": "' + userId + '"}'),
+                    types.InlineKeyboardButton(text="Данные", callback_data='{"key": "data_user", "id": "' + userId + '"}'),
+                    types.InlineKeyboardButton(text="Отправить конфиг", callback_data='{"key": "sendConf", "id": "' + userId + '"}')
+                )
+                
+            else:
+                
+                keyboard_offer_one.add(types.InlineKeyboardButton(text="Германия", callback_data='{"key": "connect", "id": "' + userId + '", "serverId": ' + str(Servers.deutsche.value) + '}'),
+                                       types.InlineKeyboardButton(text="Нидерланды", callback_data='{"key": "connect", "id": "' + userId + '", "serverId": ' + str(Servers.niderlands2.value) + '}'),
+                                       types.InlineKeyboardButton(text="Данные", callback_data='{"key": "data_user", "id": "' + userId + '"}')
+                                       )
+        if a == config.COUNT_PAGE - 1:
+            keyboard_offer_one.row(*buttonNav)
+            keyboard_offer_one.add(types.InlineKeyboardButton(text=textKeyWhere, callback_data='{"key": "option_where"}'))
+        return keyboard_offer_one
 
 
-def edit_mes_users_list(message, id):
-    key_action = types.InlineKeyboardMarkup()
-    key_action.add(*[types.InlineKeyboardButton(text=i, callback_data='{"key": "action", "id": "' + str(id) + '", "month": "' + str(i) + '"}') for i in range(1,13)],types.InlineKeyboardButton(text="Данные", callback_data='{"key": "data_user", "id": "' + str(id) + '"}'))
-    bot.edit_message_text(chat_id= message.chat.id, message_id= message.id, text = message.text, reply_markup=key_action)
-
-
-def add_token(id_user, name_user=None, month=None, time=None, extension=None, niderland=None):
-    cur = db.cursor()
-    cur.execute("SELECT datetime FROM users_subscription WHERE t_id=" + str(id_user) + " AND action=1")
-    data_cur = cur.fetchone()
-    if data_cur == None:
-        moscow_time = datetime.strptime(str(datetime.now(pytz.timezone('Europe/Moscow')))[:16], "%Y-%m-%d %H:%M")
-    else:
-        moscow_time = datetime.strptime(data_cur[0][0:16], "%Y-%m-%d %H:%M")
-    if (month == None) and (time != None):
-        date_time_exit = moscow_time + timedelta(hours=time)
-    elif (month != None) and (time == None):
-        date_time_exit = moscow_time + timedelta(days=int(month)*30)
-    add_user(id_user, date_time_exit, name_user=name_user, niderland=niderland)
-    return date_time_exit
-
-
-def add_user(id_user, date_time:str, name_user=None, niderland=None):
+def add_user(userId,
+             month,
+             name_user=None,
+             server=None):
+    
+    intervalSql = " + INTERVAL '" + str(month) + " months'"
     
     if name_user == None:
-        name_user = str(id_user)
+        name_user = str(userId)
 
-    if niderland != None:
-        server = config.SERVER_NID
-    else:
-        server = config.SERVER_USA
-    cur = db.cursor()
-    cur.execute("SELECT action FROM users_subscription WHERE t_id=" + str(id_user))
-    data_cur = cur.fetchone()
-    if data_cur == None:
-        logging.info("добавляю user: " + name_user)
-        hach_user = add_vpn_user(name_user, niderland=niderland)
-        cur.execute("INSERT INTO users_subscription (t_id, name, datetime, action, id_server, link_server, server)" +
-                    "\nVALUES ('" + str(id_user) + "', '" + str(name_user) + "', '" + str(date_time) + "', 1, '" + str(hach_user['id']) + "', '" + str(hach_user['link']) + "', '" + server + "');")
-        db.commit()
-        bot.send_message(config.ADMINCHAT, "new user: [" + form_text_markdownv2(name_user) + "](tg://user?id\=" + str(id_user) + ")", parse_mode="MarkdownV2" )
-        logging.info(name_user + " успешно добавлен")
-    elif data_cur[0] == 0:
-        hach_user = add_vpn_user(name_user, niderland=niderland)
-        cur.execute("UPDATE users_subscription" + 
-                    "\nSET datetime='" + str(date_time) + "',action=1, paid=1, id_server=" + str(hach_user['id']) + ", link_server='" + str(hach_user['link']) + "', server = '" + server + "'" +
-                    "\nWHERE t_id=" + str(id_user))
-        db.commit()
-    elif data_cur[0] == 1:
-        cur.execute("UPDATE users_subscription" + 
-                    "\nSET datetime='" + str(date_time) + "', paid=1" +
-                    "\nWHERE t_id=" + str(id_user))
-    return
+    with db.cursor() as cursor:
+
+        cursor.execute("SELECT action, server_id FROM users_subscription WHERE telegram_id=" + str(userId))
+        data_cur = cursor.fetchone()
+
+        if server == None:
+            if data_cur == None:
+                server = config.DEFAULTSERVER
+            else:
+                server = data_cur[1]
+
+        if data_cur == None:
+            logging.info("добавляю user: " + name_user)
+
+            link = controllerFastApi.add_vpn_user(userId, server)
+
+            if link == False:
+                bot.send_message(config.ADMINCHAT, "Ошибка добавления конфига пользователя")
+                
+                return config.AddUserMessage.error.value
+                
+            cursor.execute("INSERT INTO users_subscription (telegram_id, name, exit_date, action, server_link, server_id, protocol)" +
+                        "\nVALUES ('" + str(userId) + "', '" + str(name_user) + "', now() " + str(intervalSql) + ", True, '" + str(link) + "', '" + str(server) + "', " + str(config.DEFAULTPROTOCOL) + ");")
+            db.commit()
+            bot.send_message(config.ADMINCHAT, "new user: [" + utils.form_text_markdownv2(name_user) + "](tg://user?id\=" + str(userId) + ")", parse_mode="MarkdownV2" )
+            logging.info(name_user + " успешно добавлен")
+
+        elif data_cur[0] == False:
+
+            renewalOfSubscription(userId, data_cur[1], intervalSql, serverNew=server)
+
+        elif data_cur[0]:
+
+            if server != data_cur[1]:
+                del_user(userId, noUpdate=True)
+                add_user(userId, month, server=server)
+                return
+
+            cursor.execute("UPDATE users_subscription" + 
+                    "\nSET exit_date= exit_date " + intervalSql + ", paid=True" +
+                    "\nWHERE telegram_id=" + str(userId))
+            db.commit()
+            
+            return config.AddUserMessage.extended.value
+    
 
 
-def del_user(id_user):
-    server = config.API_URL
-    try:
-        cur = db.cursor()
-        cur.execute("UPDATE users_subscription SET action=0 WHERE t_id=" + str(id_user) +
-                    "\nRETURNING id_server, server")
-        dataCur = cur.fetchone()
-        db.commit()
-        if dataCur[1]:
-            if dataCur[1] == config.SERVER_NID:
-                server = config.API_URL_NIDERLAND
-        requests.Session().delete(f"{server}/access-keys/{dataCur[0]}", verify=False)
-        keyboard = types.InlineKeyboardMarkup()
-        keyboard.add(types.InlineKeyboardButton(text="Купить еще месяц", callback_data='{"key": "sale"}'))
-        bot.send_message(id_user, "Подписка окончена.", reply_markup=keyboard)
-    except Exception as e:
-        logging.error("не найден пользователь в БД или конфигурации VPN: " + str(e))
+def del_user(id_user, noUpdate=None):
+    
+    name = ""
 
+    with db.cursor(cursor_factory=DictCursor) as cursor:
+        
+        cursor.execute("UPDATE users_subscription SET action=False WHERE telegram_id=" + str(id_user) +
+                    "\nRETURNING protocol, server_id, name")
+        
+        dataCur = cursor.fetchone()
+        if noUpdate != True:
 
+            db.commit()
+
+            name = dataCur['name']
+
+            keyboard = types.InlineKeyboardMarkup()
+            keyboard.add(types.InlineKeyboardButton(text="Продлить", callback_data='{"key": "sale"}'))
+
+            try:
+                bot.send_message(id_user, "Подписка окончена.", reply_markup=keyboard)
+            except ApiTelegramException as e:
+                bot.send_message(config.ADMINCHAT, str(e) + " " + name)
+        else:
+            db.rollback()
+
+        controllerFastApi.suspendUser(id_user, dataCur["server_id"])
 
 
 
 
 def chek_subscription():
     while True:
-        moscow_time = str(datetime.now(pytz.timezone('Europe/Moscow')))
-        now_time = datetime.strptime(str(moscow_time)[:16], "%Y-%m-%d %H:%M")
-        cur = db.cursor()
-        cur.execute("SELECT t_id, datetime FROM users_subscription WHERE action=1")
-        data_cur = cur.fetchall()
-        if len(data_cur) != 0:
-            for data in data_cur: 
-                finich_time = datetime.strptime(data[1][0:16], "%Y-%m-%d %H:%M")
-                if now_time > finich_time:
+        with db.cursor() as cursor:
+            cursor.execute("SELECT telegram_id FROM users_subscription WHERE action=True AND exit_date < now()")
+            data_cur = cursor.fetchall()
+            if len(data_cur) != 0:
+                for data in data_cur:
                     del_user(data[0])
-                elif now_time == finich_time - timedelta(days=1):
-                    keyboard = types.InlineKeyboardMarkup()
-                    keyboard.add(types.InlineKeyboardButton(text="Купить", callback_data='{"key": "sale"}'))
-                    bot.send_message(data[0], "Завтра в это же время окончится подписка на VPN, чтобы не потерять доступ, оплатите и отправьте подверждение платежа.", reply_markup=keyboard)
-            db.close
+                    
+            cursor.execute("SELECT telegram_id FROM users_subscription WHERE action=True AND (exit_date::date - INTERVAL '2 days') = now()")
+            data_cur = cursor.fetchall()
+            if len(data_cur) != 0:
+                for data in data_cur:
+                    notificationOverSubscription(data[0], "Через 2 дня окончится Ваша подписка на VPN. Чтобы не потерять доступ, продлите подписку.")
+            
+            cursor.execute("SELECT telegram_id FROM users_subscription WHERE action=True AND (exit_date::date - INTERVAL '1 days') = now()")
+            data_cur = cursor.fetchall()
+            if len(data_cur) != 0:
+                for data in data_cur:
+                        notificationOverSubscription(data[0], "Завтра в это же время окончится подписка на VPN. Чтобы не потерять доступ, продлите подписку.")
+           
+            cursor.execute("SELECT telegram_id FROM users_subscription WHERE action=True AND (exit_date::date - INTERVAL '1 hours') = now()")
+            data_cur = cursor.fetchall()
+            if len(data_cur) != 0:
+                for data in data_cur:
+                        notificationOverSubscription(data[0], "Уже через час окончится подписка на VPN. Чтобы не потерять доступ, продлите подписку.")
         time.sleep(60)
         
 
 chek_sub_thread = threading.Thread(target=chek_subscription)
 chek_sub_thread.start()
 
-def add_vpn_user(name_user, niderland=None):
-    if niderland != True:
-        apiUrl = config.API_URL_NIDERLAND
-    else:
-        apiUrl = config.API_URL
-    response = requests.post(f"{apiUrl}/access-keys/",
-                             verify=False,
-                             json={"name": name_user},
-                             headers={'Content-Type':'application/json'})
-    response_json = response.json()
-    hach_user = {"id" : response_json.get('id'),
-                 "link" : response_json.get("accessUrl")}
-    return hach_user
 
+def notificationOverSubscription(user_id, text: str) -> None:
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton(text="Продлить", callback_data='{"key": "sale"}'))
+    bot.send_message(user_id,
+                    text,
+                    reply_markup=keyboard)
+    
 
 
 def generate_alphanum_crypt_string():
     letters_and_digits = string.ascii_letters + string.digits
     crypt_rand_string = ''.join(secrets.choice(letters_and_digits) for i in range(16))
     return crypt_rand_string
-
-
-def referal(message):
-    bot.send_photo(message.from_user.id, open("/root/bot_vpn/num_login.png", "rb"), caption="Введите номер учетной записи человека, который по вашей рекомендации оплатил VPN (пробный период не в счет)")
-    bot.register_next_step_handler(message, ref_action)
-
-def ref_action(message):
-    keyboard = types.InlineKeyboardMarkup()
-    keyboard.add(types.InlineKeyboardButton(text="Купить на месяц", callback_data='{"key": "sale"}'))
-    cur = db.cursor()
-    try:
-        cur.execute("SELECT COUNT(*) FROM users_subscription WHERE (t_id=" + str(message.from_user.id) + " OR t_id=" + str(message.text) + ") AND action=1 AND paid=1")
-    except Exception:
-        bot.send_message(message.from_user.id, "Ошибка. Проверьте:\n- правильно ли вы ввели название файла;\n- оформлена ли подписка у пользователя;\n- оформлена ли у вас подписка", reply_markup=keyboard)
-        bot.send_message(config.ADMINCHAT, "[" + form_text_markdownv2(names[0]) + "](tg://user?id\=" + str(message.from_user.id) + ") не активировал рефералку за счет пользователя [" + form_text_markdownv2(names[1]) + "](tg://user?id\=" + str(message.text) + ")", parse_mode="MarkdownV2")
-        return
-    count = cur.fetchone()[0]
-    if int(count) != 2:
-        bot.send_message(message.from_user.id, "Ошибка. Проверьте:\n- правильно ли вы ввели название файла;\n- оформлена ли подписка у пользователя;\n- оформлена ли у вас подписка", reply_markup=keyboard)
-        bot.send_message(config.ADMINCHAT, "[" + form_text_markdownv2(names[0]) + "](tg://user?id\=" + str(message.from_user.id) + ") не активировал рефералку за счет пользователя [" + form_text_markdownv2(names[1]) + "](tg://user?id\=" + str(message.text) + ")", parse_mode="MarkdownV2")
-        return
-    cur.execute("SELECT COUT(*) FROM referal WHERE (t_id_who=" + str(message.from_user.id) + " AND t_id_whom=" + str(message.text) + ") OR (t_id_who=" + str(message.text) + " AND t_id_whom=" + str(message.from_user.id) + ");")
-    count = cur.fetchone()[0]
-    if int(count) == 0:
-        cur.execute("INSERT INTO referal (t_id_who, t_id_whom) VALUES ('" + str(message.from_user.id) + "', '" + str(message.text) + "')")
-        db.commit()
-        datetime_exit = add_token(message.from_user.id, month=1, extension=True)
-        bot.send_message(message.from_user.id, "Бонус успешно активирован, доступ к vpn продлен до " + str(datetime_exit))
-        cur.execute("SELECT name FROM users_subscription WHERE t_id=" + str(message.from_user.id) + " OR t_id=" + str(message.text))
-        names = cur.fetchall()
-        bot.send_message(config.ADMINCHAT, "[" + form_text_markdownv2(names[0]) + "](tg://user?id\=" + str(message.from_user.id) + ") добавил пользователя [" + form_text_markdownv2(names[1]) + "](tg://user?id\=" + str(message.text) + ") и получил 1 месяц в подарок", parse_mode="MarkdownV2")
-    else:
-        bot.send_message(message.from_user.id, "Ошибка. Ранее уже был активирован бонус.", reply_markup=keyboard)
-        bot.send_message(config.ADMINCHAT, "[" + form_text_markdownv2(names[0]) + "](tg://user?id\=" + str(message.from_user.id) + ") хотел повторно активировать за счет [" + form_text_markdownv2(names[1]) + "](tg://user?id\=" + str(message.text) + ") рефералку", parse_mode="MarkdownV2")
-        return
     
 
 def data_user(id):
-    cur = db.cursor()
-    cur.execute("SELECT name, datetime, action, id_server, link_server FROM users_subscription WHERE t_id=" + str(id))
-    data_cur = cur.fetchone()
-    bot.send_message(config.ADMINCHAT, str(data_cur[0]) + "\n" + str(data_cur[1]) + "\n" + str(data_cur[2]) + "\n" + str(data_cur[4]) + "\n" + str(data_cur[3]))
+
+    m = bot.send_message(config.ADMINCHAT, "Загрузка...")
+
+    with db.cursor() as cursor:
+        cursor.execute("SELECT name, exit_date, action, server_link, server_id, paid, protocol, statistic FROM users_subscription WHERE telegram_id=" + str(id))
+        data_cur = cursor.fetchone()
+        
+        bot.edit_message_text(
+            chat_id=m.chat.id,
+            message_id=m.id,
+            text = paidCheckActive(data_cur[5]) + textCheckActive(data_cur[2]) +
+            " [" + utils.form_text_markdownv2(data_cur[0]) + "](tg://user?id\=" + str(id) +
+            ")\nДата окончания подписки: " + utils.form_text_markdownv2(str(data_cur[1])) +
+            "\n" + "\nlink: `" + utils.form_text_markdownv2(data_cur[3]) +
+            "`\nСервер: " + getServerNameById(data_cur[4]) +
+            "\nprotocol: " + getNameProtocolById(data_cur[6]) +
+            "\nstat: " + utils.form_text_markdownv2(str(data_cur[7])) +
+            "\nid:" + str(id),
+            parse_mode="MarkdownV2",
+            reply_markup=UserList.addButtonKeyForUsersList(id, data_cur[2], server=data_cur[4])
+        )
+        
+
+
+def textCheckActive(item: bool) -> str:
+    if item:
+        return "🟢"
+    return "🔴"
+    
+
+def paidCheckActive(item: bool) -> str:
+    if item:
+        return "💵"
+    return ""
