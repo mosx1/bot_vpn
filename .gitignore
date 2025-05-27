@@ -1,7 +1,9 @@
-*.txt
+logs.txt
 *.share
 *.ini
 *.json
+*.sh
+config.py
 
 
 # Byte-compiled / optimized / DLL files
