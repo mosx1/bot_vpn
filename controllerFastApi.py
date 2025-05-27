@@ -1,71 +1,93 @@
-import requests, utils, utils
+import requests, utils, utils, json
 
-def add_vpn_user(userId: str, server: int):
+
+def add_vpn_user(
+     userId: int,
+     server: int,
+     token: str = utils.get_token()
+):
     """
         Создает пользователя в xray
     """
     
     response = requests.get(
-         "http://{}/597730754/add/{}".format(
+         "http://{}/add?user_id={}&token={}".format(
               utils.getUrlByIdServer(server),
-              userId
+              userId,
+              token
               )
          ).json()
     if response["success"]:
          return response["link"]
     
-    return response["success"]
+    return response["error"]
 
 
 
-def suspendUser(userId: str, server: int) -> bool:
+def suspendUser(
+     userId: int,
+     server: int,
+     token: str = utils.get_token()
+) -> bool:
     """
         Приостонавливает пользователя в xray
     """
     response = requests.get(
-         "http://{}/597730754/suspend/{}".format(
+         "http://{}/suspend?userId={}&token={}".format(
               utils.getUrlByIdServer(server), 
-              userId
+              userId,
+              token
               )
          ).json()
     
     if response["success"]:
          return response["success"]
     
-    return response["success"]
+    return response["error"]
 
 
 
-def resumeUser(userId: str, server: int):
+def resumeUser(
+     userId: int,
+     server: int,
+     token: str = utils.get_token()     
+):
     """
         Возобновляет доступ пользователя к xray
     """
     response = requests.get(
-         "http://{}/597730754/resume/{}".format(
+         "http://{}/resume?userId={}&token={}".format(
               utils.getUrlByIdServer(server),
-              userId
+              userId,
+              token
               )
          ).json()
     if response["success"]:
          return response["success"]
     
-    return response["success"]
+    return response["error"]
 
 
 
-def delUser(userId: str, server: int):
+def del_users(
+     user_ids: set[int],
+     server: int,
+     token: str = utils.get_token()
+) -> bool:
     """
-        Удаляет пользователя с сервера
+        Удаляет пользователей с сервера
     """
-    response = requests.get(
-         "http://{}/597730754/del/{}".format(
-              utils.getUrlByIdServer(server),
-              userId
-              )
+    data = {
+         "token": token,
+         "user_ids": list(user_ids)
+    }
+    response = requests.post(
+         "http://{}/del".format(
+              utils.getUrlByIdServer(server)
+         ),
+         data = json.dumps(data)
          ).json()
-    if response["success"]:
-         return response["success"]
-    
+
     return response["success"]
 
 

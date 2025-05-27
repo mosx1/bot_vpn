@@ -4,13 +4,16 @@ import controllerFastApi, config
 
 
 
-def renewalOfSubscription(userId, serverId, intervalSql: str, serverNew=None):
+def renewalOfSubscription(userId, serverId, intervalSql: str, serverNew=None) -> bool:
     
     sqlTextLink = ""
 
-    if serverNew != None and serverId != serverNew:
+    if serverNew == None:
+        serverNew = serverId
+
+    if serverId != serverNew:
         
-        controllerFastApi.delUser(userId, serverId)
+        controllerFastApi.del_users({userId}, serverId)
         link = controllerFastApi.add_vpn_user(userId, serverNew)
         sqlTextLink = ", server_link='" + link + "'"
 
@@ -20,10 +23,13 @@ def renewalOfSubscription(userId, serverId, intervalSql: str, serverNew=None):
 
     with db.cursor() as cursor:   
         cursor.execute("UPDATE users_subscription" + 
-                    "\nSET exit_date= now() " + str(intervalSql) +
-                    ",action=True, paid=True" + 
+                    "\nSET exit_date=" +
+                    "\nCASE WHEN exit_date > now()" +
+                    "\nTHEN exit_date" + str(intervalSql) +
+                    "\nELSE now()" + str(intervalSql) +
+                    "\nEND,action=True, paid=True" + 
                     sqlTextLink + 
-                    ", server_id = '" + str(serverId) + "'" +
+                    ", server_id = '" + str(serverNew) + "'" +
                     ", protocol=" + str(config.DEFAULTPROTOCOL) + 
                     "\nWHERE telegram_id=" + str(userId))
         db.commit()

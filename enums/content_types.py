@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class ContentTypes(Enum):
-    photo = 'photo'
-    document = 'document'
-    sticker = 'sticker'
-    text = 'text'
-    video = 'video'
+    photo: str = 'photo'
+    document: str = 'document'
+    sticker: str = 'sticker'
+    text: str = 'text'
+    video: str = 'video'

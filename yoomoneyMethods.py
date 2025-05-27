@@ -2,7 +2,7 @@ import config
 
 from connect import token
 
-from yoomoney import Quickpay, Client, Authorize
+from yoomoney import Quickpay, Client
 
 
 
@@ -15,17 +15,21 @@ def getInfoLastPayment(label: str) -> dict:
     Получает информацию о последнем платеже по идентификатору платежа
     """
     client = Client(config.TOKEN_YOOMONEY)
-    history = client.operation_history(label=label)
-    
-    for operation in history.operations:
+    try:
+        history = client.operation_history(label=label)
 
-        return {
-            "status": operation.status,
-            "message": "{}\nstatus: {}\ndatetime: {}\nсумма: {}".format(operation.title,
-                                                                        operation.status,
-                                                                        operation.datetime,
-                                                                        operation.amount)
-        }
+        for operation in history.operations:
+
+            return {
+                "status": operation.status,
+                "message": "{}\nstatus: {}\ndatetime: {}\nсумма: {}".format(operation.title,
+                                                                            operation.status,
+                                                                            operation.datetime,
+                                                                            operation.amount)
+            }
+    except Exception as e:
+        getInfoLastPayment(label)
+        
         # print("Operation:",operation.operation_id)
         # print("\tStatus     -->", operation.status)
         # print("\tDatetime   -->", operation.datetime)

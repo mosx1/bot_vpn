@@ -921,3 +921,758 @@ UnboundLocalError: local variable 'time' referenced before assignment
 2024-12-30 21:05:03,353 ERROR Подключиться к БД не удалось: connection to server at "66.151.32.210", port 5432 failed: Connection refused
 	Is the server running on that host and accepting TCP/IP connections?
 
+2025-05-16 09:18:30,995 ERROR Threaded polling exception: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-05-16 09:18:31,021 ERROR Exception traceback:
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1234, in __threaded_polling
+    polling_thread.raise_exceptions()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 111, in raise_exceptions
+    raise self.exception_info
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 93, in run
+    task(*args, **kwargs)
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 688, in __retrieve_updates
+    updates = self.get_updates(offset=(self.last_update_id + 1),
+                               allowed_updates=allowed_updates,
+                               timeout=timeout, long_polling_timeout=long_polling_timeout)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 660, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 332, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+2025-05-16 09:18:35,040 ERROR Threaded polling exception: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-05-16 09:18:35,059 ERROR Exception traceback:
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1234, in __threaded_polling
+    polling_thread.raise_exceptions()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 111, in raise_exceptions
+    raise self.exception_info
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 93, in run
+    task(*args, **kwargs)
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 688, in __retrieve_updates
+    updates = self.get_updates(offset=(self.last_update_id + 1),
+                               allowed_updates=allowed_updates,
+                               timeout=timeout, long_polling_timeout=long_polling_timeout)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 660, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 332, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+2025-05-16 09:18:39,739 ERROR Threaded polling exception: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-05-16 09:18:39,770 ERROR Exception traceback:
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1234, in __threaded_polling
+    polling_thread.raise_exceptions()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 111, in raise_exceptions
+    raise self.exception_info
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 93, in run
+    task(*args, **kwargs)
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 688, in __retrieve_updates
+    updates = self.get_updates(offset=(self.last_update_id + 1),
+                               allowed_updates=allowed_updates,
+                               timeout=timeout, long_polling_timeout=long_polling_timeout)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 660, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 332, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+2025-05-16 09:18:45,969 ERROR Threaded polling exception: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-05-16 09:18:45,988 ERROR Exception traceback:
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1234, in __threaded_polling
+    polling_thread.raise_exceptions()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 111, in raise_exceptions
+    raise self.exception_info
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 93, in run
+    task(*args, **kwargs)
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 688, in __retrieve_updates
+    updates = self.get_updates(offset=(self.last_update_id + 1),
+                               allowed_updates=allowed_updates,
+                               timeout=timeout, long_polling_timeout=long_polling_timeout)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 660, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 332, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+2025-05-16 09:18:52,196 ERROR Threaded polling exception: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-05-16 09:18:52,222 ERROR Exception traceback:
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1234, in __threaded_polling
+    polling_thread.raise_exceptions()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 111, in raise_exceptions
+    raise self.exception_info
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 93, in run
+    task(*args, **kwargs)
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 688, in __retrieve_updates
+    updates = self.get_updates(offset=(self.last_update_id + 1),
+                               allowed_updates=allowed_updates,
+                               timeout=timeout, long_polling_timeout=long_polling_timeout)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 660, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 332, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+
+2025-05-16 09:19:34,283 ERROR Threaded polling exception: A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse entities: Character '.' is reserved and must be escaped with the preceding '\'
+2025-05-16 09:19:34,309 ERROR Exception traceback:
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1235, in __threaded_polling
+    self.worker_pool.raise_exceptions()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 150, in raise_exceptions
+    raise self.exception_info
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 93, in run
+    task(*args, **kwargs)
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 9233, in _run_middlewares_and_handler
+    result = handler['function'](message)
+  File "/Users/mkuznecov/my_projects/bot_vpn/handlers.py", line 335, in start
+    successfully_paid(message.from_user.id)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/messageForUser.py", line 64, in successfully_paid
+    if bot.send_photo(
+       ~~~~~~~~~~~~~~^
+            chat_id=id,
+            ^^^^^^^^^^^
+    ...<6 lines>...
+            parse_mode=ParseMode.mdv2.value
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        ):
+        ^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 2299, in send_photo
+    apihelper.send_photo(
+    ~~~~~~~~~~~~~~~~~~~~^
+        self.token, chat_id, photo, caption=caption, reply_markup=reply_markup,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        business_connection_id=business_connection_id, message_effect_id=message_effect_id,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        show_caption_above_media=show_caption_above_media, allow_paid_broadcast=allow_paid_broadcast))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 545, in send_photo
+    return _make_request(token, method_url, params=payload, files=files, method='post')
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse entities: Character '.' is reserved and must be escaped with the preceding '\'
+
+2025-05-16 09:29:30,862 ERROR Infinity polling exception: HTTPSConnectionPool(host='api.telegram.org', port=443): Read timed out. (read timeout=25)
+2025-05-16 09:29:30,946 ERROR Exception traceback:
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/connection.py", line 516, in getresponse
+    httplib_response = super().getresponse()
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 292, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socket.py", line 719, in readinto
+    return self._sock.recv_into(b)
+           ~~~~~~~~~~~~~~~~~~~~^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1304, in recv_into
+    return self.read(nbytes, buffer)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1138, in read
+    return self._sslobj.read(len, buffer)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/util/retry.py", line 474, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/util/util.py", line 39, in reraise
+    raise value
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/connectionpool.py", line 536, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/connectionpool.py", line 367, in _raise_timeout
+    raise ReadTimeoutError(
+        self, url, f"Read timed out. (read timeout={timeout_value})"
+    ) from err
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api.telegram.org', port=443): Read timed out. (read timeout=25)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1110, in infinity_polling
+    self.polling(non_stop=True, timeout=timeout, long_polling_timeout=long_polling_timeout,
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 logger_level=logger_level, allowed_updates=allowed_updates, restart_on_change=False,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 *args, **kwargs)
+                 ^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1198, in polling
+    self.__threaded_polling(non_stop=non_stop, interval=interval, timeout=timeout, long_polling_timeout=long_polling_timeout,
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                            logger_level=logger_level, allowed_updates=allowed_updates)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1273, in __threaded_polling
+    raise e
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1234, in __threaded_polling
+    polling_thread.raise_exceptions()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 111, in raise_exceptions
+    raise self.exception_info
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 93, in run
+    task(*args, **kwargs)
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 688, in __retrieve_updates
+    updates = self.get_updates(offset=(self.last_update_id + 1),
+                               allowed_updates=allowed_updates,
+                               timeout=timeout, long_polling_timeout=long_polling_timeout)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 660, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 332, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 162, in _make_request
+    result = _get_req_session().request(
+        method, request_url, params=params, files=files,
+        timeout=(connect_timeout, read_timeout), proxies=proxy)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/requests/adapters.py", line 713, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api.telegram.org', port=443): Read timed out. (read timeout=25)
+
+2025-05-16 09:29:58,686 ERROR Threaded polling exception: A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse entities: Character '.' is reserved and must be escaped with the preceding '\'
+2025-05-16 09:29:58,719 ERROR Exception traceback:
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1235, in __threaded_polling
+    self.worker_pool.raise_exceptions()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 150, in raise_exceptions
+    raise self.exception_info
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 93, in run
+    task(*args, **kwargs)
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 9233, in _run_middlewares_and_handler
+    result = handler['function'](message)
+  File "/Users/mkuznecov/my_projects/bot_vpn/handlers.py", line 335, in start
+    successfully_paid(message.from_user.id)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/messageForUser.py", line 64, in successfully_paid
+    if bot.send_photo(
+       ~~~~~~~~~~~~~~^
+            chat_id=id,
+            ^^^^^^^^^^^
+    ...<6 lines>...
+            parse_mode=ParseMode.mdv2.value
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        ):
+        ^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 2299, in send_photo
+    apihelper.send_photo(
+    ~~~~~~~~~~~~~~~~~~~~^
+        self.token, chat_id, photo, caption=caption, reply_markup=reply_markup,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        business_connection_id=business_connection_id, message_effect_id=message_effect_id,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        show_caption_above_media=show_caption_above_media, allow_paid_broadcast=allow_paid_broadcast))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 545, in send_photo
+    return _make_request(token, method_url, params=payload, files=files, method='post')
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse entities: Character '.' is reserved and must be escaped with the preceding '\'
+
+2025-05-16 09:37:17,271 ERROR Threaded polling exception: A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse entities: Character '|' is reserved and must be escaped with the preceding '\'
+2025-05-16 09:37:17,291 ERROR Exception traceback:
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1235, in __threaded_polling
+    self.worker_pool.raise_exceptions()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 150, in raise_exceptions
+    raise self.exception_info
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 93, in run
+    task(*args, **kwargs)
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 9233, in _run_middlewares_and_handler
+    result = handler['function'](message)
+  File "/Users/mkuznecov/my_projects/bot_vpn/handlers.py", line 335, in start
+    successfully_paid(message.from_user.id)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/messageForUser.py", line 64, in successfully_paid
+    if bot.send_photo(
+       ~~~~~~~~~~~~~~^
+            chat_id=id,
+            ^^^^^^^^^^^
+    ...<6 lines>...
+            parse_mode=ParseMode.mdv2.value
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        ):
+        ^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 2299, in send_photo
+    apihelper.send_photo(
+    ~~~~~~~~~~~~~~~~~~~~^
+        self.token, chat_id, photo, caption=caption, reply_markup=reply_markup,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        business_connection_id=business_connection_id, message_effect_id=message_effect_id,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        show_caption_above_media=show_caption_above_media, allow_paid_broadcast=allow_paid_broadcast))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 545, in send_photo
+    return _make_request(token, method_url, params=payload, files=files, method='post')
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse entities: Character '|' is reserved and must be escaped with the preceding '\'
+
+2025-05-25 11:18:12,720 INFO user_id: 474425142, user_name:Максим Кузнецов нажата кнопка с ключем option_where
+2025-05-25 11:24:54,780 INFO user_id: 474425142, user_name:Максим Кузнецов нажата кнопка с ключем option_where
+2025-05-25 11:25:08,475 INFO user_id: 474425142, user_name:Максим Кузнецов нажата кнопка с ключем page_client_next
+2025-05-25 11:25:14,690 INFO user_id: 474425142, user_name:Максим Кузнецов нажата кнопка с ключем page_client_back
+2025-05-25 11:25:18,446 INFO user_id: 474425142, user_name:Максим Кузнецов нажата кнопка с ключем data_user
+2025-05-25 11:28:37,295 INFO user_id: 474425142, user_name:Максим Кузнецов нажата кнопка с ключем option_where
+2025-05-25 11:28:42,019 INFO user_id: 474425142, user_name:Максим Кузнецов нажата кнопка с ключем page_client_next
+2025-05-25 11:28:43,638 INFO user_id: 474425142, user_name:Максим Кузнецов нажата кнопка с ключем page_client_next
+2025-05-26 13:03:36,715 ERROR Infinity polling exception: 'str' object has no attribute 'to_dict'
+2025-05-26 13:03:36,755 ERROR Exception traceback:
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1110, in infinity_polling
+    self.polling(non_stop=True, timeout=timeout, long_polling_timeout=long_polling_timeout,
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 logger_level=logger_level, allowed_updates=allowed_updates, restart_on_change=False,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 *args, **kwargs)
+                 ^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1198, in polling
+    self.__threaded_polling(non_stop=non_stop, interval=interval, timeout=timeout, long_polling_timeout=long_polling_timeout,
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                            logger_level=logger_level, allowed_updates=allowed_updates)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1273, in __threaded_polling
+    raise e
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1235, in __threaded_polling
+    self.worker_pool.raise_exceptions()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 150, in raise_exceptions
+    raise self.exception_info
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 93, in run
+    task(*args, **kwargs)
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 9233, in _run_middlewares_and_handler
+    result = handler['function'](message)
+  File "/Users/mkuznecov/my_projects/bot_vpn/handlers.py", line 192, in _
+    keyboard.add(types.KeyboardButton('test', web_app='https://gidcolor.ru'))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/types.py", line 2489, in add
+    button_array.append(button.to_dict())
+                        ~~~~~~~~~~~~~~^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/types.py", line 2777, in to_dict
+    json_dict['web_app'] = self.web_app.to_dict()
+                           ^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'to_dict'
+
+2025-05-26 13:12:58,110 ERROR Infinity polling exception: 'NoneType' object has no attribute 'action'
+2025-05-26 13:12:58,157 ERROR Exception traceback:
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1110, in infinity_polling
+    self.polling(non_stop=True, timeout=timeout, long_polling_timeout=long_polling_timeout,
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 logger_level=logger_level, allowed_updates=allowed_updates, restart_on_change=False,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 *args, **kwargs)
+                 ^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1198, in polling
+    self.__threaded_polling(non_stop=non_stop, interval=interval, timeout=timeout, long_polling_timeout=long_polling_timeout,
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                            logger_level=logger_level, allowed_updates=allowed_updates)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1273, in __threaded_polling
+    raise e
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1235, in __threaded_polling
+    self.worker_pool.raise_exceptions()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 150, in raise_exceptions
+    raise self.exception_info
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 93, in run
+    task(*args, **kwargs)
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 9233, in _run_middlewares_and_handler
+    result = handler['function'](message)
+  File "/Users/mkuznecov/my_projects/bot_vpn/supports/handlers.py", line 83, in _
+    reply_markup=UserList.addButtonKeyForUsersList(str(message.from_user.id), user.action)
+                                                                              ^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'action'
+
+2025-05-26 13:13:31,022 ERROR Infinity polling exception: 'NoneType' object has no attribute 'action'
+2025-05-26 13:13:31,055 ERROR Exception traceback:
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1110, in infinity_polling
+    self.polling(non_stop=True, timeout=timeout, long_polling_timeout=long_polling_timeout,
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 logger_level=logger_level, allowed_updates=allowed_updates, restart_on_change=False,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 *args, **kwargs)
+                 ^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1198, in polling
+    self.__threaded_polling(non_stop=non_stop, interval=interval, timeout=timeout, long_polling_timeout=long_polling_timeout,
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                            logger_level=logger_level, allowed_updates=allowed_updates)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1273, in __threaded_polling
+    raise e
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1235, in __threaded_polling
+    self.worker_pool.raise_exceptions()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 150, in raise_exceptions
+    raise self.exception_info
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 93, in run
+    task(*args, **kwargs)
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 9233, in _run_middlewares_and_handler
+    result = handler['function'](message)
+  File "/Users/mkuznecov/my_projects/bot_vpn/supports/handlers.py", line 83, in _
+    reply_markup=UserList.addButtonKeyForUsersList(str(message.from_user.id), user.action)
+                                                                              ^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'action'
+
+2025-05-26 13:14:39,188 ERROR Infinity polling exception: HTTPSConnectionPool(host='api.telegram.org', port=443): Read timed out. (read timeout=30)
+2025-05-26 13:14:39,289 ERROR Exception traceback:
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/connection.py", line 516, in getresponse
+    httplib_response = super().getresponse()
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 292, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socket.py", line 719, in readinto
+    return self._sock.recv_into(b)
+           ~~~~~~~~~~~~~~~~~~~~^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1304, in recv_into
+    return self.read(nbytes, buffer)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1138, in read
+    return self._sslobj.read(len, buffer)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/util/retry.py", line 474, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/util/util.py", line 39, in reraise
+    raise value
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/connectionpool.py", line 536, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/connectionpool.py", line 367, in _raise_timeout
+    raise ReadTimeoutError(
+        self, url, f"Read timed out. (read timeout={timeout_value})"
+    ) from err
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api.telegram.org', port=443): Read timed out. (read timeout=30)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1110, in infinity_polling
+    self.polling(non_stop=True, timeout=timeout, long_polling_timeout=long_polling_timeout,
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 logger_level=logger_level, allowed_updates=allowed_updates, restart_on_change=False,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 *args, **kwargs)
+                 ^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1198, in polling
+    self.__threaded_polling(non_stop=non_stop, interval=interval, timeout=timeout, long_polling_timeout=long_polling_timeout,
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                            logger_level=logger_level, allowed_updates=allowed_updates)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1273, in __threaded_polling
+    raise e
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1235, in __threaded_polling
+    self.worker_pool.raise_exceptions()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 150, in raise_exceptions
+    raise self.exception_info
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 93, in run
+    task(*args, **kwargs)
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 9233, in _run_middlewares_and_handler
+    result = handler['function'](message)
+  File "/Users/mkuznecov/my_projects/bot_vpn/handlers.py", line 288, in start
+    bot.send_message(message.chat.id, 'test',reply_markup=keyboard)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1800, in send_message
+    apihelper.send_message(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        self.token, chat_id, text,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        reply_parameters=reply_parameters, link_preview_options=link_preview_options, business_connection_id=business_connection_id,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        message_effect_id=message_effect_id, allow_paid_broadcast=allow_paid_broadcast))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 275, in send_message
+    return _make_request(token, method_url, params=payload, method='post')
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 162, in _make_request
+    result = _get_req_session().request(
+        method, request_url, params=params, files=files,
+        timeout=(connect_timeout, read_timeout), proxies=proxy)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/requests/adapters.py", line 713, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api.telegram.org', port=443): Read timed out. (read timeout=30)
+
+2025-05-26 13:15:36,729 ERROR Infinity polling exception: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot5262948613:***********************************/getUpdates?offset=310797400&timeout=20 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2025-05-26 13:15:36,783 ERROR Exception traceback:
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/connection.py", line 516, in getresponse
+    httplib_response = super().getresponse()
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 300, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+                             " response")
+http.client.RemoteDisconnected: Remote end closed connection without response
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ProxyError: ('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/urllib3/util/retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot5262948613:***********************************/getUpdates?offset=310797400&timeout=20 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1110, in infinity_polling
+    self.polling(non_stop=True, timeout=timeout, long_polling_timeout=long_polling_timeout,
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 logger_level=logger_level, allowed_updates=allowed_updates, restart_on_change=False,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 *args, **kwargs)
+                 ^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1198, in polling
+    self.__threaded_polling(non_stop=non_stop, interval=interval, timeout=timeout, long_polling_timeout=long_polling_timeout,
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                            logger_level=logger_level, allowed_updates=allowed_updates)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1273, in __threaded_polling
+    raise e
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1234, in __threaded_polling
+    polling_thread.raise_exceptions()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 111, in raise_exceptions
+    raise self.exception_info
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 93, in run
+    task(*args, **kwargs)
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 688, in __retrieve_updates
+    updates = self.get_updates(offset=(self.last_update_id + 1),
+                               allowed_updates=allowed_updates,
+                               timeout=timeout, long_polling_timeout=long_polling_timeout)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 660, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 332, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/apihelper.py", line 162, in _make_request
+    result = _get_req_session().request(
+        method, request_url, params=params, files=files,
+        timeout=(connect_timeout, read_timeout), proxies=proxy)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/requests/adapters.py", line 694, in send
+    raise ProxyError(e, request=request)
+requests.exceptions.ProxyError: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot5262948613:***********************************/getUpdates?offset=310797400&timeout=20 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+
+2025-05-26 13:15:44,552 ERROR Infinity polling exception: 'NoneType' object has no attribute 'action'
+2025-05-26 13:15:44,578 ERROR Exception traceback:
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1110, in infinity_polling
+    self.polling(non_stop=True, timeout=timeout, long_polling_timeout=long_polling_timeout,
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 logger_level=logger_level, allowed_updates=allowed_updates, restart_on_change=False,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 *args, **kwargs)
+                 ^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1198, in polling
+    self.__threaded_polling(non_stop=non_stop, interval=interval, timeout=timeout, long_polling_timeout=long_polling_timeout,
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                            logger_level=logger_level, allowed_updates=allowed_updates)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1273, in __threaded_polling
+    raise e
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1235, in __threaded_polling
+    self.worker_pool.raise_exceptions()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 150, in raise_exceptions
+    raise self.exception_info
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 93, in run
+    task(*args, **kwargs)
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 9233, in _run_middlewares_and_handler
+    result = handler['function'](message)
+  File "/Users/mkuznecov/my_projects/bot_vpn/supports/handlers.py", line 83, in _
+    reply_markup=UserList.addButtonKeyForUsersList(str(message.from_user.id), user.action)
+                                                                              ^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'action'
+
+2025-05-26 13:15:52,699 ERROR Infinity polling exception: 'NoneType' object has no attribute 'action'
+2025-05-26 13:15:52,730 ERROR Exception traceback:
+Traceback (most recent call last):
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1110, in infinity_polling
+    self.polling(non_stop=True, timeout=timeout, long_polling_timeout=long_polling_timeout,
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 logger_level=logger_level, allowed_updates=allowed_updates, restart_on_change=False,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 *args, **kwargs)
+                 ^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1198, in polling
+    self.__threaded_polling(non_stop=non_stop, interval=interval, timeout=timeout, long_polling_timeout=long_polling_timeout,
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                            logger_level=logger_level, allowed_updates=allowed_updates)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1273, in __threaded_polling
+    raise e
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 1235, in __threaded_polling
+    self.worker_pool.raise_exceptions()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 150, in raise_exceptions
+    raise self.exception_info
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/util.py", line 93, in run
+    task(*args, **kwargs)
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/mkuznecov/my_projects/bot_vpn/.env/lib/python3.13/site-packages/telebot/__init__.py", line 9233, in _run_middlewares_and_handler
+    result = handler['function'](message)
+  File "/Users/mkuznecov/my_projects/bot_vpn/supports/handlers.py", line 83, in _
+    reply_markup=UserList.addButtonKeyForUsersList(str(message.from_user.id), user.action)
+                                                                              ^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'action'
+

@@ -2,4 +2,4 @@ from enum import Enum
 
 
 class ParseMode(Enum):
-    mdv2 = 'MarkdownV2'
+    mdv2: str = 'MarkdownV2'

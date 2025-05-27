@@ -1,4 +1,18 @@
-from connect import db
+from connect import db, logging, engine
+
+from sqlalchemy.orm import Session
+from sqlalchemy import select, func, and_, text
+
+from enums.invite import CallbackKeys
+from servers.server_list import Country
+from enums.logs import TypeLogs
+
+from psycopg2.extras import DictCursor, DictRow
+
+from tables import User, ServersTable
+
+from enum import Enum
+
 
 
 def replaceMonthOnRuText(datetime_exit) -> str:
@@ -25,6 +39,7 @@ def replaceMonthOnRuText(datetime_exit) -> str:
     return form_text_markdownv2(str(arrDate[2]).split(" ")[0] + " " + str(moth) + " " + str(arrDate[0]))
 
 
+
 def form_text_markdownv2(message_text: str, delete=None):
 
     """Преобразование строки в формат MarkdownV2"""
@@ -49,3 +64,79 @@ def getUrlByIdServer(serverId: str) -> str:
         curData = cursor.fetchone()
         if curData:
             return curData[0]
+        
+
+
+def callBackBilder(callBackKey: Enum, **kwargs):
+    
+    """
+        Формирует callback_data для InlineButton
+    """
+
+    itemsText = ""
+
+    for property,value in kwargs.items():
+        if isinstance(value, str):
+            value = '"{}"'.format(value)
+            
+        itemsText += ',"{}": {}'.format(property, value)
+
+    return '{"key": "' + callBackKey.value + '"' + itemsText + '}'
+
+
+
+def get_token() -> str:
+    with db.cursor(cursor_factory=DictCursor) as cursor:
+        cursor.execute("SELECT hash FROM securityhashs")
+        dataCur = cursor.fetchone()
+        return dataCur['hash']
+    
+
+
+def getVeryFreeServerOnCountry(country: Country) -> int:
+    """
+        Возвращает менее загруженный сервер по стране
+    """
+    with Session(engine) as session:
+        query = (
+            select(
+                func.count().label('count'),
+                ServersTable.id
+            )
+            .select_from(ServersTable)
+            .join(
+                User,
+                and_(
+                    User.server_id == ServersTable.id,
+                    User.action == True
+                ), 
+                isouter=True
+            ).filter(ServersTable.country == country.value)
+            .group_by(ServersTable.id)
+            .order_by(text('count ASC'))
+            .limit(1)
+        )
+        result = session.execute(query).one()
+        return result.id
+        
+
+def write_log(type: TypeLogs, user: User, text: str) -> None:
+
+    text = "user_id: " + str(user.telegram_id) + ", user_name:" + str(user.name) + ", " + text
+
+    match type:
+        case TypeLogs.info:
+            logging.info(text)
+        case TypeLogs.error:
+            logging.error(text)
+
+
+def get_server_name_by_id(server_id: int) -> str:
+    
+    query = select(ServersTable).filter(ServersTable.id == server_id)
+
+    with Session(engine) as session:
+        data: ServersTable | None = session.execute(query).scalar()
+        if data:
+            return data.name
+        return "Неизвестное наименование сервера"
