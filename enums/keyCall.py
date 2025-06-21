@@ -7,3 +7,4 @@ class KeyCall(Enum):
     tryServers: str = "tryServers"
     refreshtoken: str = "refreshtoken"
     create_cryptio_pay: str = "create_cryptio_pay"
+    payment_stars: str = "payment_stars"

@@ -42,10 +42,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, func, text, union_all, literal_column
 
 from payment.crypto.repository.methods import crypto_pay, PayingUser, TypeOfPurchase
+from payment.stars.handlers import handle_buy
 
 from statistic.tasks import start_statistic
 
-from configparser import ConfigParser
+# from configparser import ConfigParser
 
 
 def register_message_handlers(bot: TeleBot) -> None:
@@ -90,7 +91,7 @@ def register_message_handlers(bot: TeleBot) -> None:
 
                 bot.edit_message_caption("Оплата получена, идет настройка конфигурации(это может занять несколько минут)...", userId, messageId)
                 
-                userMessage:config.AddUserMessage  = add_user(userId, month, server=server)
+                userMessage: config.AddUserMessage = add_user(userId, month, server=server)
 
                 bot.send_message(config.ADMINCHAT,
                                 "[" + utils.form_text_markdownv2(userName) + "](tg://user?id\=" + str(userId) + ") оплатил",
@@ -564,10 +565,13 @@ def register_message_handlers(bot: TeleBot) -> None:
                 label = (str(call.from_user.id) + 
                         str(datetime.datetime.now(pytz.timezone('Europe/Moscow')))).replace(" ", "").replace("-","").replace("+", "").replace(".", "").replace(":", "")
 
-                keyboard = quick_markup(
+                keyboard: keyboards.InlineKeyboardMarkup = quick_markup(
                     {
                         'Оплата рублями': {'url': getLinkPayment(label, call_data['month'])},
                         "Оплата Crypto Bot": {"url": data['mini_app_invoice_url']},
+                        "Оплата звездами": {
+                            "callback_data": '{"key": "' + enums.keyCall.KeyCall.payment_stars.name + '", "amount": ' + str(50 * int(call_data['month'])) + ', "server": ' + str(call_data['server']) + '}'
+                        },
                         '<<< назад': {'callback_data': '{"key": "pollCountMonth", "server": ' + str(call_data['server']) + '}'}
                     },
                     row_width=1
@@ -781,6 +785,14 @@ def register_message_handlers(bot: TeleBot) -> None:
                     call.message.chat.id,
                     call.message.id,
                     reply_markup=keyboard
+                )
+
+            case enums.keyCall.KeyCall.payment_stars.name:
+
+                handle_buy(
+                    call.message,
+                    call_data['amount'],
+                    call_data['server']
                 )
 
             case _:

@@ -6,7 +6,6 @@ from telebot.apihelper import ApiTelegramException
 from enum import Enum
 
 from enums.invite import CallbackKeys
-from servers.server_list import Servers, Country
 from enums.keyCall import KeyCall
 from enums.parse_mode import ParseMode
 
@@ -21,6 +20,10 @@ from sqlalchemy import select, func
 
 from tables import User
 from users.methods import get_user_by_id
+
+from servers.server_list import Servers, Country
+from servers.methods import get_server_list
+
 
 class StatusSearch(Enum):
     
@@ -245,7 +248,7 @@ def add_user(
                 return config.AddUserMessage.error
 
         elif data_cur[0]:
-
+            servers: list[ServersTable] = get_server_list()
             if server != data_cur[1]:
                 del_user(userId, noUpdate=True)
                 add_user(userId, month, server=server)
