@@ -1,7 +1,14 @@
 import config
 
 from connect import db, bot
+
 from managment_user import add_user
+
+from tables import User
+
+from users.methods import get_user_by_id
+
+from utils import replaceMonthOnRuText
 
 
 
@@ -22,10 +29,11 @@ def addInvitedBonus(userId):
         Добавляет бонус-подписку за инвайт пользователя
     """
     add_user(userId, 1)
+    user: User = get_user_by_id(userId)
     bot.send_photo(
         userId,
         photo=open(config.FILE_URL + "image/referalYes.png", "rb"),
-        caption="Дата окончания подписки изменена"
+        caption=f"Дата окончания подписки изменена: {replaceMonthOnRuText(user.exit_date)}"
     )
 
 
