@@ -9,16 +9,10 @@ class Servers(Enum):
     finland1: int = 5
 
 
-
-class ServerName(Enum):
-
-    deutsche: str = "Германия",
-    niderlands2: str = "Нидерланды"
-
-
 class Country(Enum):
     
     niderlands: int = 1
     deutsche: int = 2
+    finland: int = 3
 
 
