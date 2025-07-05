@@ -18,7 +18,7 @@ from managers.subscription.renewal_of_subscription import renewalOfSubscription
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 
-from tables import User
+from tables import User, ServersTable
 from users.methods import get_user_by_id
 
 from servers.server_list import Servers, Country
@@ -180,7 +180,7 @@ class UserList:
                 keyboard_offer_one.add(
                     types.InlineKeyboardButton(
                         text="Германия", 
-                        callback_data='{"key": "connect", "id": "' + user_id + '", "serverId": ' + str(utils.getVeryFreeServerOnCountry(Country.deutsche)) + '}'
+                        callback_data='{"key": "connect", "id": "' + user_id + '", "serverId": ' + str(utils.get_very_free_server(Country.deutsche)) + '}'
                     ),
                     types.InlineKeyboardButton(
                         text="Нидерланды", 

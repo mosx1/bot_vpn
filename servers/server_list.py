@@ -6,6 +6,7 @@ class Servers(Enum):
     deutsche2: int = 1
     deutsche3: int = 4
     niderlands2: int = 3
+    finland1: int = 5
 
 
 

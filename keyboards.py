@@ -6,7 +6,7 @@ from servers.server_list import Servers
 from servers.server_list import Country
 from enums.keyCall import KeyCall
 
-from utils import getVeryFreeServerOnCountry
+from utils import get_very_free_server
 
 # from connect import engine
 
@@ -27,8 +27,10 @@ def getInlineKeyboardListCountries(callData = None, optionText: str = "", key: s
 
     return quick_markup(
         {   
-            "Германия": {'callback_data': '{"key": "' + key + '", "server": ' + str(getVeryFreeServerOnCountry(Country.deutsche)) + optionText + '}'},
-            "Нидерланды": {'callback_data': '{"key": "' + key + '", "server": ' + str(Servers.niderlands2.value) + optionText + '}'}            
+            "Самый быстрый": {'callback_data': '{"key": "' + key + '", "server": ' + str(get_very_free_server()) + optionText + '}'},
+            "Германия": {'callback_data': '{"key": "' + key + '", "server": ' + str(get_very_free_server(Country.deutsche)) + optionText + '}'},
+            "Финляндия": {'callback_data': '{"key": "' + key + '", "server": ' + str(Servers.finland1.value) + optionText + '}'},
+            "Нидерланды": {'callback_data': '{"key": "' + key + '", "server": ' + str(Servers.niderlands2.value) + optionText + '}'}
         },
         row_width=1
     )

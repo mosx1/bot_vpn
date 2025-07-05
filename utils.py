@@ -93,9 +93,10 @@ def get_token() -> str:
     
 
 
-def getVeryFreeServerOnCountry(country: Country) -> int:
+def get_very_free_server(country: Country | None = None) -> int:
     """
         Возвращает менее загруженный сервер по стране
+        Если страна не передана - ищет по всем странам
     """
     with Session(engine) as session:
         query = (
@@ -111,12 +112,18 @@ def getVeryFreeServerOnCountry(country: Country) -> int:
                     User.action == True
                 ), 
                 isouter=True
-            ).filter(ServersTable.country == country.value)
+            )
+        )
+        if country:
+            query = query.filter(ServersTable.country == country.value)
+        query = (
+            query
             .group_by(ServersTable.id)
             .order_by(text('count ASC'))
             .limit(1)
         )
         result = session.execute(query).one()
+        print(result.id)
         return result.id
         
 
