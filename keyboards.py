@@ -27,7 +27,7 @@ def getInlineKeyboardListCountries(callData = None, optionText: str = "", key: s
 
     return quick_markup(
         {   
-            "Самый быстрый": {'callback_data': '{"key": "' + key + '", "server": ' + str(get_very_free_server()) + optionText + '}'},
+            "Самый свободный сервер(рекомендуется)": {'callback_data': '{"key": "' + key + '", "server": ' + str(get_very_free_server()) + optionText + '}'},
             "Германия": {'callback_data': '{"key": "' + key + '", "server": ' + str(get_very_free_server(Country.deutsche)) + optionText + '}'},
             "Финляндия": {'callback_data': '{"key": "' + key + '", "server": ' + str(Servers.finland1.value) + optionText + '}'},
             "Нидерланды": {'callback_data': '{"key": "' + key + '", "server": ' + str(Servers.niderlands2.value) + optionText + '}'}

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, func, and_, text
 
 from enums.invite import CallbackKeys
-from servers.server_list import Country
+from servers.server_list import Country, Servers
 from enums.logs import TypeLogs
 
 from psycopg2.extras import DictCursor, DictRow
@@ -114,8 +114,12 @@ def get_very_free_server(country: Country | None = None) -> int:
                 isouter=True
             )
         )
+        
         if country:
             query = query.filter(ServersTable.country == country.value)
+        else:
+            query = query.filter(ServersTable.id != Servers.niderlands2.value)
+
         query = (
             query
             .group_by(ServersTable.id)
@@ -123,7 +127,7 @@ def get_very_free_server(country: Country | None = None) -> int:
             .limit(1)
         )
         result = session.execute(query).one()
-        print(result.id)
+       
         return result.id
         
 
