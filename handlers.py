@@ -469,9 +469,7 @@ def register_message_handlers(bot: TeleBot) -> None:
             
             case KeyCall.sale.value:
                 
-                with db.cursor() as cursor:
-                    cursor.execute("UPDATE users_subscription SET name = '" + call.from_user.full_name + "' WHERE telegram_id =" + str(call.from_user.id))
-                    db.commit()
+                user: User = get_user_by_id(call.from_user.id)
                 
                 if 'back' in call_data:
 
@@ -479,7 +477,7 @@ def register_message_handlers(bot: TeleBot) -> None:
                         utils.form_text_markdownv2(config.TextsMessages.select_country.value),
                         call.message.chat.id,
                         call.message.id,
-                        reply_markup=keyboards.getInlineKeyboardListCountries(),
+                        reply_markup=keyboards.get_inline_keyboard_list_countries(user.server_id),
                         parse_mode=ParseMode.mdv2.value
                     )
 
@@ -488,7 +486,7 @@ def register_message_handlers(bot: TeleBot) -> None:
                     photo = open(config.FILE_URL + "vpn_option.png", "rb"),
                     caption = utils.form_text_markdownv2(config.TextsMessages.select_country.value),
                     parse_mode=ParseMode.mdv2.value,
-                    reply_markup=keyboards.getInlineKeyboardListCountries()
+                    reply_markup=keyboards.get_inline_keyboard_list_countries(user.server_id)
                 )
 
             case KeyCall.tryServers.value:
@@ -498,7 +496,7 @@ def register_message_handlers(bot: TeleBot) -> None:
                     message_id=call.message.id,
                     text = utils.form_text_markdownv2(config.TextsMessages.select_country.value),
                     parse_mode=ParseMode.mdv2.value,
-                    reply_markup=keyboards.getInlineKeyboardListCountries(callData=call_data, new=True)
+                    reply_markup=keyboards.get_inline_keyboard_list_countries_by_try(callData=call_data, new=True)
                 )
 
             case KeyCall.pollCountMonth.value:

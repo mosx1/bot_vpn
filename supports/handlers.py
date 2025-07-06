@@ -22,7 +22,7 @@ from tables import User
 
 from filters import only_user_chat
 
-from keyboards import getInlineKeyboardListCountries
+from keyboards import get_inline_keyboard_list_countries_by_try
 
 
 
@@ -58,7 +58,7 @@ def register_message_handlers(bot: TeleBot) -> None:
                         photo = open(config.FILE_URL + "vpn_option.png", "rb"),
                         caption = utils.form_text_markdownv2(config.TextsMessages.select_country.value),
                         parse_mode=ParseMode.mdv2.value,
-                        reply_markup = getInlineKeyboardListCountries()
+                        reply_markup = get_inline_keyboard_list_countries_by_try()
                     )
 
                 case config.KeyboardForUser.refProgram.value:
