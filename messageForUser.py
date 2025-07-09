@@ -87,7 +87,9 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
                 caption=optionText + config.TextsMessages.successfullySubscriptionAutomatic.value.format(
                     id,
                     utils.replaceMonthOnRuText(user.exit_date),
-                    utils.get_server_name_by_id(user.server_id)
+                    utils.form_text_markdownv2(
+                        utils.get_server_name_by_id(user.server_id)
+                    )
                 ),
                 reply_markup=keyboard, 
                 parse_mode=ParseMode.mdv2.value
@@ -102,7 +104,9 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
             caption=optionText + config.TextsMessages.successfullySubscriptionAutomatic.value.format(
                 id,
                 utils.replaceMonthOnRuText(user.exit_date),
-                utils.get_server_name_by_id(user.server_id)
+                utils.form_text_markdownv2(
+                    utils.get_server_name_by_id(user.server_id)
+                )
             ),
             reply_markup=keyboard, 
             parse_mode=ParseMode.mdv2.value

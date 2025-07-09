@@ -40,6 +40,14 @@ class ServersTable(Base):
     links: Column = Column(TEXT, nullable=False)
     country: Column = Column(INTEGER, nullable=False)
     name: Column = Column(TEXT, nullable=False)
+
+
+class CountryTable(Base):
+
+    __tablename__: str = 'country'
+
+    id: Column = Column(INTEGER, primary_key=True)
+    name: Column = Column(TEXT, nullable=False)
     
     
 Base.metadata.create_all(engine)

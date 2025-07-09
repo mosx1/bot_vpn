@@ -496,7 +496,7 @@ def register_message_handlers(bot: TeleBot) -> None:
                     message_id=call.message.id,
                     text = utils.form_text_markdownv2(config.TextsMessages.select_country.value),
                     parse_mode=ParseMode.mdv2.value,
-                    reply_markup=keyboards.get_inline_keyboard_list_countries_by_try(callData=call_data, new=True)
+                    reply_markup=keyboards.get_inline_keyboard_list_countries_by_try(callData=call_data)
                 )
 
             case KeyCall.pollCountMonth.value:
