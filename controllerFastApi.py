@@ -89,17 +89,3 @@ def del_users(
          ).json()
 
     return response["success"]
-
-
-
-def getStat(server: int) -> dict:
-     """
-          Запрос статистики по серверу
-     """
-     response = requests.get(
-         "http://{}/597730754/stat".format(
-              utils.getUrlByIdServer(server)
-              )
-         ).json()
-     
-     return response

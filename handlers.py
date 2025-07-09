@@ -683,14 +683,20 @@ def register_message_handlers(bot: TeleBot) -> None:
                 bot.send_video(call.from_user.id, open("/root/bot_vpn/video/08.mp4", "rb"), width=888, height=1920)
 
             case "page_client_next":
-
+                
                 managment_user.manager_users_list.start += config.COUNT_PAGE
-                managment_user.manager_users_list.search_all_user(call.message)
+                if managment_user.manager_users_list.search_text:
+                    managment_user.manager_users_list.search_user(call.message)
+                else:
+                    managment_user.manager_users_list.search_all_user(call.message)
 
             case "page_client_back":
 
                 managment_user.manager_users_list.start -= config.COUNT_PAGE
-                managment_user.manager_users_list.search_all_user(call.message)
+                if managment_user.manager_users_list.search_text:
+                    managment_user.manager_users_list.search_user(call.message)
+                else:
+                    managment_user.manager_users_list.search_all_user(call.message)
 
             case "home_key_faq":
 

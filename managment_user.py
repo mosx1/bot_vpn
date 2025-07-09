@@ -38,6 +38,7 @@ class UserList:
         self.start = 0
         self.one_active = True
         self.statusSearch: StatusSearch
+        self.search_text = ""
         if message:
             self.search_user(message)
 
@@ -66,11 +67,11 @@ class UserList:
     def search_user(self, message):
         self.statusSearch = StatusSearch.search
         option_where = ""
-        search_text = str(message.text).split(" ", 1)[1]
+        self.search_text: str = str(message.text).split(" ", 1)[1]
         if self.one_active:
             option_where = ", action = True"
         with db.cursor() as cursor:
-            cursor.execute("SELECT name, telegram_id, action, exit_date, server_id, paid, statistic FROM users_subscription WHERE (name || telegram_id) ILIKE '%" + search_text + "%'" + option_where + " LIMIT  " + str(config.COUNT_PAGE) + " OFFSET " + str(self.start))
+            cursor.execute("SELECT name, telegram_id, action, exit_date, server_id, paid, statistic FROM users_subscription WHERE (name || telegram_id) ILIKE '%" + self.search_text + "%'" + option_where + " LIMIT  " + str(config.COUNT_PAGE) + " OFFSET " + str(self.start))
             self.data_cur = cursor.fetchall()
         self.manager_users_list(message)
 
