@@ -35,14 +35,14 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
     user: User = get_user_by_id(id)
     keyboard = types.InlineKeyboardMarkup()
 
-    keyboard.add(
-        types.InlineKeyboardButton(
-            text="Завершить настройку", 
-            url='https://kuzmos.ru/mobile?link={}'.format(
-                str(user.server_link).replace('#', '&name=')
-            )
-        )
-    )
+    # keyboard.add(
+    #     types.InlineKeyboardButton(
+    #         text="Завершить настройку", 
+    #         url='https://kuzmos.ru/mobile?link={}'.format(
+    #             str(user.server_link).replace('#', '&name=')
+    #         )
+    #     )
+    # )
     keyboard.add(
         types.InlineKeyboardButton(
             text="Ручная настройка(если ничего не подключается)", 
@@ -85,11 +85,12 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
                 chat_id=id,
                 photo=open(config.FILE_URL + "4rrr.jpg", "rb"),
                 caption=optionText + config.TextsMessages.successfullySubscriptionAutomatic.value.format(
-                    id,
+                    str(user.server_link).replace('#', '&name='),
                     utils.replaceMonthOnRuText(user.exit_date),
                     utils.form_text_markdownv2(
                         utils.get_server_name_by_id(user.server_id)
-                    )
+                    ),
+                    id
                 ),
                 reply_markup=keyboard, 
                 parse_mode=ParseMode.mdv2.value
@@ -102,11 +103,12 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
             chat_id=id, 
             message_id=oldMessageId,
             caption=optionText + config.TextsMessages.successfullySubscriptionAutomatic.value.format(
-                id,
+                str(user.server_link).replace('#', '&name='),
                 utils.replaceMonthOnRuText(user.exit_date),
                 utils.form_text_markdownv2(
                     utils.get_server_name_by_id(user.server_id)
-                )
+                ),
+                id
             ),
             reply_markup=keyboard, 
             parse_mode=ParseMode.mdv2.value
