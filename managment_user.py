@@ -69,7 +69,7 @@ class UserList:
         option_where = ""
         self.search_text: str = str(message.text).split(" ", 1)[1]
         if self.one_active:
-            option_where = ", action = True"
+            option_where = " AND action = True "
         with db.cursor() as cursor:
             cursor.execute("SELECT name, telegram_id, action, exit_date, server_id, paid, statistic FROM users_subscription WHERE (name || telegram_id) ILIKE '%" + self.search_text + "%'" + option_where + " LIMIT  " + str(config.COUNT_PAGE) + " OFFSET " + str(self.start))
             self.data_cur = cursor.fetchall()
