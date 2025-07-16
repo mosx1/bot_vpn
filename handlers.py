@@ -46,7 +46,7 @@ from payment.stars.handlers import handle_buy
 
 from statistic.tasks import start_statistic
 
-# from configparser import ConfigParser
+from configparser import ConfigParser
 
 
 def register_message_handlers(bot: TeleBot) -> None:
@@ -501,6 +501,10 @@ def register_message_handlers(bot: TeleBot) -> None:
 
             case KeyCall.pollCountMonth.value:
                 
+                conf = ConfigParser()
+                conf.read(config.FILE_URL + 'config.ini')
+
+
                 if "gift" in call_data:
                     key = "getGiftCode"
                     keyBack = ""
@@ -510,10 +514,10 @@ def register_message_handlers(bot: TeleBot) -> None:
 
                 keyboard = quick_markup(
                     {
-                        '1 мес.| ' + str(config.PRICE) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(call_data['server']) + ', "month": 1}'},
-                        '3 мес.| ' + str(config.PRICE * 3) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(call_data['server']) + ', "month": 3}'},
-                        '6 мес.| ' + str(config.PRICE * 6) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(call_data['server']) + ', "month": 6}'},
-                        '12 мес.| ' + str(config.PRICE * 12) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(call_data['server']) + ', "month": 12}'},
+                        '1 мес.| ' + conf['Price'].get('RUB') + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(call_data['server']) + ', "month": 1}'},
+                        '3 мес.| ' + str(conf['Price'].getint('RUB') * 3) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(call_data['server']) + ', "month": 3}'},
+                        '6 мес.| ' + str(conf['Price'].getint('RUB') * 6) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(call_data['server']) + ', "month": 6}'},
+                        '12 мес.| ' + str(conf['Price'].getint('RUB') * 12) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(call_data['server']) + ', "month": 12}'},
                         '<<< назад': {'callback_data': '{"key": "' + keyBack + '", "back": 1}'}
                     },
                     row_width=2
@@ -593,8 +597,15 @@ def register_message_handlers(bot: TeleBot) -> None:
             case "connect":
 
                 key = types.InlineKeyboardMarkup()
-                key.add(*[types.InlineKeyboardButton(text=i, callback_data='{"key": "action", "id": "' + str(call_data['id']) + '", "month": "' + str(i) + '", "s":' + str(call_data['serverId']) + '}') for i in range(1,13)],
-                        types.InlineKeyboardButton(text="Назад", callback_data='{"key": "backConnectKey", "id": "' + str(call_data['id']) + '"}'))
+                key.add(
+                    *[
+                        types.InlineKeyboardButton(
+                            text=i,
+                            callback_data='{"key": "action", "id": "' + str(call_data['id']) + '", "month": "' + str(i) + '", "s":' + str(call_data['serverId']) + '}'
+                        ) for i in range(0, 13)
+                    ],
+                    types.InlineKeyboardButton(text="Назад", callback_data='{"key": "backConnectKey", "id": "' + str(call_data['id']) + '"}')
+                )
                 if call.message.content_type == "text":
                     bot.edit_message_text(chat_id = call.message.chat.id, message_id = call.message.id, text = call.message.text, reply_markup = key)
                 else:

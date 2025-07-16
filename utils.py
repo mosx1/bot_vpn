@@ -118,7 +118,12 @@ def get_very_free_server(country: Country | None = None) -> int:
         if country:
             query = query.filter(ServersTable.country == country.value)
         else:
-            query = query.filter(ServersTable.id != Servers.niderlands2.value)
+            query = query.filter(
+                and_(
+                    ServersTable.id != Servers.niderlands2.value,
+                    ServersTable.id != Servers.finland1.value
+                )
+            )
 
         query = (
             query
