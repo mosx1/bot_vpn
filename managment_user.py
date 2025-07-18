@@ -21,7 +21,7 @@ from sqlalchemy import select, func
 from tables import User, ServersTable
 from users.methods import get_user_by_id
 
-from servers.server_list import Servers, Country
+from servers.server_list import Country
 from servers.methods import get_server_list
 
 
@@ -185,7 +185,11 @@ class UserList:
                     ),
                     types.InlineKeyboardButton(
                         text="Нидерланды", 
-                        callback_data='{"key": "connect", "id": "' + user_id + '", "serverId": ' + str(Servers.niderlands2.value) + '}'
+                        callback_data='{"key": "connect", "id": "' + user_id + '", "serverId": ' + str(utils.get_very_free_server(Country.niderlands)) + '}'
+                    ),
+                    types.InlineKeyboardButton(
+                        text="Финляндия", 
+                        callback_data='{"key": "connect", "id": "' + user_id + '", "serverId": ' + str(utils.get_very_free_server(Country.finland)) + '}'
                     ),
                     types.InlineKeyboardButton(
                         text="Данные", 
@@ -217,7 +221,7 @@ def add_user(
 
         if server == None:
             if data_cur == None:
-                server = config.DEFAULTSERVER
+                server = utils.get_very_free_server()
             else:
                 server = data_cur[1]
 
@@ -290,8 +294,6 @@ def del_user(id_user, noUpdate=None, no_message=None) -> None:
             db.rollback()
 
         controllerFastApi.suspendUser(id_user, dataCur["server_id"])
-
-
 
 
 def chek_subscription():

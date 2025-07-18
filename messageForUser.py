@@ -12,16 +12,20 @@ from enums.keyCall import KeyCall
 from users.methods import get_user_by_id
 from tables import User
 
+from configparser import ConfigParser
 
 
 def periodSubscription(call: types.CallbackQuery, call_data: dict):
+
+    conf = ConfigParser()
+    conf.read(config.FILE_URL + 'config.ini')
     
     keyboard: types.InlineKeyboardMarkup = quick_markup(
                 {
-                    '1 мес.| ' + str(config.PRICE) + " руб.": {'callback_data': '{"key": "getLinkPayment", "server": ' + str(call_data['server']) + ', "month": 1}'},
-                    '3 мес.| ' + str(config.PRICE * 3) + " руб.": {'callback_data': '{"key": "getLinkPayment", "server": ' + str(call_data['server']) + ', "month": 3}'},
-                    '6 мес.| ' + str(config.PRICE * 6) + " руб.": {'callback_data': '{"key": "getLinkPayment", "server": ' + str(call_data['server']) + ', "month": 6}'},
-                    '12 мес.| ' + str(config.PRICE * 12) + " руб.": {'callback_data': '{"key": "getLinkPayment", "server": ' + str(call_data['server']) + ', "month": 12}'},
+                    '1 мес.| ' + conf['Price'].get('RUB') + " руб.": {'callback_data': '{"key": "getLinkPayment", "server": ' + str(call_data['server']) + ', "month": 1}'},
+                    '3 мес.| ' + str(conf['Price'].getint('RUB') * 3) + " руб.": {'callback_data': '{"key": "getLinkPayment", "server": ' + str(call_data['server']) + ', "month": 3}'},
+                    '6 мес.| ' + str(conf['Price'].getint('RUB') * 6) + " руб.": {'callback_data': '{"key": "getLinkPayment", "server": ' + str(call_data['server']) + ', "month": 6}'},
+                    '12 мес.| ' + str(conf['Price'].getint('RUB') * 12) + " руб.": {'callback_data': '{"key": "getLinkPayment", "server": ' + str(call_data['server']) + ', "month": 12}'},
                     '<<< назад': {'callback_data': '{"key": "sale", "back": 1}'}
                 },
                 row_width=2
@@ -62,7 +66,7 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
         ),
         types.InlineKeyboardButton(
             text=config.KeyboardForUser.gift.value,
-            callback_data='{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(config.DEFAULTSERVER) + ', "gift": true}')
+            callback_data='{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(utils.get_very_free_server()) + ', "gift": true}')
     )
     
     if not oldMessageId:

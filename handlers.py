@@ -17,7 +17,7 @@ from filters import onlyAdminChat
 
 from psycopg2.extras import DictCursor
                   
-from servers.server_list import Servers
+from servers.server_list import Servers, Country
 
 from yoomoneyMethods import getInfoLastPayment, getLinkPayment
 
@@ -330,7 +330,7 @@ def register_message_handlers(bot: TeleBot) -> None:
 
         key = quick_markup(
             {
-                config.KeyboardForUser.gift.value: {'callback_data': '{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(config.DEFAULTSERVER) + ', "gift": true}'}
+                config.KeyboardForUser.gift.value: {'callback_data': '{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(utils.get_very_free_server()) + ', "gift": true}'}
             },
             row_width=1
         )
@@ -369,7 +369,7 @@ def register_message_handlers(bot: TeleBot) -> None:
     def _(message: types.Message):
         key = quick_markup(
             {
-                config.KeyboardForUser.gift.value: {'callback_data': '{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(config.DEFAULTSERVER) + ', "gift": true}'}
+                config.KeyboardForUser.gift.value: {'callback_data': '{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(utils.get_very_free_server()) + ', "gift": true}'}
             },
             row_width=1
         )

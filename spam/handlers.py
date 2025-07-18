@@ -3,52 +3,80 @@ from telebot.util import quick_markup
 
 from filters import onlyAdminChat
 from spam.methods import spamMessage
-from servers.server_list import Servers
+
+from servers.server_list import Country
+
 from enums.spam import MessageTextRu
 from enums.keyCall import KeyCall
 
+from users.methods import get_user_by, get_user_by_country
+
+from tables import User
 
 
-def register_message_handlers(bot: TeleBot):
+
+def register_message_handlers(bot: TeleBot) -> None:
 
     @bot.message_handler(
         commands=["spam"],
         func=onlyAdminChat()
     )
-    def _(message: types.Message):
-        bot.reply_to(message, MessageTextRu.spam.value)
+    def _(message: types.Message) -> None:
+        """
+            Рассылает сообщение всем пользователям
+        """
+        current_message: types.Message = bot.reply_to(message, MessageTextRu.spam.value)
+
         spamMessage(
             message,
-            "SELECT telegram_id FROM users_subscription"
+            get_user_by()
         )
-        
-
+        bot.edit_message_text(
+            MessageTextRu.spam_completed.value,
+            current_message.chat.id,
+            current_message.id
+        )
 
 
     @bot.message_handler(
         commands=["spamDE"], 
         func=onlyAdminChat()
     )
-    def _(message: types.Message):
+    def _(message: types.Message) -> None:
+        """
+            Рассылает сообщение пользователям локации Германия
+        """
+        current_message: types.Message = bot.reply_to(message, MessageTextRu.spamDe.value)
+
         spamMessage(
             message,
-            "SELECT telegram_id FROM users_subscription WHERE action = True AND server_id = {}".format(Servers.deutsche.value)
+            get_user_by_country(Country.deutsche)
         )
-        bot.reply_to(message, MessageTextRu.spamDe.value)
-
+        bot.edit_message_text(
+            MessageTextRu.spam_completed.value,
+            current_message.chat.id,
+            current_message.id
+        )
 
 
     @bot.message_handler(
         commands=["spamNID"], 
         func=onlyAdminChat()
     )
-    def _(message: types.Message):
+    def _(message: types.Message) -> None:
+        """
+            Рассылает сообщение пользователям локации Нидерланды
+        """
+        current_message: types.Message = bot.reply_to(message, MessageTextRu.spamNid.value)
         spamMessage(
             message,
-            "SELECT telegram_id FROM users_subscription WHERE action = True AND server_id = {}".format(Servers.niderlands2.value)
+            get_user_by_country(Country.niderlands)
         )
-        bot.reply_to(message, MessageTextRu.spamNid.value)
-
+        bot.edit_message_text(
+            MessageTextRu.spam_completed.value,
+            current_message.chat.id,
+            current_message.id
+        )
 
 
     @bot.message_handler(
@@ -56,6 +84,9 @@ def register_message_handlers(bot: TeleBot):
         func=onlyAdminChat()
     )
     def _(message: types.Message) -> None:
+
+        current_message: types.Message = bot.reply_to(message, MessageTextRu.spamNid.value)
+
         inlineKeyboard: types.InlineKeyboardMarkup = quick_markup(
             {
                 "Продлить": {"callback_data": '{"key": "' + KeyCall.sale.value + '"}'}
@@ -63,23 +94,38 @@ def register_message_handlers(bot: TeleBot):
         )
         spamMessage(
             message,
-            "SELECT telegram_id FROM users_subscription WHERE action = True AND server_id = {}".format(Servers.niderlands2.value),
+            get_user_by_country(
+                Country.niderlands, 
+                User.action == True
+            ),
             inlineKeyboard
         )
-        bot.reply_to(message, MessageTextRu.spamNid.value)
-
+        
+        bot.edit_message_text(
+            MessageTextRu.spam_completed.value,
+            current_message.chat.id,
+            current_message.id
+        )
 
 
     @bot.message_handler(
         commands=["spamACTION"],
         func=onlyAdminChat()
     )
-    def _(message: types.Message):
+    def _(message: types.Message) -> None:
+        """
+            Рассылает сообщение активным пользователям
+        """
+        current_message: types.Message = bot.reply_to(message, MessageTextRu.spamAction.value)
         spamMessage(
             message,
-            "SELECT telegram_id FROM users_subscription WHERE action = True"
+            get_user_by(User.action == True)
         )
-        bot.reply_to(message, MessageTextRu.spamAction.value)
+        bot.edit_message_text(
+            MessageTextRu.spam_completed.value,
+            current_message.chat.id,
+            current_message.id
+        )
 
 
 
@@ -87,9 +133,17 @@ def register_message_handlers(bot: TeleBot):
         commands=["spamNOTACTION"], 
         func=onlyAdminChat()
     )
-    def _(message: types.Message):
+    def _(message: types.Message) -> None:
+        """
+            Рассылает сообщение неактивным пользователям
+        """
+        current_message: types.Message = bot.reply_to(message, MessageTextRu.spamNotAction.value)
         spamMessage(
             message,
-            "SELECT telegram_id FROM users_subscription WHERE action = False"
+            get_user_by(User.action == False)
         )
-        bot.reply_to(message, MessageTextRu.spamNotAction.value)
+        bot.edit_message_text(
+            MessageTextRu.spam_completed.value,
+            current_message.chat.id,
+            current_message.id
+        )

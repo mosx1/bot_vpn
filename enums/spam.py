@@ -9,3 +9,4 @@ class MessageTextRu(Enum):
     spamNid: str = "Рассылка на нидерландский сервер запущена"
     spamAction: str = "Рассылка на активных пользователей запущена"
     spamNotAction: str = "Рассылка на неактивных пользоателей запущена"
+    spam_completed: str = "Рассылка окончена"
