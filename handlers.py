@@ -553,6 +553,9 @@ def register_message_handlers(bot: TeleBot) -> None:
                 checkPayment.start()
 
             case "getLinkPayment":
+                
+                conf = ConfigParser()
+                conf.read(config.FILE_URL + 'config.ini')
 
                 data = crypto_pay.create_invoice(call_data['month'])
                 crypto_pay.ids[data['invoice_id']] = PayingUser(
@@ -572,7 +575,7 @@ def register_message_handlers(bot: TeleBot) -> None:
                         'Оплата рублями': {'url': getLinkPayment(label, call_data['month'])},
                         "Оплата Crypto Bot": {"url": data['mini_app_invoice_url']},
                         "Оплата звездами": {
-                            "callback_data": '{"key": "' + enums.keyCall.KeyCall.payment_stars.name + '", "amount": ' + str(50 * int(call_data['month'])) + ', "server": ' + str(call_data['server']) + '}'
+                            "callback_data": '{"key": "' + enums.keyCall.KeyCall.payment_stars.name + '", "amount": ' + str(conf['Price'].getint('star') * int(call_data['month'])) + ', "server": ' + str(call_data['server']) + '}'
                         },
                         '<<< назад': {'callback_data': '{"key": "pollCountMonth", "server": ' + str(call_data['server']) + '}'}
                     },
