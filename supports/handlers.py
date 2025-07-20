@@ -30,7 +30,8 @@ def register_message_handlers(bot: TeleBot) -> None:
     
     @bot.message_handler(
         func= only_user_chat(),
-        content_types=[ContentTypes.text.value]
+        content_types=[ContentTypes.text.value],
+        chat_types=['private']
     )
     def _(message: types.Message) -> bool | types.Message:
 
@@ -92,9 +93,11 @@ def register_message_handlers(bot: TeleBot) -> None:
 
     @bot.message_handler(
         func= only_user_chat(),
-        content_types=[ContentTypes.document.value]
+        content_types=[ContentTypes.document.value],
+        chat_types=['private']
     )
     def _(message: types.Message) -> None:
+        
         if message.from_user.id == config.ADMINCHAT:
             try:
                 user_id = str(message.reply_to_message.caption).split('id:', -1)[1]
@@ -119,6 +122,7 @@ def register_message_handlers(bot: TeleBot) -> None:
     @bot.message_handler(
         func=only_user_chat(),
         content_types=[ContentTypes.photo.value],
+        chat_types=['private']
     )
     def photo_chek(message: types.Message):
 
@@ -145,7 +149,8 @@ def register_message_handlers(bot: TeleBot) -> None:
 
     @bot.message_handler(
         func=only_user_chat(),
-        content_types=[ContentTypes.sticker.value]
+        content_types=[ContentTypes.sticker.value],
+        chat_types=['private']
     )
     def file_chek(message: types.Message):
         bot.send_message(chat_id=message.chat.id, reply_to_message_id=message.id, text="Стикеры не поддреживаются в данном диалоге")

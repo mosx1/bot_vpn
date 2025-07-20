@@ -6,16 +6,16 @@ import supports
 import handlers
 import spam.handlers
 import supports.handlers
-# import payment.stars.handlers
+import game.handlers
 import payment
 
-from connect import bot
+from connect import bot, storage
 
-# payment.stars.handlers.register_message_handlers(bot)
 supports.handlers.register_message_handlers(bot)
 handlers.register_message_handlers(bot)
 spam.handlers.register_message_handlers(bot)
 payment.stars.handlers.register_message_handlers(bot)
+game.handlers.register_handlers(bot, storage)
 
 
 bot.infinity_polling()
