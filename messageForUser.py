@@ -1,10 +1,8 @@
 import config, utils
 
-from connect import bot, db
+from connect import bot
 from telebot import types
 from telebot.util import quick_markup
-
-from psycopg2.extras import DictCursor
 
 from enums.parse_mode import ParseMode
 from enums.keyCall import KeyCall
@@ -13,6 +11,8 @@ from users.methods import get_user_by_id
 from tables import User
 
 from configparser import ConfigParser
+
+from keyboards import KeyboardForUser
 
 
 def periodSubscription(call: types.CallbackQuery, call_data: dict):
@@ -65,18 +65,18 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
             callback_data='{"key": "sale"}'
         ),
         types.InlineKeyboardButton(
-            text=config.KeyboardForUser.gift.value,
+            text=KeyboardForUser.gift.value,
             callback_data='{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(utils.get_very_free_server()) + ', "gift": true}')
     )
     
     if not oldMessageId:
         if user.paid:
             keyboard_ref = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            keyboard_ref.add(types.KeyboardButton(text=config.KeyboardForUser.refProgram.value))
-            keyboard_ref.add(types.KeyboardButton(text=config.KeyboardForUser.balanceTime.value))
+            keyboard_ref.add(types.KeyboardButton(text=KeyboardForUser.refProgram.value))
+            keyboard_ref.add(types.KeyboardButton(text=KeyboardForUser.balanceTime.value))
             keyboard_ref.add(
-                types.KeyboardButton(text=config.KeyboardForUser.buy.value),
-                types.KeyboardButton(text=config.KeyboardForUser.gift.value)
+                types.KeyboardButton(text=KeyboardForUser.buy.value),
+                types.KeyboardButton(text=KeyboardForUser.gift.value)
             )
             bot.send_message(
                 id,

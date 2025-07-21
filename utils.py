@@ -156,3 +156,7 @@ def get_server_name_by_id(server_id: int) -> str:
         if data:
             return data.name
         return "Неизвестное наименование сервера"
+    
+
+def get_list_values_from_enum(data: Enum) -> list:
+    return [item.value for item in data]

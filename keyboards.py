@@ -5,6 +5,16 @@ from servers.server_list import Country
 
 from utils import get_very_free_server
 
+from enum import Enum
+
+
+class KeyboardForUser(Enum):
+    
+    refProgram: str = "Реферальная программа"
+    balanceTime: str = "Дата окончания подписки"
+    gift: str = "Подарить"
+    buy: str = "Продлить"
+
 
 def get_inline_keyboard_list_countries_by_try(callData = None, optionText: str = "") -> InlineKeyboardMarkup:
     """

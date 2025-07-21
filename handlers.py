@@ -1,6 +1,4 @@
-import enums.comands
 import enums.invite
-
 import enums.keyCall
 import json, config, os, utils, pytz, datetime, time, managment_user, invite, enums, keyboards, controllerFastApi
 controllerFastApi
@@ -30,6 +28,7 @@ from enums.comands import Comands
 
 from enums.parse_mode import ParseMode
 from enums.keyCall import KeyCall
+from enums.chat_types import ChatTypes
 
 from giftUsers import genGiftCode, checkGiftCode
 
@@ -284,8 +283,12 @@ def register_message_handlers(bot: TeleBot) -> None:
         bot.send_document(message.chat.id, document=open("logs.txt","rb"))
 
 
-    @bot.message_handler(commands=[Comands.start.value])
+    @bot.message_handler(
+        commands=[Comands.start.value],
+        chat_types=[ChatTypes.private.value]
+    )
     def start(message: types.Message):
+
         jsonIdInvited = ""
         with db.cursor() as cursor:
             cursor.execute("SELECT action FROM users_subscription WHERE telegram_id=" + str(message.from_user.id))
@@ -302,7 +305,11 @@ def register_message_handlers(bot: TeleBot) -> None:
                             message.text = arrStartMessageText[1]
                     elif checkGiftCode(message):
                         return successfully_paid(message.from_user.id, optionText="Подарок активирован\n")
+                # else:
 
+                #     bot.send_message(message.chat.id, "Привет! Давай сыграем в крестики-нолики. Используй /game чтобы начать игру.")
+                #     return
+                
                 keyboard.add(types.InlineKeyboardButton(text="Попробовать", callback_data='{"key": "tryServers"' + jsonIdInvited + '}'))
                 keyboard.add(types.InlineKeyboardButton(text="Политика по обработке персональных данных", callback_data='{"key": "pppd"}'))
                 keyboard.add(types.InlineKeyboardButton(text="Условия использования", callback_data='{"key": "termsOfUse"}'))
@@ -330,7 +337,7 @@ def register_message_handlers(bot: TeleBot) -> None:
 
         key = quick_markup(
             {
-                config.KeyboardForUser.gift.value: {'callback_data': '{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(utils.get_very_free_server()) + ', "gift": true}'}
+                keyboards.KeyboardForUser.gift.value: {'callback_data': '{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(utils.get_very_free_server()) + ', "gift": true}'}
             },
             row_width=1
         )
@@ -351,25 +358,24 @@ def register_message_handlers(bot: TeleBot) -> None:
 
 
 
-    @bot.message_handler(func=lambda message: message.text == config.KeyboardForUser.balanceTime.value)
-    def _(message: types.Message):
-        with db.cursor(cursor_factory=DictCursor) as cursor:
-            cursor.execute("SELECT exit_date FROM users_subscription WHERE telegram_id=" + str(message.from_user.id))
-            data_cur = cursor.fetchone()
-            
-            bot.send_message(
-                message.from_user.id,
-                "Подписка оканчивается: " + str(data_cur['exit_date']),
-                reply_to_message_id=message.id,
-                reply_markup=keyboards.getInlineExtend()
-            )
+    @bot.message_handler(
+        func=lambda message: message.text == keyboards.KeyboardForUser.balanceTime.value
+    )
+    def _(message: types.Message) -> None:
+
+        user: User = get_user_by_id(message.from_user.id)
+        bot.reply_to(
+            message,
+            "Подписка оканчивается: " + utils.replaceMonthOnRuText(user.exit_date),
+            reply_markup=keyboards.getInlineExtend()
+        )
 
 
-    @bot.message_handler(func=lambda message: message.text == config.KeyboardForUser.gift.value)
+    @bot.message_handler(func=lambda message: message.text == keyboards.KeyboardForUser.gift.value)
     def _(message: types.Message):
         key = quick_markup(
             {
-                config.KeyboardForUser.gift.value: {'callback_data': '{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(utils.get_very_free_server()) + ', "gift": true}'}
+                keyboards.KeyboardForUser.gift.value: {'callback_data': '{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(utils.get_very_free_server()) + ', "gift": true}'}
             },
             row_width=1
         )

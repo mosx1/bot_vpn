@@ -20,16 +20,16 @@ from messageForUser import successfully_paid
 
 from tables import User
 
-from filters import only_user_chat
+from filters import only_user_chat, only_user_chat_and_text
 
-from keyboards import get_inline_keyboard_list_countries
+from keyboards import KeyboardForUser, get_inline_keyboard_list_countries
 
 
 
 def register_message_handlers(bot: TeleBot) -> None:
     
     @bot.message_handler(
-        func= only_user_chat(),
+        func= only_user_chat_and_text(),
         content_types=[ContentTypes.text.value],
         chat_types=['private']
     )
@@ -43,7 +43,7 @@ def register_message_handlers(bot: TeleBot) -> None:
 
             match message.text:
 
-                case config.KeyboardForUser.gift.value:
+                case KeyboardForUser.gift.value:
 
                     return bot.send_message(
                         message.from_user.id,
@@ -52,7 +52,7 @@ def register_message_handlers(bot: TeleBot) -> None:
                         parse_mode = ParseMode.mdv2.value
                     )
                 
-                case config.KeyboardForUser.buy.value:
+                case KeyboardForUser.buy.value:
 
                     return bot.send_photo(
                         message.from_user.id,
@@ -62,7 +62,7 @@ def register_message_handlers(bot: TeleBot) -> None:
                         reply_markup = get_inline_keyboard_list_countries()
                     )
 
-                case config.KeyboardForUser.refProgram.value:
+                case KeyboardForUser.refProgram.value:
 
                     return bot.send_message(
                         message.from_user.id,
