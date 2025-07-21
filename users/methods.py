@@ -19,7 +19,9 @@ def get_user_by_id(telegram_id: int) -> User:
 
 def get_user_by(filter: BinaryExpression | None = None) -> list[User]:
     with Session(engine) as session:
-        query = select(User).filter(filter)
+        query = select(User)
+        if filter:
+            query.filter(filter)
         return session.execute(query).scalars().all()
     
 

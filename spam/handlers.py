@@ -26,7 +26,7 @@ def register_message_handlers(bot: TeleBot) -> None:
             Рассылает сообщение всем пользователям
         """
         current_message: types.Message = bot.reply_to(message, MessageTextRu.spam.value)
-
+        print(get_user_by())
         spamMessage(
             message,
             get_user_by()
