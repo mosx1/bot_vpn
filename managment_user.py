@@ -36,7 +36,7 @@ class UserList:
     def __init__(self, message = None):
         self.mes_arr = []
         self.start = 0
-        self.one_active = True
+        self.one_active = False
         self.statusSearch: StatusSearch
         self.search_text = ""
         if message:
