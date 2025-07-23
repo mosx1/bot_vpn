@@ -8,10 +8,13 @@ from servers.server_list import Country
 
 from enums.spam import MessageTextRu
 from enums.keyCall import KeyCall
+from enums.parse_mode import ParseMode
 
 from users.methods import get_user_by, get_user_by_country
 
 from tables import User
+
+from connect import logging
 
 
 
@@ -128,7 +131,6 @@ def register_message_handlers(bot: TeleBot) -> None:
         )
 
 
-
     @bot.message_handler(
         commands=["spamNOTACTION"], 
         func=onlyAdminChat()
@@ -142,6 +144,30 @@ def register_message_handlers(bot: TeleBot) -> None:
             message,
             get_user_by(User.action == False)
         )
+        bot.edit_message_text(
+            MessageTextRu.spam_completed.value,
+            current_message.chat.id,
+            current_message.id
+        )
+    
+
+    @bot.message_handler(commands=["spamref"])
+    def _(message: types.Message) -> None:
+
+        current_message: types.Message = bot.reply_to(message, MessageTextRu.spamAction.value)
+        users: list[User] = get_user_by(User.action == True)
+        
+        for user in users:
+            try:
+                bot.send_message(
+                    user.telegram_id, 
+                    "Вы можете пригласить нового пользователя и получить за это 1 мес\. подписки бесплатно\. Для того чтоб использовать такую возможность, отправьте вашу пригласительную ссылку другу\(для копирования достаточно нажать на ссылку\)\n\n"+
+                    "Персональная ссылка:\n`https://t.me/open_vpn_sale_bot?start=" + str(user.telegram_id) + "` \n\nНа данный момент это единственный способ помочь проекту не погибнуть под жесткими законами, ведь реклама на рекламных площадках подобных сервисов запрещена\.",
+                    parse_mode= ParseMode.mdv2.value
+                )
+            except Exception as e:
+                logging.error("Не удалось отправить сообщение пользователю", e)
+                
         bot.edit_message_text(
             MessageTextRu.spam_completed.value,
             current_message.chat.id,

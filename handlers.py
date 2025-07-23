@@ -271,21 +271,6 @@ def register_message_handlers(bot: TeleBot) -> None:
             db.commit()
 
 
-
-    @bot.message_handler(commands=["spamref"])
-    def _(message: types.Message):
-        with db.cursor() as cursor:
-            cursor.execute("SELECT telegram_id FROM users_subscription")
-            for i in cursor.fetchall():
-                try:
-                    bot.send_message(i[0], "Вы можете пригласить нового пользователя и получить за это 1 мес\. подписки бесплатно\. Для того чтоб использовать такую возможность, отправьте вашу пригласительную ссылку другу\(для копирования достаточно нажать на ссылку\)\n\n"+
-                            "Персональная ссылка:\n`https://t.me/open_vpn_sale_bot?start=" + str(i[0]) + "`",
-                                parse_mode= ParseMode.mdv2.value)
-                except Exception as e:
-                    logging.error("Не удалось отправить сообщение пользователю", e)
-
-
-
     @bot.message_handler(commands=["log", "лог"], func=onlyAdminChat())
     def _(message: types.Message):
 
