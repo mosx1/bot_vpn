@@ -17,11 +17,20 @@ def get_user_by_id(telegram_id: int) -> User:
         return session.execute(query).scalar()
     
 
-def get_user_by(filter: BinaryExpression | None = None) -> list[User]:
+def get_user_by(
+        filter: BinaryExpression | None = None, 
+        limit: int | None = None,
+        offset: int | None = None
+) -> list[User]:
+    
     with Session(engine) as session:
+
         query = select(User)
-        if filter:
-            query.filter(filter)
+
+        if filter is not None: query = query.filter(filter)
+        if limit is not None: query = query.limit(limit)
+        if offset is not None: query = query.offset(offset)
+
         return session.execute(query).scalars().all()
     
 

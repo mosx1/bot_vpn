@@ -38,7 +38,7 @@ from tables import User, ServersTable
 from users.methods import get_user_by_id
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func, text, union_all, literal_column
+from sqlalchemy import select, func, text, union_all, literal_column, or_
 
 from payment.crypto.repository.methods import crypto_pay, PayingUser, TypeOfPurchase
 from payment.stars.handlers import handle_buy
@@ -186,8 +186,7 @@ def register_message_handlers(bot: TeleBot) -> None:
     @bot.message_handler(commands=[config.ADMINPASSWORD], func=onlyAdminChat())
     def d(message):
         add_key_admin(message)
-        managment_user.manager_users_list = UserList()
-        managment_user.manager_users_list.search_all_user(message)
+        managment_user.manager_users_list = UserList(message)
     
     @bot.message_handler(commands=['te'], func=onlyAdminChat())
     def _(message: types.Message):
@@ -207,10 +206,20 @@ def register_message_handlers(bot: TeleBot) -> None:
         os.system("systemctl restart bot_vpn.service")
 
 
-    @bot.message_handler(commands=["поиск", "найти", "search"], func=onlyAdminChat())
-    def create_table(message):
+    @bot.message_handler(
+            commands=["поиск", "найти", "search"], 
+            func=onlyAdminChat()
+    )
+    def _(message) -> None:
+
         add_key_admin(message)
-        managment_user.manager_users_list = UserList(message)
+
+        text: str = ' '.join(str(message.text).split(' ')[1:])
+
+        managment_user.manager_users_list = UserList(
+            message,
+            func.concat(User.telegram_id, User.name).ilike(f'%{text}%')
+        )
         
 
         
@@ -367,7 +376,8 @@ def register_message_handlers(bot: TeleBot) -> None:
         bot.reply_to(
             message,
             "Подписка оканчивается: " + utils.replaceMonthOnRuText(user.exit_date),
-            reply_markup=keyboards.getInlineExtend()
+            reply_markup=keyboards.getInlineExtend(),
+            parse_mode=ParseMode.mdv2.value
         )
 
 
@@ -704,19 +714,11 @@ def register_message_handlers(bot: TeleBot) -> None:
 
             case "page_client_next":
                 
-                managment_user.manager_users_list.start += config.COUNT_PAGE
-                if managment_user.manager_users_list.search_text:
-                    managment_user.manager_users_list.search_user(call.message)
-                else:
-                    managment_user.manager_users_list.search_all_user(call.message)
+                managment_user.manager_users_list.next_page(call.message)
 
             case "page_client_back":
 
-                managment_user.manager_users_list.start -= config.COUNT_PAGE
-                if managment_user.manager_users_list.search_text:
-                    managment_user.manager_users_list.search_user(call.message)
-                else:
-                    managment_user.manager_users_list.search_all_user(call.message)
+                managment_user.manager_users_list.back_page(call.message)
 
             case "home_key_faq":
 

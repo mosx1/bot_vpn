@@ -16,13 +16,15 @@ from protocols import getNameProtocolById
 from managers.subscription.renewal_of_subscription import renewalOfSubscription
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func
+from sqlalchemy import select, func, and_
 
 from tables import User, ServersTable
-from users.methods import get_user_by_id
+from users.methods import get_user_by_id, get_user_by
 
 from servers.server_list import Country
 from servers.methods import get_server_list
+
+from configparser import ConfigParser
 
 
 class StatusSearch(Enum):
@@ -33,12 +35,18 @@ class StatusSearch(Enum):
 
 class UserList:
     
-    def __init__(self, message = None):
+    def __init__(self, message = None, filter = None) -> None:
+
+        conf = ConfigParser()
+        conf.read(f'{config.FILE_URL}config.ini')
+
+        self.config = conf['UserList']
         self.mes_arr = []
         self.start = 0
         self.one_active = False
         self.statusSearch: StatusSearch
         self.search_text = ""
+        self.filters = filter
         if message:
             self.search_user(message)
 
@@ -48,51 +56,39 @@ class UserList:
             for item in self.mes_arr:
                 bot.delete_message(config.ADMINCHAT, item)
 
-    def search_all_user(self, message):
-        self.statusSearch = StatusSearch.all
+    
+    def next_page(self, message) -> None:
+        self.start += self.config.getint('items_on_page')
+        self.search_user(message)
 
-        if self.one_active:
-            option_where = " WHERE action = True  ORDER BY exit_date ASC "
-        else:
-            option_where = " ORDER BY name ASC "
-        with db.cursor() as cursor:
-            cursor.execute("SELECT name, telegram_id, action, exit_date, server_id, paid, statistic FROM users_subscription " +
-                           option_where +
-                           " LIMIT " +
-                           str(config.COUNT_PAGE) +
-                           " OFFSET " + str(self.start))
-            self.manager_users_list(message, cursor.fetchall())
+
+    def back_page(self, message) -> None:
+        self.start -= self.config.getint('items_on_page')
+        self.search_user(message)
     
 
-    def search_user(self, message):
-        self.statusSearch = StatusSearch.search
-        option_where = ""
-        self.search_text: str = str(message.text).split(" ", 1)[1]
-        if self.one_active:
-            option_where = " AND action = True "
-        with db.cursor() as cursor:
-            cursor.execute("SELECT name, telegram_id, action, exit_date, server_id, paid, statistic FROM users_subscription WHERE (name || telegram_id) ILIKE '%" + self.search_text + "%'" + option_where + " LIMIT  " + str(config.COUNT_PAGE) + " OFFSET " + str(self.start))
-            self.data_cur = cursor.fetchall()
-        self.manager_users_list(message)
+    def search_user(self, message) -> None:
+
+        users: list[User] = get_user_by(
+            self.filters,
+            self.config.getint('items_on_page'),
+            self.start
+        )
+        self.manager_users_list(message, users)
 
 
-    def manager_users_list(self, message: types.Message, data_cur=None) -> None:
+    def manager_users_list(self, message: types.Message, users: list[User | None]) -> None:
 
-        server: str = ""
-
-        if data_cur:
-            self.data_cur = data_cur
-        a = 0
         text_key_where = "Показать только активные"
         if self.one_active:
             text_key_where = "Показать все"
-        if len(self.data_cur) == 0:
-            self.start -= config.COUNT_PAGE
+        if len(users) == 0:
+            self.start -= self.config.getint('items_on_page')
             return
-        if len(self.data_cur) < config.COUNT_PAGE:
-            res = config.COUNT_PAGE - len(self.data_cur)
+        if len(users) < self.config.getint('items_on_page'):
+            res = self.config.getint('items_on_page') - len(users)
             for b in range(res):
-                self.data_cur.append((None, '-'))
+                users.append(None)
             button_nav = [types.InlineKeyboardButton(text="<", callback_data='{"key": "page_client_back"}')]
         if self.start == 0:
             button_nav = [types.InlineKeyboardButton(text=">", callback_data='{"key": "page_client_next"}')]
@@ -100,52 +96,75 @@ class UserList:
             button_nav = [types.InlineKeyboardButton(text="<", callback_data='{"key": "page_client_back"}'),
                           types.InlineKeyboardButton(text=">", callback_data='{"key": "page_client_next"}')]
         if len(self.mes_arr) == 0:
-            for i in self.data_cur:
-                if i[0] != None:
-                    keyboard_offer_one = self.addButtonKeyForUsersList(str(i[1]), int(i[2]), a, button_nav, text_key_where, i[4])
-                try:
-                    status = textCheckActive(int(i[2]))
-                except:
-                    return
-                
-                if i[0] != None:
-                    if len(i) == 5:
-                        server = str(i[4])
+            for a, user in enumerate(users):
 
-                m: types.Message = bot.send_message(message.chat.id,
-                                    paidCheckActive(i[5]) + status + "[" + utils.form_text_markdownv2(i[0]) +
-                                    "](tg://user?id\=" + str(i[1]) + ") " +
-                                    utils.form_text_markdownv2(str(i[3])[:-3]) + server + "\n" +
-                                    utils.form_text_markdownv2(str(i[6])),
-                                    parse_mode="MarkdownV2",
-                                    reply_markup=keyboard_offer_one,
-                                    disable_notification=True)
+                paid = '\-'
+                status = '\-'
+                name = '\-'
+                telegram_id: str = str(message.from_user.id)
+                date = '\-'
+                statistic = '\-'
+                keyboard_offer_one = None
+
+                if user is not None:
+                    keyboard_offer_one = self.addButtonKeyForUsersList(
+                        str(user.telegram_id),
+                        user.action,
+                        a, 
+                        button_nav, 
+                        text_key_where,
+                        user.server_id
+                    )
+                    paid: str = paidCheckActive(user.paid)
+                    status: str = textCheckActive(user.action)
+                    name: str = utils.form_text_markdownv2(user.name)
+                    telegram_id: str = str(user.telegram_id)
+                    date: str = utils.replaceMonthOnRuText(user.exit_date)
+                    statistic: str = utils.form_text_markdownv2(user.statistic)
+
+                m: types.Message = bot.send_message(
+                    message.chat.id,
+                    str(paid) + str(status) + "[" + str(name) + "](tg://user?id\=" + str(telegram_id) + ") " + str(date) + 
+                    "\n" + str(statistic),
+                    parse_mode="MarkdownV2",
+                    reply_markup=keyboard_offer_one,
+                    disable_notification=True
+                )
                 self.mes_arr.append(m.id)
-                a+=1
         else:
-            for i in self.data_cur:
-                if i[0] != None:
-                    keyboard_offer_one = self.addButtonKeyForUsersList(str(i[1]), int(i[2]), a, button_nav, text_key_where, i[4])
-                try:
-                    status = textCheckActive(int(i[2]))
-                except Exception:
-                    bot.edit_message_text(chat_id=message.chat.id, message_id=self.mes_arr[a], text="\-", parse_mode="MarkdownV2", reply_markup=keyboard_offer_one)
-                try:
-                    if len(i) == 5:
-                        server = str(i[4])
+            for a, user in enumerate(users):
 
-                    bot.edit_message_text(chat_id=message.chat.id,
-                                          message_id=self.mes_arr[a],
-                                          text = paidCheckActive(i[5]) + status + "[" +
-                                          utils.form_text_markdownv2(i[0]) +
-                                          "](tg://user?id\=" + str(i[1]) +
-                                          ") " + utils.form_text_markdownv2(str(i[3])[:-3]) + server + "\n" +
-                                          utils.form_text_markdownv2(str(i[6])),
-                                          parse_mode="MarkdownV2",
-                                          reply_markup=keyboard_offer_one)
-                except Exception as e:
-                    continue
-                a+=1
+                paid = '\-'
+                status = '\-'
+                name = '\-'
+                telegram_id: str = str(message.from_user.id)
+                date = '\-'
+                statistic = '\-'
+
+                if user:
+                    keyboard_offer_one = self.addButtonKeyForUsersList(
+                        str(user.telegram_id),
+                        user.action,
+                        a, 
+                        button_nav, 
+                        text_key_where,
+                        user.server_id
+                    )
+                    paid: str = paidCheckActive(user.paid)
+                    status: str = textCheckActive(user.action)
+                    name: str = utils.form_text_markdownv2(user.name)
+                    telegram_id: str = str(user.telegram_id)
+                    date: str = utils.replaceMonthOnRuText(user.exit_date)
+                    statistic: str = utils.form_text_markdownv2(user.statistic)
+
+                    bot.edit_message_text(
+                        chat_id=message.chat.id,
+                        message_id=self.mes_arr[a],
+                        text = str(paid) + str(status) + "[" + str(name) + "](tg://user?id\=" + str(telegram_id) + ") " + str(date) + 
+                        "\n" + str(statistic),
+                        parse_mode="MarkdownV2",
+                        reply_markup=keyboard_offer_one
+                    )
         
     @classmethod
     def addButtonKeyForUsersList(self, user_id: str, user_status: bool, a: int = 0, buttonNav: list = None, textKeyWhere: str = None, server: str = None) -> object:
