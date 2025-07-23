@@ -11,4 +11,4 @@ def only_user_chat():
 
 
 def only_user_chat_and_text():
-    return lambda message: message.chat.id != config.ADMINCHAT and not message.text.startswith('/') and message.text != utils.get_list_values_from_enum(KeyboardForUser)
+    return lambda message: message.chat.id != config.ADMINCHAT and not message.text.startswith('/') and message.text not in utils.get_list_values_from_enum(KeyboardForUser)

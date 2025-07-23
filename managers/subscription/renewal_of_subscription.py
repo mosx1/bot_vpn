@@ -12,7 +12,6 @@ def renewalOfSubscription(userId, serverId, intervalSql: str, serverNew=None) ->
         serverNew = serverId
 
     if serverId != serverNew:
-        
         controllerFastApi.del_users({userId}, serverId)
         link = controllerFastApi.add_vpn_user(userId, serverNew)
         sqlTextLink = ", server_link='" + link + "'"

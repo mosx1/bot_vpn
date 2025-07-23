@@ -4,6 +4,8 @@ from connect import token
 
 from yoomoney import Quickpay, Client
 
+from configparser import ConfigParser
+
 
 
 test = "https://api.telegram.org/bot" + token + "/getMe"
@@ -44,16 +46,19 @@ def getInfoLastPayment(label: str) -> dict:
 
 def getLinkPayment(label: str, month: int) -> str:
     """
-    Создает ссылку на платеж
+        Создает ссылку на платеж
     """
+    conf = ConfigParser()
+    conf.read(config.FILE_URL + 'config.ini')
+
     quickpay = Quickpay(
-                receiver=config.WALLET_YOOMONEY_ID,
-                quickpay_form="shop",
-                targets="Оплата VPN",
-                paymentType="SB",
-                sum=config.PRICE * month,
-                label=label
-                )
+        receiver=config.WALLET_YOOMONEY_ID,
+        quickpay_form="shop",
+        targets="Оплата VPN",
+        paymentType="SB",
+        sum=conf['Price'].getint('RUB') * month,
+        label=label
+    )
 
     return quickpay.redirected_url
 

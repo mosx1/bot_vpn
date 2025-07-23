@@ -10,6 +10,8 @@ from users.methods import get_user_by_id
 
 from utils import replaceMonthOnRuText
 
+from configparser import ConfigParser
+
 
 
 def writeInvited(userId: str, userInvitedId: str):
@@ -43,8 +45,11 @@ def incrementBalance(userId: str, month=None, summ=None):
         Добавляет сумму к балансу пользователя либо на основании кол-ва месяцев оплаченных пользователем, либо на основании кол-ва денег
         В метод передается id пользователя который оплатил, а начисляется тому, кто пригласил
     """
+    conf = ConfigParser()
+    conf.read(config.FILE_URL + 'config.ini')
+    
     if month:
-        summ = config.PRICE * month
+        summ = conf['Price'].getint('RUB') * month
     
     with db.cursor() as cursor:
         cursor.execute(
