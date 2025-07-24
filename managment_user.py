@@ -16,7 +16,7 @@ from protocols import getNameProtocolById
 from managers.subscription.renewal_of_subscription import renewalOfSubscription
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func, and_
+from sqlalchemy import select, func
 
 from tables import User, ServersTable
 from users.methods import get_user_by_id, get_user_by
@@ -95,32 +95,34 @@ class UserList:
         else:
             button_nav = [types.InlineKeyboardButton(text="<", callback_data='{"key": "page_client_back"}'),
                           types.InlineKeyboardButton(text=">", callback_data='{"key": "page_client_next"}')]
-        if len(self.mes_arr) == 0:
-            for a, user in enumerate(users):
+            
+        for a, user in enumerate(users):
 
-                paid = '\-'
-                status = '\-'
-                name = '\-'
-                telegram_id: str = str(message.from_user.id)
-                date = '\-'
-                statistic = '\-'
-                keyboard_offer_one = None
+            paid = '\-'
+            status = '\-'
+            name = '\-'
+            telegram_id: str = str(message.from_user.id)
+            date = '\-'
+            statistic = '\-'
+            keyboard_offer_one = None
 
-                if user is not None:
-                    keyboard_offer_one = self.addButtonKeyForUsersList(
-                        str(user.telegram_id),
-                        user.action,
-                        a, 
-                        button_nav, 
-                        text_key_where,
-                        user.server_id
-                    )
+            keyboard_offer_one: types.InlineKeyboardMarkup = self.addButtonKeyForUsersList(
+                user,
+                a, 
+                button_nav, 
+                text_key_where
+            )
+
+            if user:
+
                     paid: str = paidCheckActive(user.paid)
                     status: str = textCheckActive(user.action)
                     name: str = utils.form_text_markdownv2(user.name)
                     telegram_id: str = str(user.telegram_id)
                     date: str = utils.replaceMonthOnRuText(user.exit_date)
                     statistic: str = utils.form_text_markdownv2(user.statistic)
+
+            if len(self.mes_arr) < self.config.getint('items_on_page'):
 
                 m: types.Message = bot.send_message(
                     message.chat.id,
@@ -131,68 +133,43 @@ class UserList:
                     disable_notification=True
                 )
                 self.mes_arr.append(m.id)
-        else:
-            for a, user in enumerate(users):
+            
+            else:
 
-                paid = '\-'
-                status = '\-'
-                name = '\-'
-                telegram_id: str = str(message.from_user.id)
-                date = '\-'
-                statistic = '\-'
+                bot.edit_message_text(
+                    chat_id=message.chat.id,
+                    message_id=self.mes_arr[a],
+                    text = str(paid) + str(status) + "[" + str(name) + "](tg://user?id\=" + str(telegram_id) + ") " + str(date) + 
+                    "\n" + str(statistic),
+                    parse_mode="MarkdownV2",
+                    reply_markup=keyboard_offer_one
+                )
 
-                if user:
-                    keyboard_offer_one = self.addButtonKeyForUsersList(
-                        str(user.telegram_id),
-                        user.action,
-                        a, 
-                        button_nav, 
-                        text_key_where,
-                        user.server_id
-                    )
-                    paid: str = paidCheckActive(user.paid)
-                    status: str = textCheckActive(user.action)
-                    name: str = utils.form_text_markdownv2(user.name)
-                    telegram_id: str = str(user.telegram_id)
-                    date: str = utils.replaceMonthOnRuText(user.exit_date)
-                    statistic: str = utils.form_text_markdownv2(user.statistic)
-
-                    bot.edit_message_text(
-                        chat_id=message.chat.id,
-                        message_id=self.mes_arr[a],
-                        text = str(paid) + str(status) + "[" + str(name) + "](tg://user?id\=" + str(telegram_id) + ") " + str(date) + 
-                        "\n" + str(statistic),
-                        parse_mode="MarkdownV2",
-                        reply_markup=keyboard_offer_one
-                    )
         
     @classmethod
-    def addButtonKeyForUsersList(self, user_id: str, user_status: bool, a: int = 0, buttonNav: list = None, textKeyWhere: str = None, server: str = None) -> object:
+    def addButtonKeyForUsersList(self, user: User | None = None, a: int = 0, buttonNav: list = None, textKeyWhere: str = None) -> types.InlineKeyboardMarkup:
         keyboard_offer_one = types.InlineKeyboardMarkup()
-        if user_id:
-            if user_status:
-                if not server:
-                    user: User = get_user_by_id(int(user_id))
-                    server = user.server_id
+        if user:
+            if user.action:
 
                 inlineKeyConnect = types.InlineKeyboardButton(
                         text="+",
-                        callback_data='{"key": "connect", "id": ' + user_id + ', "serverId": ' + str(server) + '}'
+                        callback_data='{"key": "connect", "id": ' + str(user.telegram_id) + ', "serverId": ' + str(user.server_id) + '}'
                     )
 
                 keyboard_offer_one.add(
                     inlineKeyConnect,
                     types.InlineKeyboardButton(
                         text="Отключить", 
-                        callback_data='{"key": "deaction", "id": "' + user_id + '"}'
+                        callback_data='{"key": "deaction", "id": "' + str(user.telegram_id) + '"}'
                     ),
                     types.InlineKeyboardButton(
                         text="Данные", 
-                        callback_data='{"key": "data_user", "id": "' + user_id + '"}'
+                        callback_data='{"key": "data_user", "id": "' + str(user.telegram_id) + '"}'
                     ),
                     types.InlineKeyboardButton(
                         text="Отправить конфиг", 
-                        callback_data='{"key": "sendConf", "id": "' + user_id + '"}'
+                        callback_data='{"key": "sendConf", "id": "' + str(user.telegram_id) + '"}'
                     )
                 )
                 
@@ -200,19 +177,19 @@ class UserList:
                 keyboard_offer_one.add(
                     types.InlineKeyboardButton(
                         text="Германия", 
-                        callback_data='{"key": "connect", "id": "' + user_id + '", "serverId": ' + str(utils.get_very_free_server(Country.deutsche)) + '}'
+                        callback_data='{"key": "connect", "id": "' + str(user.telegram_id) + '", "serverId": ' + str(utils.get_very_free_server(Country.deutsche)) + '}'
                     ),
                     types.InlineKeyboardButton(
                         text="Нидерланды", 
-                        callback_data='{"key": "connect", "id": "' + user_id + '", "serverId": ' + str(utils.get_very_free_server(Country.niderlands)) + '}'
+                        callback_data='{"key": "connect", "id": "' + str(user.telegram_id) + '", "serverId": ' + str(utils.get_very_free_server(Country.niderlands)) + '}'
                     ),
                     types.InlineKeyboardButton(
                         text="Финляндия", 
-                        callback_data='{"key": "connect", "id": "' + user_id + '", "serverId": ' + str(utils.get_very_free_server(Country.finland)) + '}'
+                        callback_data='{"key": "connect", "id": "' + str(user.telegram_id) + '", "serverId": ' + str(utils.get_very_free_server(Country.finland)) + '}'
                     ),
                     types.InlineKeyboardButton(
                         text="Данные", 
-                        callback_data='{"key": "data_user", "id": "' + user_id + '"}'
+                        callback_data='{"key": "data_user", "id": "' + str(user.telegram_id) + '"}'
                     )
                 )
         if a == config.COUNT_PAGE - 1:
@@ -272,7 +249,7 @@ def add_user(
                 return config.AddUserMessage.error
 
         elif data_cur[0]:
-            servers: list[ServersTable] = get_server_list()
+            # servers: list[ServersTable] = get_server_list()
             if server != data_cur[1]:
                 del_user(userId, noUpdate=True)
                 add_user(userId, month, server=server)
