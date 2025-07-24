@@ -16,7 +16,7 @@ from protocols import getNameProtocolById
 from managers.subscription.renewal_of_subscription import renewalOfSubscription
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func
+from sqlalchemy import select, func, and_
 
 from tables import User, ServersTable
 from users.methods import get_user_by_id, get_user_by
@@ -43,7 +43,7 @@ class UserList:
         self.config = conf['UserList']
         self.mes_arr = []
         self.start = 0
-        self.one_active = False
+        self.one_active: bool = False
         self.statusSearch: StatusSearch
         self.search_text = ""
         self.filters = filter
