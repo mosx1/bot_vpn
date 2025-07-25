@@ -345,18 +345,14 @@ def data_user(id: int) -> types.Message:
 
     m: types.Message = bot.send_message(config.ADMINCHAT, "Загрузка...")
 
-    user: User = get_user_by_id(int(id))
+    user: User | None = get_user_by_id(int(id))
     if not user:
         return bot.edit_message_text(
             chat_id=m.chat.id,
             message_id= m.id,
             text= "Пользователь незарегистрирован"
         )
-    keyboard: types.InlineKeyboardMarkup = UserList.addButtonKeyForUsersList(
-        str(user.telegram_id),
-        user.action,
-        server=user.server_id
-    )
+    keyboard: types.InlineKeyboardMarkup = UserList.addButtonKeyForUsersList(user)
     keyboard.add(
         types.InlineKeyboardButton(
             text = "Обнулить баланс",
