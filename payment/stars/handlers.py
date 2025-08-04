@@ -70,33 +70,27 @@ def register_message_handlers(bot: TeleBot) -> None:
         invite.methods.incrementBalance(user.telegram_id, summ=summ)
         
         successfully_paid(user.telegram_id, optionText=userMessage.value)
-        bot.send_message(
-            message.chat.id,
-            "✅ **Оплата прошла успешно!** Спасибо за покупку!\n"
-            f"ID платежа: `{message.successful_payment.telegram_payment_charge_id}`"
-        )
+        # bot.send_message(
+        #     message.chat.id,
+        #     "✅ **Оплата прошла успешно!** Спасибо за покупку!\n"
+        #     f"ID платежа: `{message.successful_payment.telegram_payment_charge_id}`"
+        # )
         if conf['Telegram'].getint('admin_chat') == message.from_user.id:
             handle_successful_payment_revorke(message)
 
+
     @bot.message_handler(commands=['revorke'])
     def handle_successful_payment_revorke(message: Message) -> None:
-
-        # Данные для возврата
-        refund_data = {
-            "user_id": message.from_user.id,
-            "telegram_payment_charge_id": message.successful_payment.telegram_payment_charge_id
-        }
-        
-        # Отправляем запрос на возврат
-        response = requests.post(
-            f"https://api.telegram.org/bot{bot.token}/refundStarPayment",
-            json=refund_data
-        ).json()
-        
-        if response.get("ok"):
+        """
+            Возврат звезд
+        """
+        if bot.refund_star_payment(
+            message.from_user.id,
+            message.successful_payment.telegram_payment_charge_id
+        ):
             bot.send_message(message.chat.id, "✅ Возврат успешно выполнен!")
         else:
-            bot.send_message(message.chat.id, f"❌ Ошибка: {response.get('description')}")
+            bot.send_message(message.chat.id, f"❌ Ошибка!")
 
 
 def handler_get_pay(
