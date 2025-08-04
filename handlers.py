@@ -15,7 +15,7 @@ from filters import onlyAdminChat
 
 from psycopg2.extras import DictCursor
                   
-from servers.server_list import Servers, Country
+from servers.server_list import Servers
 
 from yoomoneyMethods import getInfoLastPayment, getLinkPayment
 
@@ -38,7 +38,7 @@ from tables import User, ServersTable
 from users.methods import get_user_by_id
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func, text, union_all, literal_column, or_
+from sqlalchemy import select, func, text, union_all, literal_column, and_
 
 from payment.crypto.repository.methods import crypto_pay, PayingUser, TypeOfPurchase
 from payment.stars.handlers import handle_buy
@@ -617,14 +617,17 @@ def register_message_handlers(bot: TeleBot) -> None:
             
             case "backConnectKey":
 
-                with db.cursor() as cursor:
-                    cursor.execute("SELECT action FROM users_subscription WHERE telegram_id={}".format(call_data['id']))
-                    action = cursor.fetchone()[0]
-                    bot.edit_message_caption(chat_id = call.message.chat.id, message_id = call.message.id, caption = call.message.caption,
-                                        reply_markup = UserList.addButtonKeyForUsersList(str(call_data['id']), action))
+                user: User = get_user_by_id(call_data['id'])
+                bot.edit_message_reply_markup(
+                    chat_id = call.message.chat.id, 
+                    message_id = call.message.id, 
+                    reply_markup = UserList.addButtonKeyForUsersList(user)
+                )
                 return
             
             case "action":
+
+                user: User = get_user_by_id(call_data['id'])
 
                 keyLoading = quick_markup(
                     {
@@ -657,10 +660,7 @@ def register_message_handlers(bot: TeleBot) -> None:
                     chat_id = call.message.chat.id,
                     message_id= call.message.id,
                     parse_mode=ParseMode.mdv2.value,
-                    reply_markup = UserList.addButtonKeyForUsersList(
-                        call_data['id'],
-                        True
-                    )
+                    reply_markup = UserList.addButtonKeyForUsersList(user)
                 )
 
             case "deaction":
@@ -715,13 +715,14 @@ def register_message_handlers(bot: TeleBot) -> None:
 
             case "option_where":
 
-                if managment_user.manager_users_list.one_active == 0:
-                    managment_user.manager_users_list.one_active = 1
+                if managment_user.manager_users_list.one_active == False:
+                    managment_user.manager_users_list.one_active = True
                 else:
-                    managment_user.manager_users_list.one_active = 0
+                    managment_user.manager_users_list.one_active = False
+
                 managment_user.manager_users_list.start = 0
-                managment_user.manager_users_list.search_all_user(call.message)
-        
+                managment_user.manager_users_list.search_user(call.message)
+             
             case "pppd":
 
                 bot.send_message(call.message.chat.id, config.TextsMessages.TEXTPERSONINFO.value)
