@@ -146,7 +146,7 @@ def register_message_handlers(bot: TeleBot) -> None:
     @bot.message_handler(
         func=only_user_chat(),
         content_types=[ContentTypes.sticker.value],
-        chat_types=['private']
+        chat_types=[ChatTypes.private.value]
     )
     def file_chek(message: types.Message):
         bot.send_message(chat_id=message.chat.id, reply_to_message_id=message.id, text="Стикеры не поддреживаются в данном диалоге")
