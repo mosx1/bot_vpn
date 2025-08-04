@@ -38,7 +38,7 @@ from tables import User, ServersTable
 from users.methods import get_user_by_id
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func, text, union_all, literal_column, and_
+from sqlalchemy import select, func, text, union_all, literal_column
 
 from payment.crypto.repository.methods import crypto_pay, PayingUser, TypeOfPurchase
 from payment.stars.handlers import handle_buy
@@ -53,7 +53,7 @@ def register_message_handlers(bot: TeleBot) -> None:
 
     def pollingInfoLastPayment(*args) -> dict:
         """
-        args - label, server, day, userId, messageId
+            args - label, server, day, userId, messageId
         """
         label = args[0]
         server = args[1]
@@ -274,7 +274,7 @@ def register_message_handlers(bot: TeleBot) -> None:
     @bot.message_handler(commands=["log", "лог"], func=onlyAdminChat())
     def _(message: types.Message):
 
-        bot.send_document(message.chat.id, document=open("logs.txt","rb"))
+        bot.send_document(message.chat.id, document=open(config.FILE_URL + "logs.txt","rb"))
 
 
     @bot.message_handler(
@@ -284,40 +284,53 @@ def register_message_handlers(bot: TeleBot) -> None:
     def start(message: types.Message):
 
         jsonIdInvited = ""
-        with db.cursor() as cursor:
-            cursor.execute("SELECT action FROM users_subscription WHERE telegram_id=" + str(message.from_user.id))
-            status = cursor.fetchone()
-            keyboard = types.InlineKeyboardMarkup()
-            if status == None:
-                arrStartMessageText = message.text.split(" ")
-                if len(arrStartMessageText) == 2:
-                    if arrStartMessageText[1].isdigit():
-                        cursor.execute("SELECT EXISTS(SELECT 1 FROM users_subscription WHERE action = true AND telegram_id = " + str(arrStartMessageText[1]) + ")")
+
+        user: User | None = get_user_by_id(message.from_user.id)
+
+        keyboard = types.InlineKeyboardMarkup()
+
+        if not user:
+            arrStartMessageText = message.text.split(" ")
+            if len(arrStartMessageText) == 2:
+                if arrStartMessageText[1].isdigit():
+                    with db.cursor() as cursor:
+                        cursor.execute(
+                            "SELECT EXISTS(SELECT 1 FROM users_subscription WHERE action = true AND telegram_id = " + str(arrStartMessageText[1]) + ")"
+                        )
                         invited = cursor.fetchall()
                         if len(invited) > 0:
                             jsonIdInvited = ', "invitedId": ' + str(arrStartMessageText[1])
                             message.text = arrStartMessageText[1]
-                    elif checkGiftCode(message):
-                        return successfully_paid(message.from_user.id, optionText="Подарок активирован\n")
-                # else:
+                elif checkGiftCode(message):
+                    return successfully_paid(message.from_user.id, optionText="Подарок активирован\n")
+            # else:
 
-                #     bot.send_message(message.chat.id, "Привет! Давай сыграем в крестики-нолики. Используй /game чтобы начать игру.")
-                #     return
-                
-                keyboard.add(types.InlineKeyboardButton(text="Попробовать", callback_data='{"key": "tryServers"' + jsonIdInvited + '}'))
-                keyboard.add(types.InlineKeyboardButton(text="Политика по обработке персональных данных", callback_data='{"key": "pppd"}'))
-                keyboard.add(types.InlineKeyboardButton(text="Условия использования", callback_data='{"key": "termsOfUse"}'))
-                option_text = "\n\n_Нажимая кнопку \"Попробовать\", Вы соглашаетесь с политикой обработки персональных данных и условиями использования сервиса\._" 
-            elif status[0] == 0:
-                keyboard.add(
-                    types.InlineKeyboardButton(text="Возобновить", callback_data='{"key": "sale"}')
+            #     bot.send_message(message.chat.id, "Привет! Давай сыграем в крестики-нолики. Используй /game чтобы начать игру.")
+            #     return
+            
+            keyboard.add(types.InlineKeyboardButton(text="Попробовать", callback_data='{"key": "tryServers"' + jsonIdInvited + '}'))
+            keyboard.add(types.InlineKeyboardButton(text="Политика по обработке персональных данных", callback_data='{"key": "pppd"}'))
+            keyboard.add(types.InlineKeyboardButton(text="Условия использования", callback_data='{"key": "termsOfUse"}'))
+            option_text = "\n\n_Нажимая кнопку \"Попробовать\", Вы соглашаетесь с политикой обработки персональных данных и условиями использования сервиса\._" 
+        
+        elif user.action == False:
+            keyboard.add(
+                types.InlineKeyboardButton(
+                    text="Возобновить", 
+                    callback_data='{"key": "sale"}'
                 )
-                option_text = ""
-            elif status[0] == 1:
-                successfully_paid(message.from_user.id)
-                return
-            bot.send_message(message.chat.id, "*Приветствую Вас в сервисе VPN для свободного интернета без границ\.*" + option_text,
-                            reply_markup=keyboard, parse_mode=ParseMode.mdv2.value)
+            )
+            option_text = ""
+        elif user.action:
+            successfully_paid(message.from_user.id)
+            return
+        
+        bot.send_message(
+            message.chat.id, 
+            "*Приветствую Вас в сервисе VPN для свободного интернета без границ\.*" + option_text,
+            reply_markup=keyboard, 
+            parse_mode=ParseMode.mdv2.value
+        )
             
 
     @bot.message_handler(commands=["status_bot"], func=onlyAdminChat())
@@ -349,9 +362,7 @@ def register_message_handlers(bot: TeleBot) -> None:
                 except Exception:
                     logging.error("Не удалось отправить spam сообщение пользователю")
             
-
-
-
+            
     @bot.message_handler(
         func=lambda message: message.text == keyboards.KeyboardForUser.balanceTime.value
     )
@@ -452,21 +463,32 @@ def register_message_handlers(bot: TeleBot) -> None:
 
             case "try":
 
-                month = config.FIRST_START_DURATION_MONTH
+                conf = ConfigParser()
+                conf.read(config.FILE_URL + 'config.ini')
 
                 bot.delete_message(call.message.chat.id, call.message.id)
-                oldMessage = bot.send_photo(chat_id=call.from_user.id, photo=open(config.FILE_URL + "4rrr.jpg", "rb"),
-                                caption="Идет формирование конфигурации. Это может занять несколько минут...")
-                add_user(call.from_user.id,
-                    month,
+                oldMessage: types.Message = bot.send_photo(
+                    chat_id=call.from_user.id, 
+                    photo=open(config.FILE_URL + "4rrr.jpg", "rb"),
+                    caption="Идет формирование конфигурации. Это может занять несколько минут..."
+                )
+                add_user(
+                    call.from_user.id,
+                    conf['BaseConfig'].getint('first_start_duration_month'),
                     name_user=utils.form_text_markdownv2(username, delete=True),
                     server=call_data['server']
                 )
                 if 'invitedId' in call_data:
                     invite.methods.addInvitedBonus(call_data['invitedId'])
-                    invite.methods.writeInvited(str(call.from_user.id), str(call_data['invitedId']))
+                    invite.methods.writeInvited(
+                        str(call.from_user.id), 
+                        str(call_data['invitedId'])
+                    )
 
-                successfully_paid(call.from_user.id, oldMessage.id)
+                successfully_paid(
+                    call.from_user.id, 
+                    oldMessage.id
+                )
             
             case KeyCall.sale.value:
                 
