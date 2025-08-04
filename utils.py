@@ -3,11 +3,10 @@ from connect import db, logging, engine
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func, and_, text
 
-from enums.invite import CallbackKeys
 from servers.server_list import Country, Servers
 from enums.logs import TypeLogs
 
-from psycopg2.extras import DictCursor, DictRow
+from psycopg2.extras import DictCursor
 
 from tables import User, ServersTable
 

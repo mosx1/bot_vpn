@@ -16,13 +16,13 @@ from protocols import getNameProtocolById
 from managers.subscription.renewal_of_subscription import renewalOfSubscription
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func, and_
+from sqlalchemy import select, func
 
-from tables import User, ServersTable
+from tables import User
 from users.methods import get_user_by_id, get_user_by
 
 from servers.server_list import Country
-from servers.methods import get_server_list
+from servers.methods import get_server_name_by_id
 
 from configparser import ConfigParser
 
@@ -380,7 +380,7 @@ def data_user(id: int) -> types.Message:
         ")\nДата окончания подписки: " + utils.form_text_markdownv2(str(user.exit_date)) +
         "\n" + "\nlink: `" + utils.form_text_markdownv2(user.server_link) +
         "`\nСервер: " + utils.form_text_markdownv2(
-            utils.get_server_name_by_id(user.server_id)
+            get_server_name_by_id(user.server_id)
         ) +
         "\nprotocol: " + str(getNameProtocolById(user.protocol)) +
         "\nstat: " + utils.form_text_markdownv2(str(user.statistic)) +
@@ -405,13 +405,28 @@ def paidCheckActive(item: bool) -> str:
 
 
 def checkAndDeleteNotSubscription() -> None:
+
+    conf = ConfigParser()
+    conf.read(config.FILE_URL + 'config.ini')
+
     with Session(engine) as session:
         query = select(
             func.json_agg(User.telegram_id).label('user_ids'),
             User.server_id
         ).where(User.action == False).group_by(User.server_id)
         data = session.execute(query).all()
-        
+
         for item in data:
+
             controllerFastApi.del_users(set(item.user_ids), item.server_id)
-            logging.info('Удалены неактивные пользователи с сервера.')
+
+            text: str = 'Удалены неактивные пользователи с сервера {}'.format(
+                get_server_name_by_id(item.server_id)
+            )
+
+            logging.info(text)
+
+            bot.send_message(
+                conf['Telegram'].getint('admin_chat'),
+                text
+            )
