@@ -136,7 +136,7 @@ def handle_buy(message: Message, amount: int, server: int) -> None:
     conf = ConfigParser()
     conf.read(config.FILE_URL + 'config.ini')
     price_stars: int = conf['Price'].getint('star')
-    count_mount = int(amount / price_stars)
+    count_mount = int(amount / price_stars) + 1
 
     bot.send_invoice(
         chat_id=message.chat.id,
