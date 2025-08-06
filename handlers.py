@@ -418,8 +418,10 @@ def register_message_handlers(bot: TeleBot) -> None:
                 try:
                     successfully_paid(i['telegram_id'], optionText="НЕОБХОДИМО ОБНОВИТЬ КОНФИГУРАЦИЮ\. СТАРАЯ КОНФИГУРАЦИЯ БОЛЬШЕ НЕ РАБОТАЕТ\.")
                 except Exception as e:
-                    bot.send_message(config.ADMINCHAT, "error sendmessage [" + str(i['name']) + "](tg://user?id\=" + str(i['telegram_id']) + ") " + utils.form_text_markdownv2(str(e)),
-                                    parse_mode=ParseMode.mdv2.value)
+                    bot.send_message(
+                        config.ADMINCHAT, 
+                        "error sendmessage [" + str(i['name']) + "](tg://user?id\=" + str(i['telegram_id']) + ") " + utils.form_text_markdownv2(str(e)),
+                        parse_mode=ParseMode.mdv2.value)
         bot.send_message(config.ADMINCHAT, "commit")
 
 

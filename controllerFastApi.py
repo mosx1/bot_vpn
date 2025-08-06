@@ -1,4 +1,6 @@
-import requests, utils, utils, json
+import requests, utils, json
+
+from connect import logging
 
 
 def add_vpn_user(
@@ -10,6 +12,10 @@ def add_vpn_user(
         Создает пользователя в xray
     """
     
+    logging.info(
+        'Создание пользователя ' + str(userId) + ' на сервере ' + utils.getUrlByIdServer(server)
+     )
+
     response = requests.get(
          "http://{}/add?user_id={}&token={}".format(
               utils.getUrlByIdServer(server),
@@ -32,6 +38,11 @@ def suspendUser(
     """
         Приостонавливает пользователя в xray
     """
+
+    logging.info(
+        'Приостановка пользователя ' + str(userId) + ' на сервере ' + utils.getUrlByIdServer(server)
+     )
+
     response = requests.get(
          "http://{}/suspend?userId={}&token={}".format(
               utils.getUrlByIdServer(server), 
@@ -55,6 +66,11 @@ def resumeUser(
     """
         Возобновляет доступ пользователя к xray
     """
+
+    logging.info(
+        'Возобновление пользователя ' + str(userId) + ' на сервере ' + utils.getUrlByIdServer(server)
+     )
+
     response = requests.get(
          "http://{}/resume?userId={}&token={}".format(
               utils.getUrlByIdServer(server),
@@ -77,6 +93,7 @@ def del_users(
     """
         Удаляет пользователей с сервера
     """
+
     data = {
          "token": token,
          "user_ids": list(user_ids)

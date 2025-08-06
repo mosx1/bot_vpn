@@ -1,20 +1,51 @@
-from connect import db
+from connect import db, bot, logging
 
 import controllerFastApi, config
 
+from configparser import ConfigParser
 
 
 def renewalOfSubscription(userId, serverId, intervalSql: str, serverNew=None) -> bool:
     
+    conf = ConfigParser()
+    conf.read(config.FILE_URL + 'config.ini')
+
     sqlTextLink = ""
 
     if serverNew == None:
         serverNew = serverId
 
     if serverId != serverNew:
-        controllerFastApi.del_users({userId}, serverId)
-        link = controllerFastApi.add_vpn_user(userId, serverNew)
-        sqlTextLink = ", server_link='" + link + "'"
+        try:
+
+            controllerFastApi.del_users({userId}, serverId)
+
+        except Exception as e:
+            
+            text = "Ошибка удаления пользователей: " + str(userId) + " с сервера: " + str(serverId)
+
+            bot.send_message(
+                conf['Telegram'].getint('admin_chat'),
+                text
+            )
+
+            logging.error(text)
+
+        try:
+
+            link = controllerFastApi.add_vpn_user(userId, serverNew)
+            sqlTextLink = ", server_link='" + link + "'"
+
+        except Exception as e:
+
+            text: str = "Ошибка добавления пользователя: " + str(userId) + " с сервера: " + str(serverId)
+
+            bot.send_message(
+                conf['Telegram'].getint('admin_chat'),
+                text
+            )
+
+            logging.error(text)
 
     else:
 
