@@ -653,7 +653,7 @@ def register_message_handlers(bot: TeleBot) -> None:
 
                 keyLoading = quick_markup(
                     {
-                        "Загрузка...": {'callback_data': '{"key": ""}'}
+                        "Загрузка...": {'callback_data': '{"key": "loading"}'}
                     }
                 )
 
