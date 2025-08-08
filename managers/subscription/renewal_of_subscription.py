@@ -7,7 +7,7 @@ from configparser import ConfigParser
 from tables import User
 
 
-async def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> bool:
+def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> bool:
     
     conf = ConfigParser()
     conf.read(config.FILE_URL + 'config.ini')
