@@ -3,7 +3,7 @@ from typing import Iterable
 from connect import engine
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from sqlalchemy.sql.elements import BinaryExpression
 
 from tables import User, ServersTable
@@ -11,7 +11,7 @@ from tables import User, ServersTable
 from servers.server_list import Country
 
 
-def get_user_by_id(telegram_id: int) -> User:
+def get_user_by_id(telegram_id: int) -> User | None:
     with Session(engine) as session:
         query = select(User).filter(User.telegram_id == telegram_id)
         return session.execute(query).scalar()
@@ -36,18 +36,23 @@ def get_user_by(
 
         if limit is not None: query = query.limit(limit)
         if offset is not None: query = query.offset(offset)
-        print(query)
+
         return session.execute(query).scalars().all()
     
 
 def get_user_by_country(country: Country, filter: BinaryExpression | None = None) -> Iterable[User]:
+
     with Session(engine) as session:
         query = (
             select(User)
             .join(
                 ServersTable,
-                (ServersTable.id == User.server_id) & (ServersTable.country == country.value)
+                and_(
+                    ServersTable.id == User.server_id, 
+                    ServersTable.country == country.value
+                )
             )
-            .filter(filter)
         )
+        if filter: query.filter(filter)
+
         return session.execute(query).scalars().all()

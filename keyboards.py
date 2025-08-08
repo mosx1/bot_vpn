@@ -27,7 +27,6 @@ def get_inline_keyboard_list_countries_by_try(callData = None, optionText: str =
         {   
             "Самый свободный сервер(рекомендуется)": {'callback_data': '{"key": "try", "server": ' + str(get_very_free_server()) + optionText + '}'},
             "Германия": {'callback_data': '{"key": "try", "server": ' + str(get_very_free_server(Country.deutsche)) + optionText + '}'},
-            "Финляндия": {'callback_data': '{"key": "try", "server": ' + str(get_very_free_server(Country.finland)) + optionText + '}'},
             "Нидерланды": {'callback_data': '{"key": "try", "server": ' + str(get_very_free_server(Country.niderlands)) + optionText + '}'}
         },
         row_width=1
@@ -43,19 +42,12 @@ def get_inline_keyboard_list_countries(current_server_id: int) -> InlineKeyboard
         {   
             "Текущая локация(рекомендуется)": {'callback_data': '{"key": "pollCountMonth", "server": ' + str(current_server_id) + '}'},
             "Германия": {'callback_data': '{"key": "pollCountMonth", "server": ' + str(get_very_free_server(Country.deutsche)) + '}'},
-            "Финляндия": {'callback_data': '{"key": "pollCountMonth", "server": ' + str(get_very_free_server(Country.finland)) + '}'},
             "Нидерланды": {'callback_data': '{"key": "pollCountMonth", "server": ' + str(get_very_free_server(Country.niderlands)) + '}'}
         },
         row_width=1
     )
 
 
-def getInlineExtend() -> InlineKeyboardMarkup:
+def getInlineExtend(value: str = "Продлить") -> InlineKeyboardMarkup:
 
-    return quick_markup(
-        {
-            "Продлить": {
-                'callback_data': '{"key": "sale"}'
-            }
-        }
-    )
+    return quick_markup({value: {'callback_data': '{"key": "sale"}'}})

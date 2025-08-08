@@ -1,3 +1,5 @@
+import keyboards
+
 from telebot import types, TeleBot
 from telebot.util import quick_markup
 
@@ -29,7 +31,7 @@ def register_message_handlers(bot: TeleBot) -> None:
             Рассылает сообщение всем пользователям
         """
         current_message: types.Message = bot.reply_to(message, MessageTextRu.spam.value)
-        print(get_user_by())
+
         spamMessage(
             message,
             get_user_by()
@@ -50,10 +52,35 @@ def register_message_handlers(bot: TeleBot) -> None:
             Рассылает сообщение пользователям локации Германия
         """
         current_message: types.Message = bot.reply_to(message, MessageTextRu.spamDe.value)
-
+        
         spamMessage(
             message,
             get_user_by_country(Country.deutsche)
+        )
+        bot.edit_message_text(
+            MessageTextRu.spam_completed.value,
+            current_message.chat.id,
+            current_message.id
+        )
+
+    
+    @bot.message_handler(
+        commands=["spamF"], 
+        func=onlyAdminChat()
+    )
+    def _(message: types.Message) -> None:
+        """
+            Рассылает сообщение пользователям локации Финляндия
+        """
+        current_message: types.Message = bot.reply_to(
+            message, 
+            "Рассылка на Финский сервер запущена"
+        )
+        print(get_user_by_country(Country.finland))
+        spamMessage(
+            message,
+            get_user_by_country(Country.finland),
+            keyboards.getInlineExtend(value="Сменить сервер")
         )
         bot.edit_message_text(
             MessageTextRu.spam_completed.value,
