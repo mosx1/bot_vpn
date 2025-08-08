@@ -711,11 +711,13 @@ def register_message_handlers(bot: TeleBot) -> None:
 
             case "faq_ios":
                 
-                with db.cursor(cursor_factory=DictCursor) as cursor:
-                    cursor.execute("SELECT server_link FROM users_subscription WHERE telegram_id =" + str(call.from_user.id))
-                    bot.send_message(call.from_user.id,
-                                    config.TextsMessages.faqIos.value.format(utils.form_text_markdownv2(cursor.fetchone()["server_link"])),
-                                    parse_mode=config.ParseMode.MarkdownV2.value)
+                user: User | None = get_user_by_id(call.from_user.id)
+
+                bot.send_message(
+                    call.from_user.id,
+                    config.TextsMessages.faqIos.value.format(utils.form_text_markdownv2(user.server_link)),
+                    parse_mode=ParseMode.mdv2.value
+                )
 
             case "comands_video":
 
