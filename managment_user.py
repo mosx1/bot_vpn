@@ -212,16 +212,15 @@ def add_user(
 
     with db.cursor() as cursor:
 
-        cursor.execute("SELECT action, server_id FROM users_subscription WHERE telegram_id=" + str(userId))
-        data_cur = cursor.fetchone()
+        user: User | None = get_user_by_id(userId)
 
         if server == None:
-            if data_cur == None:
-                server = utils.get_very_free_server()
+            if not user:
+                server: int = utils.get_very_free_server()
             else:
-                server = data_cur[1]
+                server: int = user.server_id
 
-        if data_cur == None:
+        if not user:
             logging.info("добавляю user: " + name_user)
 
             link = controllerFastApi.add_vpn_user(userId, server)
@@ -239,18 +238,18 @@ def add_user(
 
             return config.AddUserMessage.extended
 
-        elif data_cur[0] == False:
+        elif not user.action:
+            
+            renewalOfSubscription(user, intervalSql, serverNew=server)
 
-            renewalOfSubscription(userId, data_cur[1], intervalSql, serverNew=server)
-
-            if int(data_cur[1]) == int(server):
+            if int(user.server_id) == int(server):
                 return config.AddUserMessage.extended
             else:
                 return config.AddUserMessage.error
 
-        elif data_cur[0]:
+        elif user.action:
             # servers: list[ServersTable] = get_server_list()
-            if server != data_cur[1]:
+            if server != user.server_id:
                 del_user(userId, noUpdate=True)
                 add_user(userId, month, server=server)
 
@@ -408,6 +407,7 @@ def checkAndDeleteNotSubscription() -> None:
 
     conf = ConfigParser()
     conf.read(config.FILE_URL + 'config.ini')
+    admin_chat_id: int = conf['Telegram'].getint('admin_chat')
 
     with Session(engine) as session:
         query = select(
@@ -418,15 +418,21 @@ def checkAndDeleteNotSubscription() -> None:
 
         for item in data:
 
+            server_name: str = get_server_name_by_id(item.server_id)
+            
+            old_message: types.Message = bot.send_message(
+                admin_chat_id, 
+                f'Удаление неактивных пользователей с сервера {server_name}'
+            )
+
             controllerFastApi.del_users(set(item.user_ids), item.server_id)
 
-            text: str = 'Удалены неактивные пользователи с сервера {}'.format(
-                get_server_name_by_id(item.server_id)
-            )
+            text: str = f'Удалены неактивные пользователи с сервера {server_name}'
 
             logging.info(text)
 
-            bot.send_message(
-                conf['Telegram'].getint('admin_chat'),
-                text
+            bot.edit_message_text(
+                text,
+                old_message.chat.id,
+                old_message.id
             )
