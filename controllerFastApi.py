@@ -102,7 +102,8 @@ def del_users(
          "http://{}/del".format(
               utils.getUrlByIdServer(server)
          ),
-         data = json.dumps(data)
+         data = json.dumps(data),
+         timeout=60
          ).json()
 
     return response["success"]
