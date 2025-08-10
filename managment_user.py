@@ -24,7 +24,7 @@ from users.methods import get_user_by_id, get_user_by
 from users.entities import UserStates
 
 from servers.server_list import Country
-from servers.methods import get_server_name_by_id
+from servers.methods import get_server_name_by_id, get_server_list
 
 from configparser import ConfigParser
 
@@ -178,19 +178,21 @@ class UserList:
                 )
                 
             else:
+
                 keyboard_offer_one.add(
                     types.InlineKeyboardButton(
-                        text="Германия", 
-                        callback_data='{"key": "connect", "id": "' + str(user.telegram_id) + '", "serverId": ' + str(utils.get_very_free_server(Country.deutsche)) + '}'
-                    ),
-                    types.InlineKeyboardButton(
-                        text="Нидерланды", 
-                        callback_data='{"key": "connect", "id": "' + str(user.telegram_id) + '", "serverId": ' + str(utils.get_very_free_server(Country.niderlands)) + '}'
+                        text="Выбрать сервер", 
+                        callback_data='{"key": "' + KeyCall.list_servers_for_admin.name + '", "user_id": ' + str(user.telegram_id) + '}'
                     ),
                     types.InlineKeyboardButton(
                         text="Данные", 
                         callback_data='{"key": "data_user", "id": "' + str(user.telegram_id) + '"}'
-                    )
+                    ),
+                    types.InlineKeyboardButton(
+                        text="Отправить кнопку продления",
+                        callback_data='{"key": "' + KeyCall.send_message_for_extension.name + '", "user_id": "' + str(user.telegram_id) + '"}'
+                    ),
+                    row_width=2
                 )
         if a == config.COUNT_PAGE - 1:
             keyboard_offer_one.row(*buttonNav)
@@ -217,24 +219,15 @@ def add_user(
 
     user: User | None = get_user_by_id(user_id)
 
-    if user:
-        server: int = user.server_id
-
-    if (not server) and (not user):
-        server: int = utils.get_very_free_server()
+    if not server:
+        if user:
+            server: int = user.server_id
+        else:
+            server: int = utils.get_very_free_server()
 
     with db.cursor() as cursor:
 
         if not user:
-            
-            if bot.get_state(user_id) == UserStates.creation:
-                
-                return config.AddUserMessage.error
-            
-            bot.set_state(
-                user_id,
-                UserStates.creation
-            )
 
             logging.info("добавляю user: " + name_user)
             
@@ -272,8 +265,6 @@ def add_user(
                     logging.error(text)
                     
                     return config.AddUserMessage.error
-                
-            bot.delete_state(user_id)
 
         elif not user.action:
             

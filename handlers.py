@@ -15,7 +15,8 @@ from filters import onlyAdminChat
 
 from psycopg2.extras import DictCursor
                   
-from servers.server_list import Servers
+from servers.server_list import Servers, Country
+from servers.methods import get_server_list
 
 from yoomoneyMethods import getInfoLastPayment, getLinkPayment
 
@@ -35,7 +36,9 @@ from giftUsers import genGiftCode, checkGiftCode
 from messageForUser import successfully_paid, manual_successfully_paid
 
 from tables import User, ServersTable
+
 from users.methods import get_user_by_id
+from users.entities import UserStates
 
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func, text, union_all, literal_column
@@ -459,12 +462,14 @@ def register_message_handlers(bot: TeleBot) -> None:
 
         call_data = json.loads(call.data)
         username = call.from_user.full_name
+        user_id = call.from_user.id
+
         logging.info("user_id: " + str(call.from_user.id) + ", user_name:" + str(username) + " нажата кнопка с ключем " + call_data['key'])
 
         match call_data['key']:
 
             case "try":
-
+                
                 conf = ConfigParser()
                 conf.read(config.FILE_URL + 'config.ini')
 
@@ -833,6 +838,43 @@ def register_message_handlers(bot: TeleBot) -> None:
                     call.message,
                     call_data['amount'],
                     call_data['server']
+                )
+
+            case KeyCall.list_servers_for_admin.name:
+
+                keyboard: types.InlineKeyboardMarkup = quick_markup(
+                    {
+                        "Германия(самый свободный)": {"callback_data": '{"key": "connect", "id": "' + str(call_data['user_id']) + '", "serverId": ' + str(utils.get_very_free_server(Country.deutsche)) + '}'}
+                    }
+                )
+
+                keyboard.add(
+                    *[
+                        types.InlineKeyboardButton(
+                            server.name,
+                            callback_data='{"key": "connect", "id": "' + str(call_data['user_id']) + '", "serverId": ' + str(server.id) + '}'
+                        ) for server in get_server_list()
+                    ],
+                    row_width=3
+                )
+
+                bot.edit_message_reply_markup(
+                    call.message.chat.id,
+                    call.message.id,
+                    reply_markup=keyboard
+                )
+            
+            case KeyCall.send_message_for_extension.name:
+
+                bot.send_message(
+                    call_data['user_id'],
+                    "Продление:",
+                    reply_markup=keyboards.getInlineExtend()
+                )
+                
+                bot.answer_callback_query(
+                    call.id,
+                    "Отправлено"
                 )
 
             case _:

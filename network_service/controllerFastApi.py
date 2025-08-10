@@ -23,7 +23,8 @@ def add_vpn_user(
               utils.getUrlByIdServer(server),
               userId,
               token
-              )
+              ),
+          timeout=60
          ).json()
     if response["success"]:
          return response["link"]
@@ -53,7 +54,8 @@ def suspendUser(
               utils.getUrlByIdServer(server), 
               userId,
               token
-              )
+              ),
+          timeout=60
          ).json()
     
     if response["success"]:
@@ -84,7 +86,8 @@ def resume_user(
               utils.getUrlByIdServer(server),
               userId,
               token
-              )
+              ),
+          timeout=60
          ).json()
     if response["success"]:
          return response["success"]
