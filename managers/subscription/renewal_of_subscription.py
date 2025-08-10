@@ -9,7 +9,7 @@ from tables import User
 from network_service.entity import NetworkServiceError
 
 
-def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> bool:
+def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None:
     
     conf = ConfigParser()
     conf.read(config.FILE_URL + 'config.ini')
@@ -36,48 +36,19 @@ def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> bool
 
             logging.error(text)
 
-        try:
+    try:
 
-            result_add_vpn_user: str | NetworkServiceError = controllerFastApi.add_vpn_user(user.telegram_id, serverNew)
+        result_add_vpn_user: str | NetworkServiceError = controllerFastApi.add_vpn_user(user.telegram_id, serverNew)
 
-            match result_add_vpn_user:
+        match result_add_vpn_user:
 
-                case str():
+            case str():
 
-                    sqlTextLink = ", server_link='" + result_add_vpn_user + "'"
+                sqlTextLink = ", server_link='" + result_add_vpn_user + "'"
 
-                case NetworkServiceError():
-                    
-                    text = f"{result_add_vpn_user.caption}\nЗапрос:\n{result_add_vpn_user.response}"
-
-                    bot.send_message(
-                        admin_chat_id,
-                        text
-                    )
-                    logging.error(text)
-                    
-                    return
-
-        except Exception as e:
-
-            text: str = "Ошибка добавления пользователя: " + str(user.telegram_id) + " с сервера: " + str(user.server_id)
-
-            bot.send_message(
-                admin_chat_id,
-                text
-            )
-
-            logging.error(text)
-
-    else:
-
-        result_resume_user: str | NetworkServiceError = controllerFastApi.resume_user(user.telegram_id, user.server_id)
-
-        match result_resume_user:
-            
             case NetworkServiceError():
-
-                text = f"{result_resume_user.caption}\nЗапрос:\n{result_resume_user.response}"
+                
+                text = f"{result_add_vpn_user.caption}\nЗапрос:\n{result_add_vpn_user.response}"
 
                 bot.send_message(
                     admin_chat_id,
@@ -86,6 +57,19 @@ def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> bool
                 logging.error(text)
                 
                 return
+
+    except Exception as e:
+
+        text: str = "Ошибка добавления пользователя: " + str(user.telegram_id) + " с сервера: " + str(user.server_id)
+
+        bot.send_message(
+            admin_chat_id,
+            text
+        )
+
+        logging.error(text)
+
+        return
 
     with db.cursor() as cursor:   
         cursor.execute(
