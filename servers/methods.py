@@ -21,3 +21,14 @@ def get_country_list(filter: BinaryExpression | None = None) -> list[CountryTabl
         if filter:
             query.filter(filter)
         return session.execute(query).scalars().all()
+    
+
+def get_server_name_by_id(server_id: int) -> str:
+    
+    query = select(ServersTable).filter(ServersTable.id == server_id)
+
+    with Session(engine) as session:
+        data: ServersTable | None = session.execute(query).scalar()
+        if data:
+            return data.name
+        return "Неизвестное наименование сервера"

@@ -1,5 +1,3 @@
-import random
-
 from connect import db
 from telebot import types
 from managment_user import add_user

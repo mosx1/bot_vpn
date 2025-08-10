@@ -1,4 +1,4 @@
-import time, threading, config, string, secrets, utils, controllerFastApi, keyboards
+import time, threading, config, string, secrets, utils, network_service.controllerFastApi as controllerFastApi, keyboards
 from connect import db, logging, bot, engine
 from telebot import types
 from telebot.apihelper import ApiTelegramException
@@ -184,10 +184,6 @@ class UserList:
                         callback_data='{"key": "connect", "id": "' + str(user.telegram_id) + '", "serverId": ' + str(utils.get_very_free_server(Country.niderlands)) + '}'
                     ),
                     types.InlineKeyboardButton(
-                        text="Финляндия", 
-                        callback_data='{"key": "connect", "id": "' + str(user.telegram_id) + '", "serverId": ' + str(utils.get_very_free_server(Country.finland)) + '}'
-                    ),
-                    types.InlineKeyboardButton(
                         text="Данные", 
                         callback_data='{"key": "data_user", "id": "' + str(user.telegram_id) + '"}'
                     )
@@ -207,22 +203,21 @@ def add_user(
     
     intervalSql = " + INTERVAL '" + str(month) + " months'"
     
-    if name_user == None:
+    if not name_user:
         name_user = str(userId)
+
+    user: User | None = get_user_by_id(userId)
+    server: int = user.server_id
+
+    if (not server) and (not user):
+        server: int = utils.get_very_free_server()
 
     with db.cursor() as cursor:
 
-        user: User | None = get_user_by_id(userId)
-
-        if server == None:
-            if not user:
-                server: int = utils.get_very_free_server()
-            else:
-                server: int = user.server_id
-
         if not user:
-            logging.info("добавляю user: " + name_user)
 
+            logging.info("добавляю user: " + name_user)
+            
             link = controllerFastApi.add_vpn_user(userId, server)
 
             if link == False:
@@ -230,10 +225,16 @@ def add_user(
                 
                 return config.AddUserMessage.error
                 
-            cursor.execute("INSERT INTO users_subscription (telegram_id, name, exit_date, action, server_link, server_id, protocol)" +
-                        "\nVALUES ('" + str(userId) + "', '" + str(name_user) + "', now() " + str(intervalSql) + ", True, '" + str(link) + "', '" + str(server) + "', " + str(config.DEFAULTPROTOCOL) + ");")
+            cursor.execute(
+                "INSERT INTO users_subscription (telegram_id, name, exit_date, action, server_link, server_id, protocol)" +
+                "\nVALUES ('" + str(userId) + "', '" + str(name_user) + "', now() " + str(intervalSql) + ", True, '" + str(link) + "', '" + str(server) + "', " + str(config.DEFAULTPROTOCOL) + ");"
+            )
             db.commit()
-            bot.send_message(config.ADMINCHAT, "new user: [" + utils.form_text_markdownv2(name_user) + "](tg://user?id\=" + str(userId) + ")", parse_mode="MarkdownV2" )
+            bot.send_message(
+                config.ADMINCHAT, 
+                "new user: [" + utils.form_text_markdownv2(name_user) + "](tg://user?id\=" + str(userId) + ")", 
+                parse_mode=ParseMode.mdv2.value 
+            )
             logging.info(name_user + " успешно добавлен")
 
             return config.AddUserMessage.extended
@@ -255,9 +256,11 @@ def add_user(
 
                 return config.AddUserMessage.extended
 
-            cursor.execute("UPDATE users_subscription" + 
-                    "\nSET exit_date= exit_date " + intervalSql + ", paid=True" +
-                    "\nWHERE telegram_id=" + str(userId))
+            cursor.execute(
+                "UPDATE users_subscription" + 
+                "\nSET exit_date= exit_date " + intervalSql + ", paid=True" +
+                "\nWHERE telegram_id=" + str(userId)
+            )
             db.commit()
             
             return config.AddUserMessage.extended
@@ -325,11 +328,10 @@ chek_sub_thread.start()
 
 
 def notificationOverSubscription(user_id, text: str) -> types.Message:
-    keyboard = types.InlineKeyboardMarkup()
-    keyboard.add(types.InlineKeyboardButton(text="Продлить", callback_data='{"key": "sale"}'))
+    
     return bot.send_message(user_id,
         text,
-        reply_markup=keyboard
+        reply_markup=keyboards.getInlineExtend()
     )
 
 

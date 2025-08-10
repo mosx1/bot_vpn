@@ -39,14 +39,6 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
     user: User = get_user_by_id(id)
     keyboard = types.InlineKeyboardMarkup()
 
-    # keyboard.add(
-    #     types.InlineKeyboardButton(
-    #         text="Завершить настройку", 
-    #         url='https://kuzmos.ru/mobile?link={}'.format(
-    #             str(user.server_link).replace('#', '&name=')
-    #         )
-    #     )
-    # )
     keyboard.add(
         types.InlineKeyboardButton(
             text="Ручная настройка(если ничего не подключается)", 

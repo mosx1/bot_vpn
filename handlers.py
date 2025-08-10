@@ -1,6 +1,6 @@
 import enums.invite
 import enums.keyCall
-import json, config, os, utils, pytz, datetime, time, managment_user, invite, enums, keyboards, controllerFastApi
+import json, config, os, utils, pytz, datetime, time, managment_user, invite, enums, keyboards, network_service.controllerFastApi as controllerFastApi
 controllerFastApi
 
 from connect import db, logging, engine

@@ -2,12 +2,14 @@ import requests, utils, json
 
 from connect import logging
 
+from .entity import NetworkServiceError
+
 
 def add_vpn_user(
      userId: int,
      server: int,
      token: str = utils.get_token()
-):
+) -> str | NetworkServiceError:
     """
         Создает пользователя в xray
     """
@@ -26,7 +28,10 @@ def add_vpn_user(
     if response["success"]:
          return response["link"]
     
-    return response["error"]
+    return NetworkServiceError(
+        caption="Ошибка в запросе на добавление пользователя",
+        response=str(response)
+    )
 
 
 
@@ -34,7 +39,7 @@ def suspendUser(
      userId: int,
      server: int,
      token: str = utils.get_token()
-) -> bool:
+) -> bool | NetworkServiceError:
     """
         Приостонавливает пользователя в xray
     """
@@ -54,15 +59,18 @@ def suspendUser(
     if response["success"]:
          return response["success"]
     
-    return response["error"]
+    return NetworkServiceError(
+        caption="Ошибка в запросе на приостановку пользователя",
+        response=str(response)
+    )
 
 
 
-def resumeUser(
+def resume_user(
      userId: int,
      server: int,
      token: str = utils.get_token()     
-):
+) -> str | NetworkServiceError:
     """
         Возобновляет доступ пользователя к xray
     """
@@ -81,7 +89,10 @@ def resumeUser(
     if response["success"]:
          return response["success"]
     
-    return response["error"]
+    return NetworkServiceError(
+        caption="Ошибка в запросе на восстановление пользователя",
+        response=str(response)
+    )
 
 
 
@@ -106,4 +117,4 @@ def del_users(
          timeout=60
          ).json()
 
-    return response["success"]
+    return str(response)

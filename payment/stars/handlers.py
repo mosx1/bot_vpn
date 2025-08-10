@@ -1,4 +1,4 @@
-import requests, utils, config, invite
+import utils, config, invite
 
 from telebot import TeleBot
 from telebot.types import LabeledPrice, Message
