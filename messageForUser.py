@@ -14,6 +14,8 @@ from configparser import ConfigParser
 
 from keyboards import KeyboardForUser
 
+from servers.methods import get_very_free_server
+
 
 def periodSubscription(call: types.CallbackQuery, call_data: dict):
 
@@ -58,7 +60,7 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
         ),
         types.InlineKeyboardButton(
             text=KeyboardForUser.gift.value,
-            callback_data='{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(utils.get_very_free_server()) + ', "gift": true}')
+            callback_data='{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(get_very_free_server()) + ', "gift": true}')
     )
     
     if not oldMessageId:

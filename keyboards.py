@@ -2,8 +2,7 @@ from telebot.types import InlineKeyboardMarkup
 from telebot.util import quick_markup
 
 from servers.server_list import Country, Servers
-
-from utils import get_very_free_server
+from servers.methods import get_very_free_server
 
 from enum import Enum
 

@@ -91,50 +91,6 @@ def get_token() -> str:
         return dataCur['hash']
     
 
-
-def get_very_free_server(country: Country | None = None) -> int:
-    """
-        Возвращает менее загруженный сервер по стране
-        Если страна не передана - ищет по всем странам
-    """
-    with Session(engine) as session:
-        query = (
-            select(
-                func.count().label('count'),
-                ServersTable.id
-            )
-            .select_from(ServersTable)
-            .join(
-                User,
-                and_(
-                    User.server_id == ServersTable.id,
-                    User.action == True
-                ), 
-                isouter=True
-            )
-        )
-        
-        if country:
-            query = query.filter(ServersTable.country == country.value)
-        else:
-            query = query.filter(
-                and_(
-                    ServersTable.id != Servers.niderlands2.value,
-                    ServersTable.id != Servers.finland1.value
-                )
-            )
-
-        query = (
-            query
-            .group_by(ServersTable.id)
-            .order_by(text('count ASC'))
-            .limit(1)
-        )
-        result = session.execute(query).one()
-       
-        return result.id
-        
-
 def write_log(type: TypeLogs, user: User, text: str) -> None:
 
     text = "user_id: " + str(user.telegram_id) + ", user_name:" + str(user.name) + ", " + text

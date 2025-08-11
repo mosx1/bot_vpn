@@ -15,8 +15,6 @@ def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None
     conf.read(config.FILE_URL + 'config.ini')
     admin_chat_id: int = conf['Telegram'].getint('admin_chat')
 
-    sqlTextLink = ""
-
     if serverNew == None:
         serverNew = user.server_id
 
@@ -44,7 +42,21 @@ def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None
 
             case str():
 
-                sqlTextLink = ", server_link='" + result_add_vpn_user + "'"
+                with db.cursor() as cursor:   
+                    cursor.execute(
+                        "UPDATE users_subscription" + 
+                        "\nSET exit_date=" +
+                        "\nCASE WHEN exit_date > now()" +
+                        "\nTHEN exit_date" + str(intervalSql) +
+                        "\nELSE now()" + str(intervalSql) +
+                        "\nEND,action=True, paid=True" + 
+                        ", server_link='" + result_add_vpn_user + "'" +
+                        ", server_id = '" + str(serverNew) + "'" +
+                        ", protocol=" + str(config.DEFAULTPROTOCOL) + 
+                        "\nWHERE telegram_id=" + str(user.telegram_id)
+                    )
+                    db.commit()
+
 
             case NetworkServiceError():
                 
@@ -71,17 +83,4 @@ def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None
 
         return
 
-    with db.cursor() as cursor:   
-        cursor.execute(
-            "UPDATE users_subscription" + 
-            "\nSET exit_date=" +
-            "\nCASE WHEN exit_date > now()" +
-            "\nTHEN exit_date" + str(intervalSql) +
-            "\nELSE now()" + str(intervalSql) +
-            "\nEND,action=True, paid=True" + 
-            sqlTextLink + 
-            ", server_id = '" + str(serverNew) + "'" +
-            ", protocol=" + str(config.DEFAULTPROTOCOL) + 
-            "\nWHERE telegram_id=" + str(user.telegram_id)
-        )
-        db.commit()
+    

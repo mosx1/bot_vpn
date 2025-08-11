@@ -16,7 +16,7 @@ from filters import onlyAdminChat
 from psycopg2.extras import DictCursor
                   
 from servers.server_list import Servers, Country
-from servers.methods import get_server_list
+from servers.methods import get_server_list, get_very_free_server
 
 from yoomoneyMethods import getInfoLastPayment, getLinkPayment
 
@@ -38,7 +38,6 @@ from messageForUser import successfully_paid, manual_successfully_paid
 from tables import User, ServersTable
 
 from users.methods import get_user_by_id
-from users.entities import UserStates
 
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func, text, union_all, literal_column
@@ -347,7 +346,7 @@ def register_message_handlers(bot: TeleBot) -> None:
 
         key = quick_markup(
             {
-                keyboards.KeyboardForUser.gift.value: {'callback_data': '{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(utils.get_very_free_server()) + ', "gift": true}'}
+                keyboards.KeyboardForUser.gift.value: {'callback_data': '{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(get_very_free_server()) + ', "gift": true}'}
             },
             row_width=1
         )
@@ -384,7 +383,7 @@ def register_message_handlers(bot: TeleBot) -> None:
     def _(message: types.Message):
         key = quick_markup(
             {
-                keyboards.KeyboardForUser.gift.value: {'callback_data': '{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(utils.get_very_free_server()) + ', "gift": true}'}
+                keyboards.KeyboardForUser.gift.value: {'callback_data': '{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(get_very_free_server()) + ', "gift": true}'}
             },
             row_width=1
         )
@@ -844,7 +843,7 @@ def register_message_handlers(bot: TeleBot) -> None:
 
                 keyboard: types.InlineKeyboardMarkup = quick_markup(
                     {
-                        "Германия(самый свободный)": {"callback_data": '{"key": "connect", "id": "' + str(call_data['user_id']) + '", "serverId": ' + str(utils.get_very_free_server(Country.deutsche)) + '}'}
+                        "Германия(самый свободный)": {"callback_data": '{"key": "connect", "id": "' + str(call_data['user_id']) + '", "serverId": ' + str(get_very_free_server(Country.deutsche)) + '}'}
                     }
                 )
 

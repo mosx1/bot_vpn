@@ -21,10 +21,8 @@ from sqlalchemy import select, func
 from tables import User
 
 from users.methods import get_user_by_id, get_user_by
-from users.entities import UserStates
 
-from servers.server_list import Country
-from servers.methods import get_server_name_by_id, get_server_list
+from servers.methods import get_server_name_by_id, get_very_free_server
 
 from configparser import ConfigParser
 
@@ -223,7 +221,7 @@ def add_user(
         if user:
             server: int = user.server_id
         else:
-            server: int = utils.get_very_free_server()
+            server: int = get_very_free_server()
 
     with db.cursor() as cursor:
 
