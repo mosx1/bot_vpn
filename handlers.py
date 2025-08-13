@@ -3,7 +3,7 @@ import enums.keyCall
 import json, config, os, utils, pytz, datetime, time, managment_user, invite, enums, keyboards, network_service.controllerFastApi as controllerFastApi
 controllerFastApi
 
-from connect import db, logging, engine
+from connect import db, logging
 
 import invite.methods
 
@@ -35,12 +35,9 @@ from giftUsers import genGiftCode, checkGiftCode
 
 from messageForUser import successfully_paid, manual_successfully_paid
 
-from tables import User, ServersTable
+from tables import User
 
 from users.methods import get_user_by_id
-
-from sqlalchemy.orm import Session
-from sqlalchemy import select, func, text, union_all, literal_column
 
 from payment.crypto.repository.methods import crypto_pay, PayingUser, TypeOfPurchase
 from payment.stars.handlers import handle_buy
