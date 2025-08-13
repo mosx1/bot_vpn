@@ -39,6 +39,8 @@ from tables import User
 
 from users.methods import get_user_by_id
 
+from sqlalchemy import func
+
 from payment.crypto.repository.methods import crypto_pay, PayingUser, TypeOfPurchase
 from payment.stars.handlers import handle_buy
 
