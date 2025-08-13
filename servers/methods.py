@@ -1,7 +1,8 @@
+from typing import Tuple
 from connect import engine
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func, and_, text
+from sqlalchemy import Row, Sequence, select, func, and_, text
 from sqlalchemy.sql.elements import BinaryExpression
 
 from tables import ServersTable, CountryTable, User
@@ -101,3 +102,48 @@ def get_very_free_server(country: Country | None = None) -> int:
         result = session.execute(query).one()
         
         return result.id
+    
+
+def get_info_all_servers() -> Row[Tuple]:
+    """
+        Информация по всем серверам вместе
+    """
+    conf = ConfigParser()
+    conf.read(FILE_URL + 'config.ini')
+    
+    with Session(engine) as session:
+            
+            query = select(
+                    func.count().label("count"),
+                    func.count().filter(User.paid == True).label("count_pay")
+                ).filter(User.action == True)
+            
+            return session.execute(query).one()
+
+
+def get_info_servers() -> Sequence[Row[Tuple]]:
+    """
+        Информация отдельно по каждому серверу
+    """
+    conf = ConfigParser()
+    conf.read(FILE_URL + 'config.ini')
+    
+    with Session(engine) as session:
+            
+            query = (
+                select(
+                    ServersTable.name.label("name"),
+                    func.count().label("count"),
+                    func.count().filter(User.paid == True).label("count_pay"),
+                    (func.count() / conf['BaseConfig'].getfloat('coefficient_load_servers') / ServersTable.speed * 100).label('load')
+                ).join(
+                    User, ServersTable.id == User.server_id
+                ).filter(
+                    User.action == True
+                ).group_by(
+                    ServersTable.name,
+                    ServersTable.speed
+                )
+            ).order_by(text('count_pay DESC'))
+            
+            return session.execute(query).all()

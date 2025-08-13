@@ -8,6 +8,7 @@ import spam.handlers
 import supports.handlers
 import game.handlers
 import payment
+import managers.handlers
 
 from connect import bot, storage
 
@@ -16,6 +17,7 @@ handlers.register_message_handlers(bot)
 spam.handlers.register_message_handlers(bot)
 payment.stars.handlers.register_message_handlers(bot)
 game.handlers.register_handlers(bot, storage)
+managers.handlers.register_message_handlers(bot)
 
 
 bot.infinity_polling()

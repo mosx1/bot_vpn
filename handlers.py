@@ -222,45 +222,6 @@ def register_message_handlers(bot: TeleBot) -> None:
             message,
             func.concat(User.telegram_id, User.name).ilike(f'%{text}%')
         )
-        
-
-        
-    @bot.message_handler(commands=[Comands.actionUsersCount.value])
-    def _(message: types.Message):
-
-        message_text: str = ''
-
-        with Session(engine) as session:
-            query = union_all(
-                select(
-                    literal_column("'Всего активных'").label("name"),
-                    func.count().label("count"),
-                    func.count().filter(User.paid == True).label("count_pay")
-                ).filter(
-                    User.action == True
-                ),
-                select(
-                    ServersTable.name.label("name"),
-                    func.count().label("count"),
-                    func.count().filter(User.paid == True).label("count_pay")
-                ).join(
-                    User, ServersTable.id == User.server_id
-                ).filter(
-                    User.action == True
-                ).group_by(
-                    ServersTable.name
-                )
-            ).order_by(text('count_pay DESC'))
-            
-            result = session.execute(query).all()
-
-            for item in result:
-                message_text += f"{item.count} | {item.count_pay} : {item.name} \n"
-
-            bot.send_message(
-                message.chat.id,
-                message_text
-            )
 
 
     @bot.message_handler(commands=["del"], func=onlyAdminChat())
