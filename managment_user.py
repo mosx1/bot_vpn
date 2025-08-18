@@ -23,6 +23,7 @@ from tables import User
 from users.methods import get_user_by_id, get_user_by
 
 from servers.methods import get_server_name_by_id, get_very_free_server
+from servers.server_list import Servers
 
 from configparser import ConfigParser
 
@@ -316,7 +317,7 @@ def del_user(id_user, noUpdate=None, no_message=None) -> None:
         else:
             db.rollback()
 
-        controllerFastApi.suspendUser(id_user, dataCur["server_id"])
+        controllerFastApi.suspend_users({id_user}, dataCur["server_id"])
 
 
 def chek_subscription():
@@ -440,9 +441,9 @@ def checkAndDeleteNotSubscription() -> None:
         query = select(
             func.json_agg(User.telegram_id).label('user_ids'),
             User.server_id
-        ).where(User.action == False).group_by(User.server_id)
+        ).where(User.action == False, User.server_id != Servers.finland1.value).group_by(User.server_id)
         data = session.execute(query).all()
-
+        
         for item in data:
 
             server_name: str = get_server_name_by_id(item.server_id)

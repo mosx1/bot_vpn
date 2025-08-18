@@ -14,9 +14,13 @@ test = "https://api.telegram.org/bot" + token + "/getMe"
 
 def getInfoLastPayment(label: str) -> dict:
     """
-    Получает информацию о последнем платеже по идентификатору платежа
+        Получает информацию о последнем платеже по идентификатору платежа
     """
-    client = Client(config.TOKEN_YOOMONEY)
+
+    conf = ConfigParser()
+    conf.read(config.FILE_URL + 'config.ini')
+
+    client = Client(conf['Umani'].get('token'))
     try:
         history = client.operation_history(label=label)
 

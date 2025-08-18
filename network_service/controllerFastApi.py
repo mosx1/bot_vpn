@@ -36,35 +36,27 @@ def add_vpn_user(
 
 
 
-def suspendUser(
-     userId: int,
+def suspend_users(
+     user_ids: set[int],
      server: int,
      token: str = utils.get_token()
 ) -> bool | NetworkServiceError:
     """
         Приостонавливает пользователя в xray
     """
-
-    logging.info(
-        'Приостановка пользователя ' + str(userId) + ' на сервере ' + utils.getUrlByIdServer(server)
-     )
-
-    response = requests.get(
-         "http://{}/suspend?userId={}&token={}".format(
-              utils.getUrlByIdServer(server), 
-              userId,
-              token
-              ),
-          timeout=60
+    data = {
+         "token": token,
+         "user_ids": list(user_ids)
+    }
+    response = requests.post(
+         "http://{}/suspend".format(
+              utils.getUrlByIdServer(server)
+         ),
+         data = json.dumps(data),
+         timeout=60
          ).json()
-    
-    if response["success"]:
-         return response["success"]
-    
-    return NetworkServiceError(
-        caption="Ошибка в запросе на приостановку пользователя",
-        response=str(response)
-    )
+
+    return str(response)
 
 
 
@@ -121,3 +113,5 @@ def del_users(
          ).json()
 
     return str(response)
+
+
