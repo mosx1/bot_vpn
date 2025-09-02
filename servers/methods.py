@@ -51,21 +51,6 @@ def get_very_free_server(country: Country | None = None) -> int:
     conf.read(FILE_URL + 'config.ini')
 
     with Session(engine) as session:
-        # query = (
-        #     select(
-        #         func.count().label('count'),
-        #         ServersTable.id
-        #     )
-        #     .select_from(ServersTable)
-        #     .join(
-        #         User,
-        #         and_(
-        #             User.server_id == ServersTable.id,
-        #             User.action == True
-        #         ), 
-        #         isouter=True
-        #     )
-        # )
 
         query = (
             select(
@@ -88,8 +73,12 @@ def get_very_free_server(country: Country | None = None) -> int:
         else:
             query = query.filter(
                 and_(
-                    ServersTable.id != Servers.niderlands2.value,
-                    ServersTable.id != Servers.finland1.value
+                    ~ServersTable.id.in_(
+                        [
+                            Servers.niderlands2.value,
+                            Servers.finland1.value
+                        ]
+                    )
                 )
             )
 

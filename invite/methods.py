@@ -12,6 +12,8 @@ from utils import replaceMonthOnRuText
 
 from configparser import ConfigParser
 
+from enums.parse_mode import ParseMode
+
 
 
 def writeInvited(userId: str, userInvitedId: str):
@@ -35,7 +37,8 @@ def addInvitedBonus(userId):
     bot.send_photo(
         userId,
         photo=open(config.FILE_URL + "image/referalYes.png", "rb"),
-        caption=f"Дата окончания подписки изменена: {replaceMonthOnRuText(user.exit_date)}"
+        caption=f"Дата окончания подписки изменена\: {replaceMonthOnRuText(user.exit_date)}",
+        parse_mode=ParseMode.mdv2.value
     )
 
 

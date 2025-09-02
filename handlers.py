@@ -261,14 +261,14 @@ def register_message_handlers(bot: TeleBot) -> None:
                         )
                         invited = cursor.fetchall()
                         if len(invited) > 0:
-                            jsonIdInvited = ', "invitedId": ' + str(arrStartMessageText[1])
+                            jsonIdInvited: str = ', "invitedId": ' + str(arrStartMessageText[1])
                             message.text = arrStartMessageText[1]
                 elif checkGiftCode(message):
                     return successfully_paid(message.from_user.id, optionText="Подарок активирован\n")
-            # else:
+            else:
 
-            #     bot.send_message(message.chat.id, "Привет! Давай сыграем в крестики-нолики. Используй /game чтобы начать игру.")
-            #     return
+                bot.send_message(message.chat.id, "Привет! Давай сыграем в крестики-нолики. Используй /game чтобы начать игру.")
+                return
             
             keyboard.add(types.InlineKeyboardButton(text="Попробовать", callback_data='{"key": "tryServers"' + jsonIdInvited + '}'))
             keyboard.add(types.InlineKeyboardButton(text="Политика по обработке персональных данных", callback_data='{"key": "pppd"}'))
@@ -653,16 +653,18 @@ def register_message_handlers(bot: TeleBot) -> None:
 
             case "deaction":
             
-                del_user(call_data['id'])
+                del_user(call_data['id'], no_message=True)
 
                 if managment_user.manager_users_list.statusSearch == StatusSearch.search:
                     managment_user.manager_users_list.search_user(call.message)
                 elif managment_user.manager_users_list.statusSearch == StatusSearch.all:
                     managment_user.manager_users_list.search_all_user(call.message)
 
-                bot.answer_callback_query(callback_query_id=call.id,
-                                        text="Подписка успешно отключена",
-                                        show_alert=True)
+                bot.answer_callback_query(
+                    callback_query_id=call.id,
+                    text="Подписка успешно отключена",
+                    show_alert=True
+                )
                 
             case "not_action":
 
