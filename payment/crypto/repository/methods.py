@@ -131,7 +131,7 @@ class CryptoPay:
     def get_invoices(self) -> list:
 
         data = {
-            "invoice_ids": self.ids.keys()
+            "invoice_ids": [item for item in self.ids.keys()]
         }
         data_json: str = json.dumps(data)
         response = requests.post(
@@ -232,8 +232,8 @@ class CryptoPay:
                                 bot.reply_to(photoMessage, "Перешлите это сообщение другу в качестве подарка. Спасибо что помогаете нам делать интернет доступнее.")
 
                         del self.ids[invoice['invoice_id']]
-                
-                if datetime(invoice['created_at']) < stop_datetime:
+                        
+                if datetime.fromisoformat(invoice['created_at']) < stop_datetime:
                     if self.delete_invoice(invoice['invoice_id']):
                         del self.ids[invoice['invoice_id']]
 

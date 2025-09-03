@@ -150,3 +150,25 @@ def register_message_handlers(bot: TeleBot) -> None:
     )
     def file_chek(message: types.Message):
         bot.send_message(chat_id=message.chat.id, reply_to_message_id=message.id, text="Стикеры не поддреживаются в данном диалоге")
+
+
+    @bot.message_handler(
+        func= lambda message: message.chat.id == config.ADMINCHAT and
+        message.reply_to_message and message.text[0] != "/"
+    )
+    def _(message: types.Message) -> None:
+
+        if message.reply_to_message.text:
+            user_id: str | int = str(message.reply_to_message.text).split('id:', -1)[1]
+        else:
+            user_id: str | int = str(message.reply_to_message.caption).split('id:', -1)[1]
+        
+        try:
+            bot.copy_message(chat_id=user_id, from_chat_id=config.ADMINCHAT, message_id=message.id)
+        except Exception as e:
+            bot.send_message(
+                config.ADMINCHAT,
+                reply_to_message_id=message.id,
+                text='```error\n' + utils.form_text_markdownv2(str(e)) + '\n```',
+                parse_mode=ParseMode.mdv2.value
+            )

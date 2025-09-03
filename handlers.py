@@ -9,7 +9,7 @@ import invite.methods
 
 from telebot import types, TeleBot
 
-from managment_user import add_user, del_user, UserList, data_user, StatusSearch, checkAndDeleteNotSubscription
+from managment_user import add_user, del_user, UserList, data_user, StatusSearch, delete_not_subscription
 
 from filters import onlyAdminChat
 
@@ -180,7 +180,7 @@ def register_message_handlers(bot: TeleBot) -> None:
 
     @bot.message_handler(commands=[Comands.checkSubscription.value], func=onlyAdminChat())
     def _(message: types.Message) -> None:
-        treadCheckUsersSubscription = Thread(target=checkAndDeleteNotSubscription)
+        treadCheckUsersSubscription = Thread(target=delete_not_subscription)
         treadCheckUsersSubscription.start()
 
     
@@ -393,27 +393,6 @@ def register_message_handlers(bot: TeleBot) -> None:
     )
     def _(message: types.Message):
         data_user(message.forward_from.id)
-
-
-    @bot.message_handler(
-        func= lambda message: message.chat.id == config.ADMINCHAT and
-        message.reply_to_message and message.text[0] != "/"
-    )
-    def _(message: types.Message) -> None:
-        if message.reply_to_message.text:
-            user_id: str | int = str(message.reply_to_message.text).split('id:', -1)[1]
-        else:
-            user_id: str | int = str(message.reply_to_message.caption).split('id:', -1)[1]
-        
-        try:
-            bot.copy_message(chat_id=user_id, from_chat_id=config.ADMINCHAT, message_id=message.id)
-        except Exception as e:
-            bot.send_message(
-                config.ADMINCHAT,
-                reply_to_message_id=message.id,
-                text='```error\n' + utils.form_text_markdownv2(str(e)) + '\n```',
-                parse_mode=ParseMode.mdv2.value
-            )
 
 
     @bot.callback_query_handler(func=lambda call: str(call.data).startswith('{"key":'))

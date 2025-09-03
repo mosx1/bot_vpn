@@ -1,4 +1,5 @@
 import time, threading, config, string, secrets, utils, keyboards
+from typing import NoReturn
 from connect import db, logging, bot, engine
 from telebot import types
 from telebot.apihelper import ApiTelegramException
@@ -28,6 +29,8 @@ from servers.server_list import Servers
 from configparser import ConfigParser
 
 from network_service import controllerFastApi
+
+from datetime import datetime
 
 
 class StatusSearch(Enum):
@@ -431,7 +434,7 @@ def paidCheckActive(item: bool) -> str:
     return ""
 
 
-def checkAndDeleteNotSubscription() -> None:
+def delete_not_subscription() -> None:
 
     conf = ConfigParser()
     conf.read(config.FILE_URL + 'config.ini')
@@ -450,7 +453,8 @@ def checkAndDeleteNotSubscription() -> None:
             
             old_message: types.Message = bot.send_message(
                 admin_chat_id, 
-                f'Удаление неактивных пользователей с сервера {server_name}'
+                f'Удаление неактивных пользователей с сервера {server_name}',
+                disable_notification=True
             )
 
             controllerFastApi.del_users(set(item.user_ids), item.server_id)
@@ -464,3 +468,15 @@ def checkAndDeleteNotSubscription() -> None:
                 old_message.chat.id,
                 old_message.id
             )
+
+
+def delete_not_subscription_tasks() -> NoReturn:
+
+    while True:
+        if datetime.hour == 0:
+            delete_not_subscription()
+            time.sleep(86400)
+
+
+del_not_sub_thread = threading.Thread(target=delete_not_subscription_tasks)
+del_not_sub_thread.start()

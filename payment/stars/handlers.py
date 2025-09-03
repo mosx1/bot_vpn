@@ -38,7 +38,7 @@ def register_message_handlers(bot: TeleBot) -> None:
         conf = ConfigParser()
         conf.read(config.FILE_URL + 'config.ini')
         price_stars: int = conf['Price'].getint('star')
-        summ = int(message.successful_payment.total_amount / 1000000)
+        summ: int = message.successful_payment.total_amount
         month = int(summ / price_stars)
         server = int(message.successful_payment.invoice_payload.split('server:')[-1])
         user: User = get_user_by_id(message.from_user.id)
