@@ -36,15 +36,6 @@ def get_inline_keyboard_list_countries(current_server_id: int) -> InlineKeyboard
     """
         Возвращает клавиатуру со списком стран доступных для аренды для старых пользователей
     """
-    if current_server_id == Servers.finland1.value:
-
-        return quick_markup(
-            {   
-                "Германия(рекомендуется)": {'callback_data': '{"key": "pollCountMonth", "server": ' + str(get_very_free_server(Country.deutsche)) + '}'},
-                "Нидерланды": {'callback_data': '{"key": "pollCountMonth", "server": ' + str(get_very_free_server(Country.niderlands)) + '}'}
-            },
-            row_width=1
-        )
 
     return quick_markup(
         {   

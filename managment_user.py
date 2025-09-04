@@ -444,7 +444,11 @@ def delete_not_subscription() -> None:
         query = select(
             func.json_agg(User.telegram_id).label('user_ids'),
             User.server_id
-        ).where(User.action == False, User.server_id != Servers.finland1.value).group_by(User.server_id)
+        ).where(
+            User.action == False
+        ).group_by(
+            User.server_id
+        )
         data = session.execute(query).all()
         
         for item in data:

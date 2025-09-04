@@ -75,8 +75,7 @@ def get_very_free_server(country: Country | None = None) -> int:
                 and_(
                     ~ServersTable.id.in_(
                         [
-                            Servers.niderlands2.value,
-                            Servers.finland1.value
+                            Servers.niderlands2.value
                         ]
                     )
                 )
