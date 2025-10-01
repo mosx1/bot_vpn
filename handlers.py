@@ -71,7 +71,7 @@ def register_message_handlers(bot: TeleBot) -> None:
         while True:
 
             time.sleep(3)
-            currentDateTime = datetime.datetime.now(pytz.timezone('Europe/Moscow'))
+            currentDateTime: datetime.datetime = datetime.datetime.now(pytz.timezone('Europe/Moscow'))
             try:
                 res = getInfoLastPayment(label)
             except Exception as e:
@@ -265,10 +265,10 @@ def register_message_handlers(bot: TeleBot) -> None:
                             message.text = arrStartMessageText[1]
                 elif checkGiftCode(message):
                     return successfully_paid(message.from_user.id, optionText="Подарок активирован\n")
-            else:
+            # else:
 
-                bot.send_message(message.chat.id, "Привет! Давай сыграем в крестики-нолики. Используй /game чтобы начать игру.")
-                return
+            #     bot.send_message(message.chat.id, "Привет! Давай сыграем в крестики-нолики. Используй /game чтобы начать игру.")
+            #     return
             
             keyboard.add(types.InlineKeyboardButton(text="Попробовать", callback_data='{"key": "tryServers"' + jsonIdInvited + '}'))
             keyboard.add(types.InlineKeyboardButton(text="Политика по обработке персональных данных", callback_data='{"key": "pppd"}'))
@@ -399,8 +399,7 @@ def register_message_handlers(bot: TeleBot) -> None:
     def callback_woker(call: types.CallbackQuery):
 
         call_data = json.loads(call.data)
-        username = call.from_user.full_name
-        user_id = call.from_user.id
+        username: str = call.from_user.full_name
 
         logging.info("user_id: " + str(call.from_user.id) + ", user_name:" + str(username) + " нажата кнопка с ключем " + call_data['key'])
 
