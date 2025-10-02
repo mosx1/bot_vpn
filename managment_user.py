@@ -17,14 +17,13 @@ from protocols import getNameProtocolById
 from managers.subscription.renewal_of_subscription import renewalOfSubscription
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func
+from sqlalchemy import select, func, and_, text
 
 from tables import User
 
 from users.methods import get_user_by_id, get_user_by
 
 from servers.methods import get_server_name_by_id, get_very_free_server
-from servers.server_list import Servers
 
 from configparser import ConfigParser
 
@@ -324,45 +323,81 @@ def del_user(id_user, noUpdate=None, no_message=None) -> None:
 
 
 def chek_subscription():
+
     while True:
-        with db.cursor() as cursor:
-            cursor.execute("SELECT telegram_id FROM users_subscription WHERE action=True AND exit_date < now()")
-            data_cur = cursor.fetchall()
-            if len(data_cur) != 0:
-                for data in data_cur:
-                    del_user(data[0])
-                    
-            cursor.execute("SELECT telegram_id FROM users_subscription WHERE action=True AND (exit_date - INTERVAL '2 days') = now()")
-            data_cur = cursor.fetchall()
-            if len(data_cur) != 0:
-                for data in data_cur:
-                    notificationOverSubscription(data[0], "Через 2 дня окончится Ваша подписка на VPN. Чтобы не потерять доступ, продлите подписку.")
+
+        users: list[User] = get_user_by(
+            and_(
+                User.action == True,
+                User.exit_date < func.now()
+            )
+        )
             
-            cursor.execute("SELECT telegram_id FROM users_subscription WHERE action=True AND (exit_date - INTERVAL '1 days') = now()")
-            data_cur = cursor.fetchall()
-            if len(data_cur) != 0:
-                for data in data_cur:
-                        notificationOverSubscription(data[0], "Завтра в это же время окончится подписка на VPN. Чтобы не потерять доступ, продлите подписку.")
-           
-            cursor.execute("SELECT telegram_id FROM users_subscription WHERE action=True AND (exit_date - INTERVAL '1 hours') = now()")
-            data_cur = cursor.fetchall()
-            if len(data_cur) != 0:
-                for data in data_cur:
-                        notificationOverSubscription(data[0], "Уже через час окончится подписка на VPN. Чтобы не потерять доступ, продлите подписку.")
-        time.sleep(60)
+        for user in users:
+
+            del_user(user.telegram_id)
+
+        users: list[User] = get_user_by(
+            and_(
+                User.action == True,
+                User.exit_date - text("INTERVAL '3 days'") == func.now()
+            )
+        )
+
+        for user in users:
+
+            bot.send_message(
+                user.telegram_id,
+                "Через 3 дня окончится Ваша подписка на VPN. Чтобы не потерять доступ, продлите подписку.",
+                reply_markup=keyboards.getInlineExtend()
+            )
+
+        users: list[User] = get_user_by(
+            and_(
+                User.action == True,
+                User.exit_date - text("INTERVAL '2 days'") == func.now()
+            )
+        )
+
+        for user in users:
+
+            bot.send_message(
+                user.telegram_id,
+                "Через 2 дня окончится Ваша подписка на VPN. Чтобы не потерять доступ, продлите подписку.",
+                reply_markup=keyboards.getInlineExtend()
+            )
         
+        users: list[User] = get_user_by(
+            and_(
+                User.action == True,
+                User.exit_date - text("INTERVAL '1 days'") == func.now()
+            )
+        )
 
-chek_sub_thread = threading.Thread(target=chek_subscription)
-chek_sub_thread.start()
+        for user in users:
 
+            bot.send_message(
+                user.telegram_id,
+                "Завтра в это же время окончится подписка на VPN. Чтобы не потерять доступ, продлите подписку.",
+                reply_markup=keyboards.getInlineExtend()
+            )
+        
+        users: list[User] = get_user_by(
+            and_(
+                User.action == True,
+                User.exit_date - text("INTERVAL '1 hours'") == func.now()
+            )
+        )
 
-def notificationOverSubscription(user_id, text: str) -> types.Message:
-    
-    return bot.send_message(user_id,
-        text,
-        reply_markup=keyboards.getInlineExtend()
-    )
+        for user in users:
 
+            bot.send_message(
+                user.telegram_id,
+                "Уже через час окончится подписка на VPN. Чтобы не потерять доступ, продлите подписку.",
+                reply_markup=keyboards.getInlineExtend()
+            )
+
+        time.sleep(60)
 
 
 def generate_alphanum_crypt_string():
@@ -482,5 +517,8 @@ def delete_not_subscription_tasks() -> NoReturn:
             time.sleep(86400)
 
 
+chek_sub_thread = threading.Thread(target=chek_subscription)
 del_not_sub_thread = threading.Thread(target=delete_not_subscription_tasks)
+
+chek_sub_thread.start()
 del_not_sub_thread.start()
