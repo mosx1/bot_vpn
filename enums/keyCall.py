@@ -10,3 +10,4 @@ class KeyCall(Enum):
     payment_stars: str = "payment_stars"
     list_servers_for_admin: str = "list_servers_for_admin"
     send_message_for_extension: str = "send_message_for_extension"
+    loading: str = "loading"

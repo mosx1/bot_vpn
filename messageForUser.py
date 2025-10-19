@@ -12,9 +12,11 @@ from tables import User
 
 from configparser import ConfigParser
 
-from keyboards import KeyboardForUser
+from keyboards import KeyboardForUser, get_inline_loading
 
 from servers.methods import get_very_free_server
+
+from network_service.controller_flask_api import get_subscription_link
 
 
 def periodSubscription(call: types.CallbackQuery, call_data: dict):
@@ -38,19 +40,22 @@ def periodSubscription(call: types.CallbackQuery, call_data: dict):
 
 def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
 
+    conf = ConfigParser()
+    conf.read(config.FILE_URL + 'config.ini')
+
     user: User = get_user_by_id(id)
     keyboard = types.InlineKeyboardMarkup()
 
     keyboard.add(
         types.InlineKeyboardButton(
-            text="Ручная настройка(если ничего не подключается)", 
-            callback_data='{"key": "manualSettings", "id": "' + str(id) + '"}'
+            text="Авто вкл/выкл на iPhone", 
+            callback_data='{"key": "comands_video"}'
         )
     )
     keyboard.add(
         types.InlineKeyboardButton(
-            text="Авто вкл/выкл на iPhone", 
-            callback_data='{"key": "comands_video"}'
+            text="Ручная настройка", 
+            callback_data='{"key": "manualSettings", "id": "' + str(id) + '"}'
         )
     )
     keyboard.add(
@@ -60,9 +65,12 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
         ),
         types.InlineKeyboardButton(
             text=KeyboardForUser.gift.value,
-            callback_data='{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(get_very_free_server()) + ', "gift": true}')
+            callback_data='{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(get_very_free_server()) + ', "gift": true}'
+        )
     )
     
+    text_for_message: str = conf['MessagesTextMD'].get('successfully_subscription_automatic')
+
     if not oldMessageId:
         if user.paid:
             keyboard_ref = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -82,8 +90,8 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
         if bot.send_photo(
                 chat_id=id,
                 photo=open(config.FILE_URL + "4rrr.jpg", "rb"),
-                caption=optionText + config.TextsMessages.successfullySubscriptionAutomatic.value.format(
-                    str(user.server_link).replace('#', '&name='),
+                caption=optionText + text_for_message.format(
+                    user.telegram_id,
                     utils.replaceMonthOnRuText(user.exit_date),
                     utils.form_text_markdownv2(
                         utils.get_server_name_by_id(user.server_id)
@@ -100,8 +108,8 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
         return bot.edit_message_caption(
             chat_id=id, 
             message_id=oldMessageId,
-            caption=optionText + config.TextsMessages.successfullySubscriptionAutomatic.value.format(
-                str(user.server_link).replace('#', '&name='),
+            caption=optionText + text_for_message.format(
+                user.telegram_id,
                 utils.replaceMonthOnRuText(user.exit_date),
                 utils.form_text_markdownv2(
                     utils.get_server_name_by_id(user.server_id)
@@ -113,14 +121,25 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
         )
 
 
-def manual_successfully_paid(id, old_message_id) -> bool:
+def manual_successfully_paid(id: int, old_message_id: int) -> bool:
+    """
+        отправляет сообщение для ручной настройки
+    """
+    bot.edit_message_reply_markup(
+        id,
+        old_message_id,
+        reply_markup=get_inline_loading()
+    )
+
+    conf = ConfigParser()
+    conf.read(config.FILE_URL + 'config.ini')
+
+    caption_for_message: str = conf['MessagesTextMD'].get('successfully_subscription')
 
     user: User = get_user_by_id(id)
 
     keyboard: types.InlineKeyboardMarkup = quick_markup(
         {
-            "Как подключить ПК": {"url": "https://drive.google.com/file/d/1mSATyhbzILNiMJxnkHMnKZWj_h6LpKIF/view?usp=sharing"},
-            "Как подключить Android/iOS/MacOS": {"callback_data": '{"key": "home_key_faq"}'},
             "<<<Назад": {"callback_data": '{"key": "backmanualSettings", "id": "' + str(id) +'"}'}
         },
         row_width=1
@@ -129,9 +148,11 @@ def manual_successfully_paid(id, old_message_id) -> bool:
     return bot.edit_message_caption(
         chat_id=id, 
         message_id=old_message_id,
-        caption=config.TextsMessages.successfullySubscription.value.format(
-        utils.form_text_markdownv2(user.server_link),
-        utils.replaceMonthOnRuText(user.exit_date)),
+        caption=caption_for_message.format(
+            get_subscription_link(id),
+            utils.form_text_markdownv2(user.server_link),
+            utils.replaceMonthOnRuText(user.exit_date)
+        ),
         reply_markup=keyboard, 
         parse_mode=ParseMode.mdv2.value
     )

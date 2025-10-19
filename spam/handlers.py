@@ -18,6 +18,8 @@ from tables import User
 
 from connect import logging
 
+from messageForUser import successfully_paid
+
 
 
 def register_message_handlers(bot: TeleBot) -> None:
@@ -175,3 +177,23 @@ def register_message_handlers(bot: TeleBot) -> None:
             current_message.chat.id,
             current_message.id
         )
+    
+    
+    @bot.message_handler(commands=["spamSUB"])
+    def _(message: types.Message) -> None:
+
+        bot.reply_to(
+            message, 
+            'Начата рассылка'
+        )
+
+        users: list[User] = get_user_by(User.action == True)
+        
+        for user in users:
+            try:
+                successfully_paid(
+                    user.telegram_id,
+                    optionText="*РАБОТА ВОССТАНОВЛЕНА, НЕОБХОДИМО ЗАНОВО НАСТРОИТЬ КОНФИГУРАЦИЮ*"
+                )
+            except Exception as e:
+                logging.error(f"Не удалось отправить сообщение пользователю id: {user.telegram_id} name: {user.name}")

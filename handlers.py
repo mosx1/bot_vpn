@@ -595,16 +595,10 @@ def register_message_handlers(bot: TeleBot) -> None:
 
                 user: User = get_user_by_id(call_data['id'])
 
-                keyLoading = quick_markup(
-                    {
-                        "Загрузка...": {'callback_data': '{"key": "loading"}'}
-                    }
-                )
-
                 bot.edit_message_reply_markup(
                     chat_id = call.message.chat.id,
                     message_id= call.message.id,
-                    reply_markup = keyLoading
+                    reply_markup = keyboards.get_inline_loading()
                 )
 
                 if call.message.chat.id == config.ADMINCHAT:
@@ -652,16 +646,6 @@ def register_message_handlers(bot: TeleBot) -> None:
             case "faq_video":
 
                 bot.send_video(call.from_user.id, open("/root/bot_vpn/video/0809.mp4", "rb"), width=888, height=1920)
-
-            case "faq_ios":
-                
-                user: User | None = get_user_by_id(call.from_user.id)
-
-                bot.send_message(
-                    call.from_user.id,
-                    config.TextsMessages.faqIos.value.format(utils.form_text_markdownv2(user.server_link)),
-                    parse_mode=ParseMode.mdv2.value
-                )
 
             case "comands_video":
 
@@ -814,6 +798,13 @@ def register_message_handlers(bot: TeleBot) -> None:
                 bot.answer_callback_query(
                     call.id,
                     "Отправлено"
+                )
+            
+            case KeyCall.loading.name:
+
+                bot.answer_callback_query(
+                    callback_query_id=call.id,
+                    text='Идет загрузка, ожидайте.'
                 )
 
             case _:

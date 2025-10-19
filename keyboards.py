@@ -6,6 +6,8 @@ from servers.methods import get_very_free_server
 
 from enum import Enum
 
+from enums.keyCall import KeyCall
+
 
 class KeyboardForUser(Enum):
     
@@ -24,9 +26,15 @@ def get_inline_keyboard_list_countries_by_try(callData = None, optionText: str =
 
     return quick_markup(
         {   
-            "Самый свободный сервер(рекомендуется)": {'callback_data': '{"key": "try", "server": ' + str(get_very_free_server()) + optionText + '}'},
-            "Германия": {'callback_data': '{"key": "try", "server": ' + str(get_very_free_server(Country.deutsche)) + optionText + '}'},
-            "Нидерланды": {'callback_data': '{"key": "try", "server": ' + str(get_very_free_server(Country.niderlands)) + optionText + '}'}
+            "Самый свободный сервер(рекомендуется)": {
+                'callback_data': '{"key": "try", "server": ' + str(get_very_free_server()) + optionText + '}'
+            },
+            "Германия": {
+                'callback_data': '{"key": "try", "server": ' + str(get_very_free_server(Country.deutsche)) + optionText + '}'
+            },
+            "Нидерланды": {
+                'callback_data': '{"key": "try", "server": ' + str(get_very_free_server(Country.niderlands)) + optionText + '}'
+            }
         },
         row_width=1
     )
@@ -39,9 +47,15 @@ def get_inline_keyboard_list_countries(current_server_id: int) -> InlineKeyboard
 
     return quick_markup(
         {   
-            "Текущая локация(рекомендуется)": {'callback_data': '{"key": "pollCountMonth", "server": ' + str(current_server_id) + '}'},
-            "Германия": {'callback_data': '{"key": "pollCountMonth", "server": ' + str(get_very_free_server(Country.deutsche)) + '}'},
-            "Нидерланды": {'callback_data': '{"key": "pollCountMonth", "server": ' + str(get_very_free_server(Country.niderlands)) + '}'}
+            "Текущая локация(рекомендуется)": {
+                'callback_data': '{"key": "' + KeyCall.pollCountMonth.name + '", "server": ' + str(current_server_id) + '}'
+            },
+            "Германия": {
+                'callback_data': '{"key": "' + KeyCall.pollCountMonth.name + '", "server": ' + str(get_very_free_server(Country.deutsche)) + '}'
+            },
+            "Нидерланды": {
+                'callback_data': '{"key": "' + KeyCall.pollCountMonth.name + '", "server": ' + str(get_very_free_server(Country.niderlands)) + '}'
+            }
         },
         row_width=1
     )
@@ -49,5 +63,8 @@ def get_inline_keyboard_list_countries(current_server_id: int) -> InlineKeyboard
 
 
 def getInlineExtend(value: str = "Продлить") -> InlineKeyboardMarkup:
+    return quick_markup({value: {'callback_data': '{"key": "' + KeyCall.sale.name + '"}'}})
 
-    return quick_markup({value: {'callback_data': '{"key": "sale"}'}})
+
+def get_inline_loading() -> InlineKeyboardMarkup:
+    return quick_markup({"Загрузка...": {"callback_data": '{"key": "' + KeyCall.loading.name + '"}'}})
