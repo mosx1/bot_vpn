@@ -1,4 +1,4 @@
-import requests, utils, json
+import requests, utils, json, time
 
 from connect import logging
 
@@ -55,8 +55,24 @@ def suspend_users(
          data = json.dumps(data),
          timeout=60
          ).json()
+    
+    if "success" in response and response["success"]:
+         return response["success"]
+    
+    if "detail" in response and response["detail"] and response["detail"] == "Method Not Allowed":
+        
+        time.sleep(5)
 
-    return str(response)
+        return suspend_users(
+            user_ids,
+            server,
+            token
+        )
+    
+    return NetworkServiceError(
+        caption="Ошибка в запросе на приостановление пользователя",
+        response=str(response)
+    )
 
 
 

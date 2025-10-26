@@ -28,6 +28,7 @@ from servers.methods import get_server_name_by_id, get_very_free_server
 from configparser import ConfigParser
 
 from network_service import controllerFastApi
+from network_service.entity import NetworkServiceError
 
 from datetime import datetime
 
@@ -237,7 +238,7 @@ def add_user(
             match result_add_vpn_user:
 
                 case str():
-
+                    
                     cursor.execute(
                         "INSERT INTO users_subscription (telegram_id, name, exit_date, action, server_link, server_id, protocol)" +
                         "\nVALUES ('" + str(user_id) + "', '" + str(name_user) + "', now() " + str(intervalSql) + ", True, '" + result_add_vpn_user + "', '" + str(server) + "', " + str(config.DEFAULTPROTOCOL) + ");"
@@ -295,7 +296,7 @@ def add_user(
     
 
 
-def del_user(id_user, noUpdate=None, no_message=None) -> None:
+def del_user(id_user, noUpdate=None, no_message=None) -> bool | NetworkServiceError:
     
     name = ""
 
@@ -319,7 +320,11 @@ def del_user(id_user, noUpdate=None, no_message=None) -> None:
         else:
             db.rollback()
 
-        controllerFastApi.suspend_users({id_user}, dataCur["server_id"])
+        return controllerFastApi.suspend_users(
+            {id_user}, 
+            dataCur["server_id"]
+        )
+        
 
 
 def chek_subscription():
@@ -406,18 +411,33 @@ def generate_alphanum_crypt_string():
     return crypt_rand_string
     
 
-def data_user(id: int) -> types.Message:
-
-    m: types.Message = bot.send_message(config.ADMINCHAT, "Загрузка...")
+def data_user(id: int, old_message: types.Message | None = None) -> types.Message:
+    """
+        Получить информацию о пользователе
+    """
+    if old_message:
+        m: types.Message = bot.edit_message_reply_markup(
+            old_message.chat.id,
+            old_message.id,
+            reply_markup=keyboards.get_inline_loading()
+        )
+    else:
+        m: types.Message = bot.send_message(
+            config.ADMINCHAT, 
+            "Загрузка..."
+        )
 
     user: User | None = get_user_by_id(int(id))
+
     if not user:
         return bot.edit_message_text(
             chat_id=m.chat.id,
             message_id= m.id,
             text= "Пользователь незарегистрирован"
         )
+    
     keyboard: types.InlineKeyboardMarkup = UserList.addButtonKeyForUsersList(user)
+    
     keyboard.add(
         types.InlineKeyboardButton(
             text = "Обнулить баланс",

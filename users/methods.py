@@ -3,10 +3,10 @@ from typing import Iterable
 from connect import engine
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, insert
 from sqlalchemy.sql.elements import BinaryExpression
 
-from tables import User, ServersTable
+from tables import User, ServersTable, UserToSubscription
 
 from servers.server_list import Country
 
@@ -56,3 +56,17 @@ def get_user_by_country(country: Country, filter: BinaryExpression | None = None
         if filter: query.filter(filter)
 
         return session.execute(query).scalars().all()
+    
+
+def add_subscription_for_user(telegram_id: int, server_link: str, server_id: str) -> None:
+    """
+        Добавляет запись в бд с подпиской пользователю.
+    """
+    with Session(engine) as session:
+        query = insert(UserToSubscription).values(
+            telegram_id=telegram_id,
+            server_link=server_link,
+            server_id=server_id
+        )
+        session.execute(query)
+        session.commit()

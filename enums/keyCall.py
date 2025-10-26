@@ -11,3 +11,5 @@ class KeyCall(Enum):
     list_servers_for_admin: str = "list_servers_for_admin"
     send_message_for_extension: str = "send_message_for_extension"
     loading: str = "loading"
+    deaction: str = "deaction"
+    data_user: str = "data_user"

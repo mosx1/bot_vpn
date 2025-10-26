@@ -1,7 +1,6 @@
 import enums.invite
 import enums.keyCall
-import json, config, os, utils, pytz, datetime, time, managment_user, invite, enums, keyboards, network_service.controllerFastApi as controllerFastApi
-controllerFastApi
+import json, config, os, utils, pytz, datetime, time, managment_user, invite, enums, keyboards
 
 from connect import db, logging
 
@@ -47,6 +46,9 @@ from payment.stars.handlers import handle_buy
 from statistic.tasks import start_statistic
 
 from configparser import ConfigParser
+
+from network_service import controllerFastApi
+from network_service.entity import NetworkServiceError
 
 
 def register_message_handlers(bot: TeleBot) -> None:
@@ -623,18 +625,28 @@ def register_message_handlers(bot: TeleBot) -> None:
                     reply_markup = UserList.addButtonKeyForUsersList(user)
                 )
 
-            case "deaction":
+            case KeyCall.deaction.name:
+
+                text = ""
             
-                del_user(call_data['id'], no_message=True)
+                res: bool | NetworkServiceError = del_user(call_data['id'], no_message=True)
 
-                if managment_user.manager_users_list.statusSearch == StatusSearch.search:
-                    managment_user.manager_users_list.search_user(call.message)
-                elif managment_user.manager_users_list.statusSearch == StatusSearch.all:
-                    managment_user.manager_users_list.search_all_user(call.message)
+                if not isinstance(res, NetworkServiceError):
 
-                bot.answer_callback_query(
+                    data_user(
+                        call_data['id'],
+                        call.message
+                    )
+
+                    text = "Подписка отключена"
+
+                else:
+
+                    text = f"{res.caption} [{res.response}]"
+
+                return bot.answer_callback_query(
                     callback_query_id=call.id,
-                    text="Подписка успешно отключена",
+                    text=text,
                     show_alert=True
                 )
                 
@@ -663,9 +675,12 @@ def register_message_handlers(bot: TeleBot) -> None:
 
                 bot.send_video(call.from_user.id, open("/root/bot_vpn/video/999.mp4", "rb"), width=888, height=1920)
 
-            case "data_user":
+            case KeyCall.data_user.name:
 
-                data_user(call_data['id'])
+                data_user(
+                    call_data['id'],
+                    call.message
+                )
 
             case "option_where":
 
@@ -705,7 +720,12 @@ def register_message_handlers(bot: TeleBot) -> None:
                     call.message.chat.id,
                     call.message.id
                 )
-                data_user(call_data['userId'])
+
+                data_user(
+                    call_data['userId'],
+                    call.message
+                )
+
                 bot.answer_callback_query(
                     callback_query_id=call.id,
                     text='Баланс обнулен'
