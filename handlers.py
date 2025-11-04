@@ -6,9 +6,9 @@ from connect import db, logging
 
 import invite.methods
 
-from telebot import types, TeleBot
+from telebot import types
 
-from managment_user import add_user, del_user, UserList, data_user, StatusSearch, delete_not_subscription
+from managment_user import add_user, del_user, UserList, data_user, delete_not_subscription
 
 from filters import onlyAdminChat
 
@@ -50,8 +50,10 @@ from configparser import ConfigParser
 from network_service import controllerFastApi
 from network_service.entity import NetworkServiceError
 
+from core.telebot import TeleBotMod
 
-def register_message_handlers(bot: TeleBot) -> None:
+
+def register_message_handlers(bot: TeleBotMod) -> None:
     
 
     def pollingInfoLastPayment(*args) -> dict:
@@ -578,10 +580,12 @@ def register_message_handlers(bot: TeleBot) -> None:
                     ],
                     types.InlineKeyboardButton(text="Назад", callback_data='{"key": "backConnectKey", "id": "' + str(call_data['id']) + '"}')
                 )
-                if call.message.content_type == "text":
-                    bot.edit_message_text(chat_id = call.message.chat.id, message_id = call.message.id, text = call.message.text, reply_markup = key)
-                else:
-                    bot.edit_message_caption(chat_id = call.message.chat.id, message_id = call.message.id, caption = call.message.caption, reply_markup = key)
+                
+                return bot.edit_message_reply_markup(
+                    call.message.chat.id,
+                    call.message.id,
+                    reply_markup=key
+                )
             
             case "backConnectKey":
 
@@ -612,16 +616,24 @@ def register_message_handlers(bot: TeleBot) -> None:
                     add_user(call_data['id'], call_data["month"], name_user=username, server=call_data['s'])
                 else:
                     add_user(call_data['id'], call_data["month"], name_user=username)
+                
+                text_arr: list[str] = utils.form_text_markdownv2(call.message.text).split('id:')[:-1]
+                text: str = "id:".join(text_arr)
 
-                bot.edit_message_text(
-                    text = utils.form_text_markdownv2(call.message.text) + 
-                        "\n\n*Подписка активирована, сообщение пользователю отправлено*" if successfully_paid(
-                            call_data['id']
-                        ) else utils.form_text_markdownv2(call.message.text) + 
-                        "\n\n*Подписка активирована, но сообщение не отправлено*",
-                    chat_id = call.message.chat.id,
-                    message_id= call.message.id,
-                    parse_mode=ParseMode.mdv2.value,
+                if successfully_paid(call_data['id']):
+
+                    text += "\n\n*Подписка активирована, сообщение пользователю отправлено*"
+
+                else:
+
+                    text += "\n\n*Подписка активирована, но сообщение не отправлено*"
+
+                text += "\n\nid:" + call_data['id']
+
+                bot.edit_message_text_or_caption(
+                    call.message,
+                    text,
+                    parse_mode=ParseMode.mdv2,
                     reply_markup = UserList.addButtonKeyForUsersList(user)
                 )
 

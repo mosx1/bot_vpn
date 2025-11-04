@@ -1,0 +1,38 @@
+name: 🚀 Deploy to Server
+
+on:
+  workflow_dispatch:  # Позволяет запускать вручную по кнопке в GitHub UI
+
+jobs:
+  deploy:
+    name: Deploy via SSH
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧩 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🧰 Set up SSH key
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: 🐳 Build Docker image
+        run: |
+          docker build -t mybot:latest .
+
+      - name: 🚀 Deploy to server
+        env:
+          HOST: ${{ secrets.SERVER_HOST }}
+          USER: ${{ secrets.SERVER_USER }}
+        run: |
+          ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
+            cd /opt/mybot || mkdir -p /opt/mybot
+            docker stop mybot || true
+            docker rm mybot || true
+            docker image rm mybot:latest || true
+            cd /opt/mybot
+            git pull || true
+            docker build -t bot_vpn:latest .
+            docker run -d --name bot_vpn --restart always bot_vpn:latest
+          EOF

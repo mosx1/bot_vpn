@@ -1,10 +1,11 @@
 import time, threading, config, string, secrets, utils, keyboards
-from typing import NoReturn
-from connect import db, logging, bot, engine
-from telebot import types
-from telebot.apihelper import ApiTelegramException
 
-from enum import Enum
+from typing import NoReturn
+
+from connect import db, logging, bot, engine
+
+from telebot.apihelper import ApiTelegramException
+from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
 from enums.invite import CallbackKeys
 from enums.keyCall import KeyCall
@@ -21,7 +22,7 @@ from sqlalchemy import select, func, and_, text
 
 from tables import User
 
-from users.methods import get_user_by_id, get_user_by
+from users.methods import get_user_by_id, get_user_by, add_subscription_for_user
 
 from servers.methods import get_server_name_by_id, get_very_free_server
 
@@ -31,13 +32,6 @@ from network_service import controllerFastApi
 from network_service.entity import NetworkServiceError
 
 from datetime import datetime
-
-
-class StatusSearch(Enum):
-    
-    one = 0
-    all = 1
-    search = 2
 
 class UserList:
     
@@ -50,7 +44,6 @@ class UserList:
         self.mes_arr = []
         self.start = 0
         self.one_active: bool = False
-        self.statusSearch: StatusSearch
         self.search_text = ""
         self.filters = filter
         if message:
@@ -83,7 +76,7 @@ class UserList:
         self.manager_users_list(message, users)
 
 
-    def manager_users_list(self, message: types.Message, users: list[User | None]) -> None:
+    def manager_users_list(self, message: Message, users: list[User | None]) -> None:
 
         text_key_where = "Показать только активные"
         if self.one_active:
@@ -95,12 +88,14 @@ class UserList:
             res = self.config.getint('items_on_page') - len(users)
             for b in range(res):
                 users.append(None)
-            button_nav = [types.InlineKeyboardButton(text="<", callback_data='{"key": "page_client_back"}')]
+            button_nav = [InlineKeyboardButton(text="<", callback_data='{"key": "page_client_back"}')]
         if self.start == 0:
-            button_nav = [types.InlineKeyboardButton(text=">", callback_data='{"key": "page_client_next"}')]
+            button_nav = [InlineKeyboardButton(text=">", callback_data='{"key": "page_client_next"}')]
         else:
-            button_nav = [types.InlineKeyboardButton(text="<", callback_data='{"key": "page_client_back"}'),
-                          types.InlineKeyboardButton(text=">", callback_data='{"key": "page_client_next"}')]
+            button_nav = [
+                InlineKeyboardButton(text="<", callback_data='{"key": "page_client_back"}'),
+                InlineKeyboardButton(text=">", callback_data='{"key": "page_client_next"}')
+            ]
             
         for a, user in enumerate(users):
 
@@ -112,7 +107,7 @@ class UserList:
             statistic = '\-'
             keyboard_offer_one = None
 
-            keyboard_offer_one: types.InlineKeyboardMarkup = self.addButtonKeyForUsersList(
+            keyboard_offer_one: InlineKeyboardMarkup = self.addButtonKeyForUsersList(
                 user,
                 a, 
                 button_nav, 
@@ -130,7 +125,7 @@ class UserList:
 
             if len(self.mes_arr) < self.config.getint('items_on_page'):
 
-                m: types.Message = bot.send_message(
+                m: Message = bot.send_message(
                     message.chat.id,
                     str(paid) + str(status) + "[" + str(name) + "](tg://user?id\=" + str(telegram_id) + ") " + str(date) + 
                     "\n" + str(statistic),
@@ -153,27 +148,27 @@ class UserList:
 
         
     @classmethod
-    def addButtonKeyForUsersList(self, user: User | None = None, a: int = 0, buttonNav: list = None, textKeyWhere: str = None) -> types.InlineKeyboardMarkup:
-        keyboard_offer_one = types.InlineKeyboardMarkup()
+    def addButtonKeyForUsersList(self, user: User | None = None, a: int = 0, buttonNav: list = None, textKeyWhere: str = None) -> InlineKeyboardMarkup:
+        keyboard_offer_one = InlineKeyboardMarkup()
         if user:
             if user.action:
 
-                inlineKeyConnect = types.InlineKeyboardButton(
+                inlineKeyConnect = InlineKeyboardButton(
                         text="+",
                         callback_data='{"key": "connect", "id": ' + str(user.telegram_id) + ', "serverId": ' + str(user.server_id) + '}'
                     )
 
                 keyboard_offer_one.add(
                     inlineKeyConnect,
-                    types.InlineKeyboardButton(
+                    InlineKeyboardButton(
                         text="Отключить", 
                         callback_data='{"key": "deaction", "id": "' + str(user.telegram_id) + '"}'
                     ),
-                    types.InlineKeyboardButton(
+                    InlineKeyboardButton(
                         text="Данные", 
                         callback_data='{"key": "data_user", "id": "' + str(user.telegram_id) + '"}'
                     ),
-                    types.InlineKeyboardButton(
+                    InlineKeyboardButton(
                         text="Отправить конфиг", 
                         callback_data='{"key": "sendConf", "id": "' + str(user.telegram_id) + '"}'
                     )
@@ -182,15 +177,15 @@ class UserList:
             else:
 
                 keyboard_offer_one.add(
-                    types.InlineKeyboardButton(
+                    InlineKeyboardButton(
                         text="Выбрать сервер", 
                         callback_data='{"key": "' + KeyCall.list_servers_for_admin.name + '", "user_id": ' + str(user.telegram_id) + '}'
                     ),
-                    types.InlineKeyboardButton(
+                    InlineKeyboardButton(
                         text="Данные", 
                         callback_data='{"key": "data_user", "id": "' + str(user.telegram_id) + '"}'
                     ),
-                    types.InlineKeyboardButton(
+                    InlineKeyboardButton(
                         text="Отправить кнопку продления",
                         callback_data='{"key": "' + KeyCall.send_message_for_extension.name + '", "user_id": "' + str(user.telegram_id) + '"}'
                     ),
@@ -198,7 +193,7 @@ class UserList:
                 )
         if a == config.COUNT_PAGE - 1:
             keyboard_offer_one.row(*buttonNav)
-            keyboard_offer_one.add(types.InlineKeyboardButton(text=textKeyWhere, callback_data='{"key": "option_where"}'))
+            keyboard_offer_one.add(InlineKeyboardButton(text=textKeyWhere, callback_data='{"key": "option_where"}'))
         return keyboard_offer_one
 
 
@@ -411,18 +406,18 @@ def generate_alphanum_crypt_string():
     return crypt_rand_string
     
 
-def data_user(id: int, old_message: types.Message | None = None) -> types.Message:
+def data_user(id: int, old_message: Message | None = None) -> Message:
     """
         Получить информацию о пользователе
     """
     if old_message:
-        m: types.Message = bot.edit_message_reply_markup(
+        message: Message = bot.edit_message_reply_markup(
             old_message.chat.id,
             old_message.id,
             reply_markup=keyboards.get_inline_loading()
         )
     else:
-        m: types.Message = bot.send_message(
+        message: Message = bot.send_message(
             config.ADMINCHAT, 
             "Загрузка..."
         )
@@ -431,15 +426,15 @@ def data_user(id: int, old_message: types.Message | None = None) -> types.Messag
 
     if not user:
         return bot.edit_message_text(
-            chat_id=m.chat.id,
-            message_id= m.id,
+            chat_id=message.chat.id,
+            message_id= message.id,
             text= "Пользователь незарегистрирован"
         )
     
-    keyboard: types.InlineKeyboardMarkup = UserList.addButtonKeyForUsersList(user)
-    
+    keyboard: InlineKeyboardMarkup = UserList.addButtonKeyForUsersList(user)
+
     keyboard.add(
-        types.InlineKeyboardButton(
+        InlineKeyboardButton(
             text = "Обнулить баланс",
             callback_data = utils.callBackBilder(
                 CallbackKeys.resetToZeroBalance,
@@ -448,7 +443,7 @@ def data_user(id: int, old_message: types.Message | None = None) -> types.Messag
         )
     )
     keyboard.add(
-        types.InlineKeyboardButton(
+        InlineKeyboardButton(
             text=KeyCall.refreshtoken.value,
             callback_data=utils.callBackBilder(
                 KeyCall.refreshtoken,
@@ -456,11 +451,10 @@ def data_user(id: int, old_message: types.Message | None = None) -> types.Messag
             )
         )
     )
-
-    return bot.edit_message_text(
-        chat_id=m.chat.id,
-        message_id=m.id,
-        text = paidCheckActive(user.paid) + textCheckActive(user.action) +
+    
+    return bot.edit_message_text_or_caption(
+        message,
+        paidCheckActive(user.paid) + textCheckActive(user.action) +
         " [" + utils.form_text_markdownv2(user.name) + "](tg://user?id\=" + str(user.telegram_id) +
         ")\nДата окончания подписки: " + utils.form_text_markdownv2(str(user.exit_date)) +
         "\n" + "\nlink: `" + utils.form_text_markdownv2(user.server_link) +
@@ -471,10 +465,9 @@ def data_user(id: int, old_message: types.Message | None = None) -> types.Messag
         "\nstat: " + utils.form_text_markdownv2(str(user.statistic)) +
         "\nбаланс: " + utils.form_text_markdownv2(str(user.balance)) +
         "\nid:" + str(user.telegram_id),
-        parse_mode=ParseMode.mdv2.value,
-        reply_markup = keyboard
-    )
-        
+        parse_mode=ParseMode.mdv2,
+        reply_markup=keyboard
+    )  
 
 
 def textCheckActive(item: bool) -> str:
@@ -510,7 +503,7 @@ def delete_not_subscription() -> None:
 
             server_name: str = get_server_name_by_id(item.server_id)
             
-            old_message: types.Message = bot.send_message(
+            old_message: Message = bot.send_message(
                 admin_chat_id, 
                 f'Удаление неактивных пользователей с сервера {server_name}',
                 disable_notification=True

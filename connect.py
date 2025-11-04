@@ -1,4 +1,4 @@
-import telebot, logging, requests, time, threading, psycopg2
+import logging, requests, time, threading, psycopg2
 
 from telebot.storage import StateMemoryStorage
 
@@ -8,16 +8,17 @@ from sqlalchemy import Engine, create_engine
 
 from config import FILE_URL
 
+from core.telebot import TeleBotMod
+
 
 conf = ConfigParser()
 conf.read(FILE_URL + 'config.ini')
 
 token = conf['Telegram']['token_prod'] #general
-token = conf['Telegram']['token_test']
 
 storage = StateMemoryStorage()
 
-bot = telebot.TeleBot(
+bot = TeleBotMod(
     token,
     state_storage=storage
 )

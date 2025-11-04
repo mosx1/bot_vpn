@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3.13
 
 WORKDIR /bot_vpn
 
@@ -8,4 +8,4 @@ RUN pip install -r requirements.txt
 COPY . /bot_vpn
 
 
-CMD ["python3", "-W", "ignore", "bot_vpn.py"]
+CMD ["python3", "bot_vpn.py"]
