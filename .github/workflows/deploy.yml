@@ -19,7 +19,7 @@ jobs:
 
       - name: 🐳 Build Docker image
         run: |
-          docker build -t mybot:latest .
+          docker build -t bot_vpn:latest .
 
       - name: 🚀 Deploy to server
         env:
@@ -27,11 +27,11 @@ jobs:
           USER: ${{ secrets.SERVER_USER }}
         run: |
           ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
-            cd /opt/mybot || mkdir -p /opt/mybot
-            docker stop mybot || true
-            docker rm mybot || true
-            docker image rm mybot:latest || true
-            cd /opt/mybot
+            cd /opt/bot_vpn || mkdir -p /opt/bot_vpn
+            docker stop bot_vpn || true
+            docker rm bot_vpn || true
+            docker image rm bot_vpn:latest || true
+            cd /opt/bot_vpn
             git pull || true
             docker build -t bot_vpn:latest .
             docker run -d --name bot_vpn --restart always bot_vpn:latest
