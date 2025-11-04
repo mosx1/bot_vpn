@@ -27,11 +27,11 @@ jobs:
           USER: ${{ secrets.SERVER_USER }}
         run: |
           ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
-            cd /opt/bot_vpn || mkdir -p /opt/bot_vpn
+            cd /root/bot_vpn || mkdir -p /root/bot_vpn
             docker stop bot_vpn || true
             docker rm bot_vpn || true
             docker image rm bot_vpn:latest || true
-            cd /opt/bot_vpn
+            cd /root/bot_vpn
             git pull || true
             docker build -t bot_vpn:latest .
             docker run -d --name bot_vpn --restart always bot_vpn:latest
