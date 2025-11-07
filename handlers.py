@@ -176,8 +176,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                     types.KeyboardButton(text=f'/{Comands.actionUsersCount.value}'))
         keyboard.add(
             types.KeyboardButton(text=f'/{Comands.statistic.value}'),
-            types.KeyboardButton(text=f'/{Comands.checkSubscription.value}'),
-            types.KeyboardButton(text=f'/{Comands.restart.value}')
+            types.KeyboardButton(text=f'/{Comands.checkSubscription.value}')
         )
         bot.send_message(message.from_user.id, "add_key", reply_markup=keyboard)
 
