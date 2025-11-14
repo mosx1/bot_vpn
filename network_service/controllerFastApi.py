@@ -53,7 +53,7 @@ def suspend_users(
               utils.getUrlByIdServer(server)
          ),
          data = json.dumps(data),
-         timeout=60
+         timeout=20
          ).json()
     
     if "success" in response and response["success"]:

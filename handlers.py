@@ -668,11 +668,11 @@ def register_message_handlers(bot: TeleBotMod) -> None:
 
             case "faq_video":
 
-                bot.send_video(call.from_user.id, open("/root/bot_vpn/video/0809.mp4", "rb"), width=888, height=1920)
+                bot.send_video(call.from_user.id, open(f"{config.FILE_URL}video/0809.mp4", "rb"), width=888, height=1920)
 
             case "comands_video":
 
-                bot.send_video(call.from_user.id, open("/root/bot_vpn/video/08.mp4", "rb"), width=888, height=1920)
+                bot.send_video(call.from_user.id, open(f"{config.FILE_URL}video/08.mp4", "rb"), width=888, height=1920)
 
             case "page_client_next":
                 
@@ -681,10 +681,6 @@ def register_message_handlers(bot: TeleBotMod) -> None:
             case "page_client_back":
 
                 managment_user.manager_users_list.back_page(call.message)
-
-            case "home_key_faq":
-
-                bot.send_video(call.from_user.id, open("/root/bot_vpn/video/999.mp4", "rb"), width=888, height=1920)
 
             case KeyCall.data_user.name:
 
