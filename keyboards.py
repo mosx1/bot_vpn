@@ -11,7 +11,6 @@ from enums.keyCall import KeyCall
 
 class KeyboardForUser(Enum):
     
-    refProgram: str = "Реферальная программа"
     balanceTime: str = "Дата окончания подписки"
     gift: str = "Подарить"
     buy: str = "Продлить"
@@ -31,9 +30,6 @@ def get_inline_keyboard_list_countries_by_try(callData = None, optionText: str =
             },
             "Германия": {
                 'callback_data': '{"key": "try", "server": ' + str(get_very_free_server(Country.deutsche)) + optionText + '}'
-            },
-            "Нидерланды": {
-                'callback_data': '{"key": "try", "server": ' + str(get_very_free_server(Country.niderlands)) + optionText + '}'
             }
         },
         row_width=1
@@ -52,9 +48,6 @@ def get_inline_keyboard_list_countries(current_server_id: int) -> InlineKeyboard
             },
             "Германия": {
                 'callback_data': '{"key": "' + KeyCall.pollCountMonth.name + '", "server": ' + str(get_very_free_server(Country.deutsche)) + '}'
-            },
-            "Нидерланды": {
-                'callback_data': '{"key": "' + KeyCall.pollCountMonth.name + '", "server": ' + str(get_very_free_server(Country.niderlands)) + '}'
             }
         },
         row_width=1
