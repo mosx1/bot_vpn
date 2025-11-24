@@ -150,8 +150,7 @@ def manual_successfully_paid(id: int, old_message_id: int) -> bool:
             message_id=old_message_id,
             caption=caption_for_message.format(
                 get_subscription_link(id),
-                utils.form_text_markdownv2(user.server_link),
-                utils.replaceMonthOnRuText(user.exit_date)
+                utils.form_text_markdownv2(user.server_link)
             ),
             reply_markup=keyboard, 
             parse_mode=ParseMode.mdv2.value
