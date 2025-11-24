@@ -56,15 +56,6 @@ def register_message_handlers(bot: TeleBot) -> None:
                     parse_mode=ParseMode.mdv2.value,
                     reply_markup = get_inline_keyboard_list_countries()
                 )
-
-            case KeyboardForUser.refProgram.value:
-
-                return bot.send_message(
-                    message.from_user.id,
-                    "Вы можете пригласить нового пользователя и получить за это 1 мес\. подписки бесплатно\. Для того чтоб использовать такую возможность, отправьте вашу пригласительную ссылку другу\(для копирования достаточно нажать на ссылку\)\n\n"+
-                    "Персональная ссылка:\n`https://t.me/open_vpn_sale_bot?start=" + str(message.from_user.id) + "`",
-                    parse_mode= ParseMode.mdv2.value
-                )
             
             case _:
 
