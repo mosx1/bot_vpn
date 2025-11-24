@@ -74,7 +74,6 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
     if not oldMessageId:
         if user.paid:
             keyboard_ref = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            keyboard_ref.add(types.KeyboardButton(text=KeyboardForUser.refProgram.value))
             keyboard_ref.add(types.KeyboardButton(text=KeyboardForUser.balanceTime.value))
             keyboard_ref.add(
                 types.KeyboardButton(text=KeyboardForUser.buy.value),
