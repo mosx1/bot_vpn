@@ -492,7 +492,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                     },
                     row_width=2
                 )
-                bot.edit_message_caption("На какой срок?", call.message.chat.id, call.message.id, reply_markup=keyboard)
+                bot.edit_message_text_or_caption(call.message, "На какой срок?", reply_markup=keyboard)
             
             case "getGiftCode":
 
