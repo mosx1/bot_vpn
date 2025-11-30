@@ -28,7 +28,6 @@ from enums.comands import Comands
 from enums.parse_mode import ParseMode
 from enums.keyCall import KeyCall
 from enums.chat_types import ChatTypes
-from enums.content_types import ContentTypes
 
 from giftUsers import genGiftCode, checkGiftCode
 
