@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import warnings
 import payment.stars
 import payment.stars.handlers
 import supports
@@ -10,9 +10,9 @@ import game.handlers
 import payment
 import managers.handlers
 import callback_handlers
-
 from connect import bot, storage
 
+warnings.filterwarnings("ignore", category=SyntaxWarning)
 callback_handlers.register_callback_handlers(bot)
 supports.handlers.register_message_handlers(bot)
 handlers.register_message_handlers(bot)

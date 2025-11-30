@@ -14,7 +14,7 @@ from core.telebot import TeleBotMod
 conf = ConfigParser()
 conf.read(FILE_URL + 'config.ini')
 
-token = conf['Telegram']['token_test'] #general
+token = conf['Telegram']['token_prod'] #general
 
 storage = StateMemoryStorage()
 
