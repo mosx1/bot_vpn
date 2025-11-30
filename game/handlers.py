@@ -57,7 +57,7 @@ def register_handlers(bot: TeleBot, storage: StateMemoryStorage) -> None:
             )
     
 
-    @bot.callback_query_handler(func=lambda call: True)
+    #k_query_handler(func=lambda call: not str(call.data).startswith('{"key":'))
     def handle_move(call: CallbackQuery) -> None:
 
         storage_data: dict = storage.data.copy()

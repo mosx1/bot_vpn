@@ -19,25 +19,6 @@ from servers.methods import get_very_free_server
 from network_service.controller_flask_api import get_subscription_link
 
 
-def periodSubscription(call: types.CallbackQuery, call_data: dict):
-
-    conf = ConfigParser()
-    conf.read(config.FILE_URL + 'config.ini')
-    
-    keyboard: types.InlineKeyboardMarkup = quick_markup(
-                {
-                    '1 мес.| ' + conf['Price'].get('RUB') + " руб.": {'callback_data': '{"key": "getLinkPayment", "server": ' + str(call_data['server']) + ', "month": 1}'},
-                    '3 мес.| ' + str(conf['Price'].getint('RUB') * 3) + " руб.": {'callback_data': '{"key": "getLinkPayment", "server": ' + str(call_data['server']) + ', "month": 3}'},
-                    '6 мес.| ' + str(conf['Price'].getint('RUB') * 6) + " руб.": {'callback_data': '{"key": "getLinkPayment", "server": ' + str(call_data['server']) + ', "month": 6}'},
-                    '12 мес.| ' + str(conf['Price'].getint('RUB') * 12) + " руб.": {'callback_data': '{"key": "getLinkPayment", "server": ' + str(call_data['server']) + ', "month": 12}'},
-                    '<<< назад': {'callback_data': '{"key": "sale", "back": 1}'}
-                },
-                row_width=2
-            )
-    bot.edit_message_caption("На какой срок?", call.message.chat.id, call.message.id, reply_markup=keyboard)
-
-
-
 def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
 
     conf = ConfigParser()

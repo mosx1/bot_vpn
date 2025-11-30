@@ -3,8 +3,10 @@ import config, utils
 from enums.content_types import ContentTypes
 from enums.parse_mode import ParseMode
 from enums.chat_types import ChatTypes
+from enums.keyCall import KeyCall
 
-from telebot import types, TeleBot
+from telebot import types
+from telebot.util import quick_markup
 
 from giftUsers import checkGiftCode
 
@@ -20,9 +22,15 @@ from keyboards import KeyboardForUser, get_inline_keyboard_list_countries
 
 from users.methods import get_user_by_id
 
+from core.telebot import TeleBotMod
+
+from configparser import ConfigParser
+
+from servers.methods import get_very_free_server
 
 
-def register_message_handlers(bot: TeleBot) -> None:
+
+def register_message_handlers(bot: TeleBotMod) -> None:
     
     @bot.message_handler(
         func= only_user_chat_and_text(),
@@ -49,13 +57,22 @@ def register_message_handlers(bot: TeleBot) -> None:
             
             case KeyboardForUser.buy.value:
 
-                return bot.send_photo(
-                    message.from_user.id,
-                    photo = open(config.FILE_URL + "vpn_option.png", "rb"),
-                    caption = utils.form_text_markdownv2(config.TextsMessages.select_country.value),
-                    parse_mode=ParseMode.mdv2.value,
-                    reply_markup = get_inline_keyboard_list_countries()
+                conf = ConfigParser()
+                conf.read(config.FILE_URL + 'config.ini')
+
+                server_id: int = get_very_free_server()
+
+                keyboard = quick_markup(
+                    {
+                        '1 мес.| ' + conf['Price'].get('RUB') + " руб.": {'callback_data': '{"key": "' + KeyCall.get_link_payment.value + '", "server": ' + str(server_id) + ', "month": 1}'},
+                        '3 мес.| ' + str(conf['Price'].getint('RUB') * 3) + " руб.": {'callback_data': '{"key": "' + KeyCall.get_link_payment.value + '", "server": ' + str(server_id) + ', "month": 3}'},
+                        '6 мес.| ' + str(conf['Price'].getint('RUB') * 6) + " руб.": {'callback_data': '{"key": "' + KeyCall.get_link_payment.value + '", "server": ' + str(server_id) + ', "month": 6}'},
+                        '12 мес.| ' + str(conf['Price'].getint('RUB') * 12) + " руб.": {'callback_data': '{"key": "' + KeyCall.get_link_payment.value + '", "server": ' + str(server_id) + ', "month": 12}'},
+                        '◀️ назад': {'callback_data': '{"key": "' + KeyCall.backmanual_settings.value + '"}'}
+                    },
+                    row_width=2
                 )
+                bot.reply_to(message, "На какой срок?", reply_markup=keyboard)
             
             case _:
 

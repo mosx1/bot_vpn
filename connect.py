@@ -14,7 +14,7 @@ from core.telebot import TeleBotMod
 conf = ConfigParser()
 conf.read(FILE_URL + 'config.ini')
 
-token = conf['Telegram']['token_prod'] #general
+token = conf['Telegram']['token_test'] #general
 
 storage = StateMemoryStorage()
 
@@ -36,16 +36,14 @@ password: str = postgres.get('password')
 host: str = postgres.get('host')
 
 
-try:
-    db = psycopg2.connect(
-        dbname = conf['Postgres']['dbname'],
-        user = conf['Postgres']['user'],
-        password = conf['Postgres']['password'],
-        host = conf['Postgres']['host']
-    )
-    db.autocommit = True
-except Exception as e:
-    logging.error("Подключиться к БД не удалось: " + str(e))
+db = psycopg2.connect(
+    dbname = conf['Postgres']['dbname'],
+    user = conf['Postgres']['user'],
+    password = conf['Postgres']['password'],
+    host = conf['Postgres']['host']
+)
+db.autocommit = True
+
 
 engine: Engine = create_engine('postgresql+psycopg2://', creator=lambda: db)
 

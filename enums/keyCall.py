@@ -2,7 +2,7 @@ from enum import Enum
 
 class KeyCall(Enum):
     
-    pollCountMonth: str = "pollCountMonth"
+    pollCountMonth: int = "1"
     sale: str = "sale"
     tryServers: str = "tryServers"
     refreshtoken: str = "refreshtoken"
@@ -15,3 +15,4 @@ class KeyCall(Enum):
     data_user: str = "data_user"
     backmanual_settings: str = "backmanualSettings"
     transfer_from_nid: str = "transfer_from_nid"
+    get_link_payment: str = "getLinkPayment"
