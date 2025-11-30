@@ -46,10 +46,10 @@ def get_inline_keyboard_list_countries(current_server_id: int) -> InlineKeyboard
     return quick_markup(
         {   
             "Текущая локация(рекомендуется)": {
-                'callback_data': '{"key": "' + KeyCall.pollCountMonth.name + '", "server": ' + str(current_server_id) + '}'
+                'callback_data': '{"key": "' + KeyCall.pollCountMonth.value + '", "server": ' + str(current_server_id) + '}'
             },
             "Германия": {
-                'callback_data': '{"key": "' + KeyCall.pollCountMonth.name + '", "server": ' + str(get_very_free_server(Country.deutsche)) + '}'
+                'callback_data': '{"key": "' + KeyCall.pollCountMonth.value + '", "server": ' + str(get_very_free_server(Country.deutsche)) + '}'
             }
         },
         row_width=1
@@ -58,7 +58,7 @@ def get_inline_keyboard_list_countries(current_server_id: int) -> InlineKeyboard
 
 
 def getInlineExtend(value: str = "Продлить") -> InlineKeyboardMarkup:
-    return quick_markup({value: {'callback_data': '{"key": "' + KeyCall.sale.name + '"}'}})
+    return quick_markup({value: {'callback_data': '{"key": "' + KeyCall.pollCountMonth.value + '"}'}})
 
 
 def get_inline_loading() -> InlineKeyboardMarkup:
