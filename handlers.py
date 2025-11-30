@@ -406,7 +406,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
         username: str = call.from_user.full_name
 
         logging.info("user_id: " + str(call.from_user.id) + ", user_name:" + str(username) + " нажата кнопка с ключем " + call_data['key'])
-
+        
         match call_data['key']:
 
             case "try":
@@ -471,7 +471,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                 )
 
             case KeyCall.pollCountMonth.value:
-                
+
                 conf = ConfigParser()
                 conf.read(config.FILE_URL + 'config.ini')
 

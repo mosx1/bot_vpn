@@ -1,11 +1,12 @@
-import config
+import config, logging
 
-from connect import token
+from connect import token, bot
 
 from yoomoney import Quickpay, Client
 
 from configparser import ConfigParser
 
+from requests.exceptions import ReadTimeout
 
 
 test = "https://api.telegram.org/bot" + token + "/getMe"
@@ -34,7 +35,10 @@ def getInfoLastPayment(label: str) -> dict:
                                                                             operation.amount)
             }
     except Exception as e:
-        getInfoLastPayment(label)
+
+        logging.error("Неудачная попытка проверки последнего платежа")
+
+        return getInfoLastPayment(label)
         
         # print("Operation:",operation.operation_id)
         # print("\tStatus     -->", operation.status)
@@ -55,14 +59,21 @@ def getLinkPayment(label: str, month: int) -> str:
     conf = ConfigParser()
     conf.read(config.FILE_URL + 'config.ini')
 
-    quickpay = Quickpay(
-        receiver=config.WALLET_YOOMONEY_ID,
-        quickpay_form="shop",
-        targets="Оплата VPN",
-        paymentType="SB",
-        sum=conf['Price'].getint('RUB') * month,
-        label=label
-    )
+    try:
+        quickpay = Quickpay(
+            receiver=config.WALLET_YOOMONEY_ID,
+            quickpay_form="shop",
+            targets="Оплата VPN",
+            paymentType="SB",
+            sum=conf['Price'].getint('RUB') * month,
+            label=label
+        )
+
+    except ReadTimeout as e:
+
+        logging.error("Неудачная попытка создания ссылки на оплату")
+
+        return getLinkPayment(label, month)
 
     return quickpay.redirected_url
 
