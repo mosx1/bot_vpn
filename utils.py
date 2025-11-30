@@ -1,4 +1,4 @@
-from connect import db, logging, engine
+from connect import logging, engine
 
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -6,9 +6,7 @@ from sqlalchemy import select
 from enums.logs import TypeLogs
 from enums.content_types import ContentTypes
 
-from psycopg2.extras import DictCursor
-
-from tables import User, ServersTable
+from tables import User, ServersTable, SecurityHashs
 
 from enum import Enum
 
@@ -60,11 +58,10 @@ def form_text_markdownv2(message_text: str, delete=None):
 
 #получает адрес сервера по ид
 def getUrlByIdServer(serverId: str) -> str:
-    with db.cursor() as cursor:
-        cursor.execute("SELECT links FROM servers WHERE id = " + str(serverId))
-        curData = cursor.fetchone()
-        if curData:
-            return curData[0]
+    with Session(engine) as session:
+        query = select(ServersTable).where(ServersTable.id == serverId)
+        server: ServersTable | None = session.execute(query).scalar()
+        return server.links
         
 
 
@@ -87,10 +84,10 @@ def callBackBilder(callBackKey: Enum, **kwargs):
 
 
 def get_token() -> str:
-    with db.cursor(cursor_factory=DictCursor) as cursor:
-        cursor.execute("SELECT hash FROM securityhashs")
-        dataCur = cursor.fetchone()
-        return dataCur['hash']
+    with Session(engine) as session:
+        query = select(SecurityHashs)
+        security_hash: SecurityHashs | None = session.execute(query).scalar()
+        return security_hash.hash
     
 
 def write_log(type: TypeLogs, user: User, text: str) -> None:
