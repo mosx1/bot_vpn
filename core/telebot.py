@@ -17,13 +17,16 @@ class TeleBotMod(TeleBot):
         """
             Редактирует текст сообщения
         """
+        if parse_mode:
+            parse_mode = parse_mode.value
+            
         if message.content_type == ContentTypes.text.value:
 
             return self.edit_message_text(
                 text_or_caption,
                 message.chat.id,
                 message.id,
-                parse_mode=parse_mode.value,
+                parse_mode=parse_mode,
                 reply_markup=reply_markup
             )
         
@@ -31,7 +34,7 @@ class TeleBotMod(TeleBot):
             text_or_caption,
             message.chat.id,
             message.id,
-            parse_mode=parse_mode.value,
+            parse_mode=parse_mode,
             reply_markup=reply_markup
         )
     
