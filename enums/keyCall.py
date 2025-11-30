@@ -13,3 +13,4 @@ class KeyCall(Enum):
     loading: str = "loading"
     deaction: str = "deaction"
     data_user: str = "data_user"
+    backmanual_settings: str = "backmanualSettings"

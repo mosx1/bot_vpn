@@ -485,7 +485,8 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                         '1 мес.| ' + conf['Price'].get('RUB') + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(server_id) + ', "month": 1}'},
                         '3 мес.| ' + str(conf['Price'].getint('RUB') * 3) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(server_id) + ', "month": 3}'},
                         '6 мес.| ' + str(conf['Price'].getint('RUB') * 6) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(server_id) + ', "month": 6}'},
-                        '12 мес.| ' + str(conf['Price'].getint('RUB') * 12) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(server_id) + ', "month": 12}'}
+                        '12 мес.| ' + str(conf['Price'].getint('RUB') * 12) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(server_id) + ', "month": 12}'},
+                        '◀️ назад': {'callback_data': '{"key": "' + KeyCall.backmanual_settings.value + '"}'}
                     },
                     row_width=2
                 )
@@ -706,7 +707,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
 
                 manual_successfully_paid(call_data['id'], call.message.id)
 
-            case "backmanualSettings":
+            case KeyCall.backmanual_settings.value:
 
                 successfully_paid(call_data['id'], oldMessageId=call.message.id)
 
