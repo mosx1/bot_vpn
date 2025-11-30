@@ -61,7 +61,7 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
     keyboard.add(
         types.InlineKeyboardButton(
             text="Продлить", 
-            callback_data='{"key": "sale"}'
+            callback_data='{"key": "' + KeyCall.pollCountMonth.value + '"}'
         ),
         types.InlineKeyboardButton(
             text=KeyboardForUser.gift.value,
@@ -86,7 +86,7 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
                 parse_mode= ParseMode.mdv2.value
             )
     
-        if bot.send_photo(
+        if t := bot.send_photo(
                 chat_id=id,
                 photo=open(config.FILE_URL + "4rrr.jpg", "rb"),
                 caption=optionText + text_for_message.format(
@@ -100,6 +100,7 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
                 reply_markup=keyboard, 
                 parse_mode=ParseMode.mdv2.value
             ):
+            manual_successfully_paid(id, t.id)
             return True
         else:
             return False
@@ -118,6 +119,7 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
             reply_markup=keyboard, 
             parse_mode=ParseMode.mdv2.value
         )
+    
 
 
 def manual_successfully_paid(id: int, old_message_id: int) -> bool:
@@ -155,7 +157,7 @@ def manual_successfully_paid(id: int, old_message_id: int) -> bool:
             reply_markup=keyboard, 
             parse_mode=ParseMode.mdv2.value
         )
-    except Exception:
+    except Exception as e :
         bot.send_message(
             id,
             user.server_link

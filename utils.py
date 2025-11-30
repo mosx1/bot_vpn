@@ -1,16 +1,18 @@
 from connect import db, logging, engine
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func, and_, text
+from sqlalchemy import select
 
-from servers.server_list import Country, Servers
 from enums.logs import TypeLogs
+from enums.content_types import ContentTypes
 
 from psycopg2.extras import DictCursor
 
 from tables import User, ServersTable
 
 from enum import Enum
+
+from telebot.types import Message
 
 
 
@@ -115,3 +117,9 @@ def get_server_name_by_id(server_id: int) -> str:
 
 def get_list_values_from_enum(data: Enum) -> list:
     return [item.value for item in data]
+
+
+def get_message_text_or_caption(message: Message) -> str | None:
+    if message.content_type == ContentTypes.text.value:
+        return message.text
+    return message.caption

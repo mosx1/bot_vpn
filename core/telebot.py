@@ -34,3 +34,12 @@ class TeleBotMod(TeleBot):
             parse_mode=parse_mode.value,
             reply_markup=reply_markup
         )
+    
+@property
+def text_or_caption(self) -> str:
+    if self.content_type == ContentTypes.text.value:
+        return self.text
+    return self.caption
+
+
+Message.text_or_caption = text_or_caption

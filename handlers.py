@@ -25,10 +25,10 @@ from telebot.types import WebAppInfo
 from threading import Thread
 
 from enums.comands import Comands
-
 from enums.parse_mode import ParseMode
 from enums.keyCall import KeyCall
 from enums.chat_types import ChatTypes
+from enums.content_types import ContentTypes
 
 from giftUsers import genGiftCode, checkGiftCode
 
@@ -273,7 +273,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
             #     bot.send_message(message.chat.id, "Привет! Давай сыграем в крестики-нолики. Используй /game чтобы начать игру.")
             #     return
             
-            keyboard.add(types.InlineKeyboardButton(text="Попробовать", callback_data='{"key": "tryServers"' + jsonIdInvited + '}'))
+            keyboard.add(types.InlineKeyboardButton(text="Попробовать", callback_data='{"key": "try"' + jsonIdInvited + '}'))
             keyboard.add(types.InlineKeyboardButton(text="Политика по обработке персональных данных", callback_data='{"key": "pppd"}'))
             keyboard.add(types.InlineKeyboardButton(text="Условия использования", callback_data='{"key": "termsOfUse"}'))
             option_text = "\n\n_Нажимая кнопку \"Попробовать\", Вы соглашаетесь с политикой обработки персональных данных и условиями использования сервиса\._" 
@@ -282,7 +282,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
             keyboard.add(
                 types.InlineKeyboardButton(
                     text="Возобновить", 
-                    callback_data='{"key": "sale"}'
+                    callback_data='{"key": "' + KeyCall.pollCountMonth.value + '"}'
                 )
             )
             option_text = ""
@@ -423,7 +423,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                     call.from_user.id,
                     conf['BaseConfig'].getint('first_start_duration_month'),
                     name_user=utils.form_text_markdownv2(username, delete=True),
-                    server=call_data['server']
+                    server=get_very_free_server()
                 )
                 if 'invitedId' in call_data:
                     invite.methods.addInvitedBonus(call_data['invitedId'])
@@ -474,21 +474,19 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                 conf = ConfigParser()
                 conf.read(config.FILE_URL + 'config.ini')
 
+                server_id: int = get_very_free_server()
 
                 if "gift" in call_data:
                     key = "getGiftCode"
-                    keyBack = ""
                 else:
                     key = "getLinkPayment"
-                    keyBack = "sale"
 
                 keyboard = quick_markup(
                     {
-                        '1 мес.| ' + conf['Price'].get('RUB') + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(call_data['server']) + ', "month": 1}'},
-                        '3 мес.| ' + str(conf['Price'].getint('RUB') * 3) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(call_data['server']) + ', "month": 3}'},
-                        '6 мес.| ' + str(conf['Price'].getint('RUB') * 6) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(call_data['server']) + ', "month": 6}'},
-                        '12 мес.| ' + str(conf['Price'].getint('RUB') * 12) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(call_data['server']) + ', "month": 12}'},
-                        '<<< назад': {'callback_data': '{"key": "' + keyBack + '", "back": 1}'}
+                        '1 мес.| ' + conf['Price'].get('RUB') + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(server_id) + ', "month": 1}'},
+                        '3 мес.| ' + str(conf['Price'].getint('RUB') * 3) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(server_id) + ', "month": 3}'},
+                        '6 мес.| ' + str(conf['Price'].getint('RUB') * 6) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(server_id) + ', "month": 6}'},
+                        '12 мес.| ' + str(conf['Price'].getint('RUB') * 12) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(server_id) + ', "month": 12}'}
                     },
                     row_width=2
                 )
@@ -616,15 +614,13 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                 else:
                     add_user(call_data['id'], call_data["month"], name_user=username)
                 
-                text_arr: list[str] = utils.form_text_markdownv2(call.message.text).split('id:')[:-1]
+                text_arr: list[str] = utils.form_text_markdownv2(call.message.text_or_caption).split('id:')[:-1]
+
                 text: str = "id:".join(text_arr)
 
                 if successfully_paid(call_data['id']):
-
                     text += "\n\n*Подписка активирована, сообщение пользователю отправлено*"
-
                 else:
-
                     text += "\n\n*Подписка активирована, но сообщение не отправлено*"
 
                 text += "\n\nid:" + call_data['id']
