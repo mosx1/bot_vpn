@@ -100,7 +100,7 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
                 reply_markup=keyboard, 
                 parse_mode=ParseMode.mdv2.value
             ):
-            manual_successfully_paid(id, t.id)
+
             return True
         else:
             return False
