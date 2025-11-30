@@ -557,10 +557,9 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                 if int(user.server_id) != int(call_data['server']):
                     option_text = "\n\nВнимание! После оплаты необходимо будет заново настроить VPN по инструкции, которую отправит вам бот."
 
-                bot.edit_message_caption(
-                    "Вы выбрали сервер " + utils.get_server_name_by_id(call_data['server']) + option_text, 
-                    call.message.chat.id, 
-                    call.message.id,
+                bot.edit_message_text_or_caption(
+                    call.message, 
+                    "Вы выбрали сервер " + utils.get_server_name_by_id(call_data['server']) + option_text,
                     reply_markup=keyboard
                 )
 
