@@ -500,7 +500,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                     call_data['month'],
                     call_data['server'],
                     call.message.id,
-                    TypeOfPurchase.gift/
+                    TypeOfPurchase.gift
                 )
 
                 label = (str(call.from_user.id) + 
@@ -713,7 +713,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                     id: int = call_data.get('id')
                 else:
                     id: int = call.from_user.id
-                    
+
                 successfully_paid(id, oldMessageId=call.message.id)
 
             case "sendConf":
