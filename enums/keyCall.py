@@ -14,3 +14,4 @@ class KeyCall(Enum):
     deaction: str = "deaction"
     data_user: str = "data_user"
     backmanual_settings: str = "backmanualSettings"
+    transfer_from_nid: str = "transfer_from_nid"

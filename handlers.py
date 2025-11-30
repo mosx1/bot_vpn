@@ -51,6 +51,8 @@ from network_service.entity import NetworkServiceError
 
 from core.telebot import TeleBotMod
 
+from managers.subscription.renewal_of_subscription import renewalOfSubscription
+
 
 def register_message_handlers(bot: TeleBotMod) -> None:
     
@@ -833,6 +835,21 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                 bot.answer_callback_query(
                     callback_query_id=call.id,
                     text='Идет загрузка, ожидайте.'
+                )
+
+            case KeyCall.transfer_from_nid.value:
+
+                bot.edit_message_reply_markup(
+                    call.message.chat.id,
+                    call.message.id,
+                    reply_markup=keyboards.get_inline_loading()
+                )
+                user: User = get_user_by_id(call.from_user.id)
+                renewalOfSubscription(user, "", get_very_free_server())
+                successfully_paid(
+                    user.telegram_id,
+                    call.message.id,
+                    "ПЕРЕНАСТРОЙТЕ ПРИЛОЖЕНИЕ!!!"
                 )
 
             case _:

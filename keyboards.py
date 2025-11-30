@@ -8,6 +8,8 @@ from enum import Enum
 
 from enums.keyCall import KeyCall
 
+from utils import callBackBilder
+
 
 class KeyboardForUser(Enum):
     
@@ -61,3 +63,6 @@ def getInlineExtend(value: str = "Продлить") -> InlineKeyboardMarkup:
 
 def get_inline_loading() -> InlineKeyboardMarkup:
     return quick_markup({"Загрузка...": {"callback_data": '{"key": "' + KeyCall.loading.name + '"}'}})
+
+def get_inline_transfer_for_nid() -> InlineKeyboardMarkup:
+    return quick_markup({"Перейти на Немецкие сервера": {"callback_data": '{"key": "' + KeyCall.transfer_from_nid.value + '"}'}})

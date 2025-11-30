@@ -82,7 +82,8 @@ def register_message_handlers(bot: TeleBot) -> None:
         bot.edit_message_text(
             MessageTextRu.spam_completed.value,
             current_message.chat.id,
-            current_message.id
+            current_message.id,
+            reply_markup=keyboards.get_inline_transfer_for_nid()
         )
 
 
