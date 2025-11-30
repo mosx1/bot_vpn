@@ -56,7 +56,7 @@ def getLinkPayment(label: str, month: int) -> str:
     conf.read(config.FILE_URL + 'config.ini')
 
     quickpay = Quickpay(
-        receiver=config.WALLET_YOOMONEY_ID,
+        receiver=conf['Umani'].get('token').split('.')[0],
         quickpay_form="shop",
         targets="Оплата VPN",
         paymentType="SB",
