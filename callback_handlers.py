@@ -344,7 +344,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
 
                 bot.edit_message_text_or_caption(
                     call.message, 
-                    "Оплата рублями временно не принимается. Купить звезды для оплаты можно тут -->> ",
+                    "Оплата рублями временно не принимается. В место этого используйте оплату звездами, она не менее удобна.",
                     reply_markup=keyboard
                 )
 
