@@ -296,12 +296,19 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 
                 conf = ConfigParser()
                 conf.read(config.FILE_URL + 'config.ini')
+                
+                user: User = get_user_by_id(call.from_user.id)
+                
+                if user.action:
+                    server_id = user.server_id
+                else:
+                    server_id = get_very_free_server()
 
                 data = crypto_pay.create_invoice(call_data['month'])
                 crypto_pay.ids[data['invoice_id']] = PayingUser(
                     call.from_user.id,
                     call_data['month'],
-                    call_data['server'],
+                    server_id,
                     call.message.id,
                     TypeOfPurchase.yourself
                 )
@@ -317,13 +324,19 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                         'Оплата рублями': {'url': link_payment},
                         "Оплата Crypto Bot": {"url": data['mini_app_invoice_url']},
                         "Оплата звездами": {
-                            "callback_data": '{"key": "' + enums.keyCall.KeyCall.payment_stars.name + '", "amount": ' + str(conf['Price'].getint('star') * int(call_data['month'])) + ', "server": ' + str(call_data['server']) + '}'
+                            "callback_data": json.dumps(
+                                {
+                                    "key": enums.keyCall.KeyCall.payment_stars.name, 
+                                    "amount": str(conf['Price'].getint('star') * int(call_data['month'])), 
+                                    "server": str(server_id)
+                                }
+                            )
                         },
-                        '<<< назад': {'callback_data': '{"key": "pollCountMonth", "server": ' + str(call_data['server']) + '}'}
+                        '<<< назад': {'callback_data': '{"key": "pollCountMonth", "server": ' + str(server_id) + '}'}
                     },
                     row_width=1
                 )
-                user: User = get_user_by_id(call.from_user.id)
+                
 
                 option_text = ""
                 if int(user.server_id) != int(call_data['server']):
