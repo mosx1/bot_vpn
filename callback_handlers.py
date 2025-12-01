@@ -321,7 +321,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
 
                 keyboard: keyboards.InlineKeyboardMarkup = quick_markup(
                     {
-                        'Оплата рублями': {'url': link_payment},
+                        # 'Оплата рублями': {'url': link_payment},
                         "Оплата Crypto Bot": {"url": data['mini_app_invoice_url']},
                         "Оплата звездами": {
                             "callback_data": json.dumps(
@@ -344,7 +344,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
 
                 bot.edit_message_text_or_caption(
                     call.message, 
-                    "Вы выбрали сервер " + utils.get_server_name_by_id(call_data['server']) + option_text,
+                    "Вы выбрали сервер " + utils.get_server_name_by_id(call_data['server']) + option_text + "\n" + link_payment,
                     reply_markup=keyboard
                 )
 
