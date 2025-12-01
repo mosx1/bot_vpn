@@ -317,7 +317,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 label = (str(call.from_user.id) + 
                         str(datetime.datetime.now(pytz.timezone('Europe/Moscow')))).replace(" ", "").replace("-","").replace("+", "").replace(".", "").replace(":", "")
 
-                link_payment: str = "test"
+                link_payment: str = getLinkPayment(label, call_data['month'])
 
                 keyboard: keyboards.InlineKeyboardMarkup = quick_markup(
                     {
@@ -327,8 +327,8 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                             "callback_data": json.dumps(
                                 {
                                     "key": enums.keyCall.KeyCall.payment_stars.name, 
-                                    "amount": str(conf['Price'].getint('star') * int(call_data['month'])), 
-                                    "server": str(server_id)
+                                    "amount": conf['Price'].getint('star') * int(call_data['month']), 
+                                    "server": server_id
                                 }
                             )
                         },
@@ -344,7 +344,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
 
                 bot.edit_message_text_or_caption(
                     call.message, 
-                    "Вы выбрали сервер " + utils.get_server_name_by_id(call_data['server']) + option_text + "\n" + link_payment,
+                    "Оплата рублями временно не принимается. Купить звезды для оплаты можно тут -->> ",
                     reply_markup=keyboard
                 )
 
