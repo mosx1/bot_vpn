@@ -69,7 +69,7 @@ def getLinkPayment(label: str, month: int) -> str:
             label=label
         )
 
-    except ReadTimeout as e:
+    except Exception as e:
 
         logging.error("Неудачная попытка создания ссылки на оплату")
 
