@@ -317,7 +317,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 label = (str(call.from_user.id) + 
                         str(datetime.datetime.now(pytz.timezone('Europe/Moscow')))).replace(" ", "").replace("-","").replace("+", "").replace(".", "").replace(":", "")
 
-                link_payment: str = getLinkPayment(label, call_data['month'])
+                # link_payment: str = getLinkPayment(label, call_data['month'])
 
                 keyboard: keyboards.InlineKeyboardMarkup = quick_markup(
                     {
