@@ -49,7 +49,7 @@ from configparser import ConfigParser
 from network_service import controllerFastApi
 from network_service.entity import NetworkServiceError
 
-from core.telebot import TeleBotMod
+from core.aiogram import TeleBotMod
 
 from managers.subscription.renewal_of_subscription import renewalOfSubscription
 

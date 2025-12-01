@@ -1,13 +1,13 @@
-from telebot import TeleBot
-from telebot.types import Message, InlineKeyboardMarkup
+from aiogram import Bot
+from aiogram.types import Message, InlineKeyboardMarkup
 
 from enums.content_types import ContentTypes
 from enums.parse_mode import ParseMode
 
 
-class TeleBotMod(TeleBot):
+class TeleBotMod(Bot):
 
-    def edit_message_text_or_caption(
+    async def edit_message_text_or_caption(
             self,
             message: Message,
             text_or_caption: str,
@@ -22,7 +22,7 @@ class TeleBotMod(TeleBot):
             
         if message.content_type == ContentTypes.text.value:
 
-            return self.edit_message_text(
+            return await self.edit_message_text(
                 text_or_caption,
                 message.chat.id,
                 message.id,
@@ -30,7 +30,7 @@ class TeleBotMod(TeleBot):
                 reply_markup=reply_markup
             )
         
-        return self.edit_message_caption(
+        return await self.edit_message_caption(
             text_or_caption,
             message.chat.id,
             message.id,

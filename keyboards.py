@@ -1,5 +1,6 @@
-from telebot.types import InlineKeyboardMarkup
-from telebot.util import quick_markup
+import json
+
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from servers.server_list import Country, Servers
 from servers.methods import get_very_free_server
@@ -10,6 +11,7 @@ from enums.keyCall import KeyCall
 
 from utils import callBackBilder
 
+from configparser import ConfigParser
 
 class KeyboardForUser(Enum):
     
@@ -66,3 +68,134 @@ def get_inline_loading() -> InlineKeyboardMarkup:
 
 def get_inline_transfer_for_nid() -> InlineKeyboardMarkup:
     return quick_markup({"Перейти на Немецкие сервера": {"callback_data": '{"key": "' + KeyCall.transfer_from_nid.value + '"}'}})
+
+def get_inline_subscription_period(key: str, server_id: int) -> InlineKeyboardMarkup:
+
+    conf = ConfigParser()
+    conf.read('config.ini')
+    
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text='1 мес.| ' + conf['Price'].get('RUB') + " руб.",
+                callback_data=json.dumps(
+                    {
+                        "key":  key,
+                        "server": server_id,
+                        "month": 1
+                    }
+                )
+            ),
+            InlineKeyboardButton(
+                text='3 мес.| ' + str(conf['Price'].getint('RUB') * 3) + " руб.",
+                callback_data=json.dumps(
+                    {
+                        "key":  key,
+                        "server": server_id, 
+                        "month": 3
+                    }
+                )
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text='6 мес.| ' + str(conf['Price'].getint('RUB') * 6) + " руб.",
+                callback_data=json.dumps(
+                    {
+                        "key": key, 
+                        "server": server_id, 
+                        "month": 6
+                    }
+                )
+            ),
+            InlineKeyboardButton(
+                text='12 мес.| ' + str(conf['Price'].getint('RUB') * 12) + " руб.",
+                callback_data=json.dumps(
+                    {
+                        "key": key, 
+                        "server": server_id, 
+                        "month": 12
+                    }
+                )
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text='◀️ назад',
+                callback_data=json.dumps(
+                    {
+                        "key": KeyCall.backmanual_settings.value
+                    }
+                )
+            )
+        ]
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+def get_inline_payment_methods(
+        server_id: int,
+        link_yoomony: str | None = None, 
+        link_crypto_bot: str | None = None,
+        gift: bool = False
+) -> InlineKeyboardMarkup:
+
+    buttons = []
+
+    if link_yoomony:
+        
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text='Оплата рублями',
+                    url=link_yoomony
+                )
+            ]
+        )
+    
+    if link_crypto_bot:
+
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text="Оплата Crypto Bot",
+                    url=link_crypto_bot
+                )
+            ]
+        )
+    
+    buttons.append(
+        [
+            InlineKeyboardButton(
+                text='<<< назад',
+                callback_data=json.dumps(
+                    {
+                        "key": "pollCountMonth", 
+                        "server": server_id, 
+                        "gift": gift
+                    }
+                )
+            )
+        ]
+    )
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def get_inline_qty_month(user_id: int, server_id: int) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=i,
+                callback_data=json.dumps(
+                    {
+                        "key": "action", 
+                        "id": user_id, 
+                        "month": str(i),
+                        "s": server_id
+                    }
+                )
+            ) for i in range(0, 13)
+        ]
+    ]
+    
+    return InlineKeyboardMarkup(inline_keyboard=buttons)

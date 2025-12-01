@@ -22,7 +22,7 @@ from keyboards import KeyboardForUser, get_inline_keyboard_list_countries
 
 from users.methods import get_user_by_id
 
-from core.telebot import TeleBotMod
+from core.aiogram import TeleBotMod
 
 from configparser import ConfigParser
 
