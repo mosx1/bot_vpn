@@ -12,6 +12,8 @@ import managers.handlers
 import callback_handlers
 from connect import bot, storage
 
+bot.remove_webhook()
+
 warnings.filterwarnings("ignore", category=SyntaxWarning)
 callback_handlers.register_callback_handlers(bot)
 supports.handlers.register_message_handlers(bot)
@@ -21,6 +23,6 @@ payment.stars.handlers.register_message_handlers(bot)
 game.handlers.register_handlers(bot, storage)
 managers.handlers.register_message_handlers(bot)
 
-bot.remove_webhook()
+
 print('БОТ ЗАПУЩЕН')
 bot.infinity_polling()

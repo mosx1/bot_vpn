@@ -53,6 +53,8 @@ from core.telebot import TeleBotMod
 
 from managers.subscription.renewal_of_subscription import renewalOfSubscription
 
+from payment.methods import send_message_for_pay
+
 
 
 def register_callback_handlers(bot: TeleBotMod) -> None:
@@ -294,61 +296,19 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
 
             case "getLinkPayment":
                 
-                conf = ConfigParser()
-                conf.read(config.FILE_URL + 'config.ini')
-                
-                user: User = get_user_by_id(call.from_user.id)
-                
-                if user.action:
-                    server_id = user.server_id
-                else:
-                    server_id = get_very_free_server()
+                send_message_for_pay(bot, call.from_user.id, call_data['server'], call_data['month'], call.message)
 
-                data = crypto_pay.create_invoice(call_data['month'])
-                crypto_pay.ids[data['invoice_id']] = PayingUser(
-                    call.from_user.id,
-                    call_data['month'],
-                    server_id,
-                    call.message.id,
-                    TypeOfPurchase.yourself
+                checkPayment = Thread(
+                    target=pollingInfoLastPayment, 
+                    args=(
+                        label, 
+                        call_data['server'], 
+                        call_data['month'], 
+                        call.from_user.id, 
+                        call.message.id, 
+                        call.from_user.full_name
+                    )
                 )
-
-
-                label = (str(call.from_user.id) + 
-                        str(datetime.datetime.now(pytz.timezone('Europe/Moscow')))).replace(" ", "").replace("-","").replace("+", "").replace(".", "").replace(":", "")
-
-                # link_payment: str = getLinkPayment(label, call_data['month'])
-
-                keyboard: keyboards.InlineKeyboardMarkup = quick_markup(
-                    {
-                        # 'Оплата рублями': {'url': link_payment},
-                        "Оплата Crypto Bot": {"url": data['mini_app_invoice_url']},
-                        "Оплата звездами": {
-                            "callback_data": json.dumps(
-                                {
-                                    "key": enums.keyCall.KeyCall.payment_stars.name, 
-                                    "amount": conf['Price'].getint('star') * int(call_data['month']), 
-                                    "server": server_id
-                                }
-                            )
-                        },
-                        '<<< назад': {'callback_data': '{"key": "pollCountMonth", "server": ' + str(server_id) + '}'}
-                    },
-                    row_width=1
-                )
-                
-
-                option_text = ""
-                if int(user.server_id) != int(call_data['server']):
-                    option_text = "\n\nВнимание! После оплаты необходимо будет заново настроить VPN по инструкции, которую отправит вам бот."
-
-                bot.edit_message_text_or_caption(
-                    call.message, 
-                    "Оплата рублями временно не принимается. В место этого используйте оплату звездами.",
-                    reply_markup=keyboard
-                )
-
-                checkPayment = Thread(target=pollingInfoLastPayment, args=(label, call_data['server'], call_data['month'], call.from_user.id, call.message.id, call.from_user.full_name))
                 checkPayment.start()
 
             case "connect":

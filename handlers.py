@@ -1,23 +1,19 @@
-import enums.invite
-import enums.keyCall
-import json, config, os, utils, pytz, datetime, time, managment_user, invite, enums, keyboards
+
+import config, os, utils, managment_user, keyboards
 
 from connect import db, logging
 
-import invite.methods
 
 from telebot import types
 
-from managment_user import add_user, del_user, UserList, data_user, delete_not_subscription
+from managment_user import UserList, data_user, delete_not_subscription
 
 from filters import onlyAdminChat
 
 from psycopg2.extras import DictCursor
                   
-from servers.server_list import Servers, Country
-from servers.methods import get_server_list, get_very_free_server
-
-from yoomoneyMethods import getInfoLastPayment, getLinkPayment
+from servers.server_list import Servers
+from servers.methods import get_very_free_server
 
 from telebot.util import quick_markup
 from telebot.types import WebAppInfo
@@ -29,9 +25,9 @@ from enums.parse_mode import ParseMode
 from enums.keyCall import KeyCall
 from enums.chat_types import ChatTypes
 
-from giftUsers import genGiftCode, checkGiftCode
+from giftUsers import checkGiftCode
 
-from messageForUser import successfully_paid, manual_successfully_paid
+from messageForUser import successfully_paid
 
 from tables import User
 
@@ -39,19 +35,14 @@ from users.methods import get_user_by_id
 
 from sqlalchemy import func
 
-from payment.crypto.repository.methods import crypto_pay, PayingUser, TypeOfPurchase
-from payment.stars.handlers import handle_buy
-
 from statistic.tasks import start_statistic
 
-from configparser import ConfigParser
 
 from network_service import controllerFastApi
-from network_service.entity import NetworkServiceError
 
 from core.telebot import TeleBotMod
 
-from managers.subscription.renewal_of_subscription import renewalOfSubscription
+from payment.methods import send_message_for_pay
 
 
 def register_message_handlers(bot: TeleBotMod) -> None:
@@ -187,7 +178,6 @@ def register_message_handlers(bot: TeleBotMod) -> None:
     @bot.message_handler(commands=["status_bot"], func=onlyAdminChat())
     def oss(message):
         bot.send_message(message.chat.id, str(os.system("systemctl status bot_vpn.service")))
-
     
 
     @bot.message_handler(commands=["gift"])

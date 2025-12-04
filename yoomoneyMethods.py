@@ -47,11 +47,6 @@ def getInfoLastPayment(label: str) -> dict:
         # print("\tAmount     -->", operation.amount)
 
 
-
-
-
-
-
 def getLinkPayment(label: str, month: int) -> str:
     """
         Создает ссылку на платеж
@@ -59,21 +54,14 @@ def getLinkPayment(label: str, month: int) -> str:
     conf = ConfigParser()
     conf.read(config.FILE_URL + 'config.ini')
 
-    try:
-        quickpay = Quickpay(
-            receiver=config.WALLET_YOOMONEY_ID,
-            quickpay_form="shop",
-            targets="Оплата VPN",
-            paymentType="SB",
-            sum=conf['Price'].getint('RUB') * month,
-            label=label
-        )
-
-    except Exception as e:
-
-        logging.error("Неудачная попытка создания ссылки на оплату")
-
-        return getLinkPayment(label, month)
+    quickpay = Quickpay(
+        receiver=config.WALLET_YOOMONEY_ID,
+        quickpay_form="shop",
+        targets="Оплата VPN",
+        paymentType="SB",
+        sum=conf['Price'].getint('RUB') * month,
+        label=label
+    )
 
     return quickpay.redirected_url
 

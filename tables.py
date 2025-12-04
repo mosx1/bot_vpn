@@ -2,6 +2,7 @@ from connect import engine
 
 from sqlalchemy import Column,Numeric, BIGINT, TEXT, TIMESTAMP, BOOLEAN, String, ForeignKeyConstraint, INTEGER, VARCHAR, TIME, func, SMALLINT
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.dialects.postgresql import JSONB
 
 
 Base = declarative_base()
@@ -74,6 +75,18 @@ class UserToSubscription(Base):
 
     __table_agrs___ = (
         ForeignKeyConstraint(['telegram_id'], ['users_subscription.telegram_id']),
+        ForeignKeyConstraint(['server_id'], ['servers.id'])
+    )
+
+class ConfigsServers(Base):
+
+    __tablename__: str = 'configs_servers'
+
+    id = Column(BIGINT, primary_key=True)
+    server_id = Column(BIGINT, nullable=False)
+    config = Column(JSONB)
+
+    __table_agrs___ = (
         ForeignKeyConstraint(['server_id'], ['servers.id'])
     )
     
