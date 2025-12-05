@@ -296,7 +296,10 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
 
             case "getLinkPayment":
                 
-                send_message_for_pay(bot, call.from_user.id, call_data['server'], call_data['month'], call.message)
+                label = (str(call.from_user.id) + 
+                    str(datetime.datetime.now(pytz.timezone('Europe/Moscow')))).replace(" ", "").replace("-","").replace("+", "").replace(".", "").replace(":", "")
+                
+                send_message_for_pay(bot, call.from_user.id, call_data['server'], call_data['month'], call.message, label)
 
                 checkPayment = Thread(
                     target=pollingInfoLastPayment, 

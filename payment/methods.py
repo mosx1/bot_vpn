@@ -18,7 +18,7 @@ from core.telebot import TeleBotMod
 from telebot.types import Message
 
 
-def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: int, message: Message):
+def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: int, message: Message, label):
 
     conf = ConfigParser()
     conf.read(config.FILE_URL + 'config.ini')
@@ -38,10 +38,6 @@ def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: i
         message.id,
         TypeOfPurchase.yourself
     )
-
-
-    label = (str(user_id) + 
-            str(datetime.datetime.now(pytz.timezone('Europe/Moscow')))).replace(" ", "").replace("-","").replace("+", "").replace(".", "").replace(":", "")
 
     link_payment: str = getLinkPayment(label, month)
 
@@ -66,17 +62,17 @@ def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: i
 
     option_text = ""
     if int(user.server_id) != int(server_id):
-        option_text = "\n\nВнимание! После оплаты необходимо будет заново настроить VPN по инструкции, которую отправит вам бот."
+        option_text = "Внимание! После оплаты необходимо будет заново настроить VPN по инструкции, которую отправит вам бот.\n\n"
 
     try:
         bot.edit_message_text_or_caption(
             message, 
-            "Выберите способ оплаты:",
+            f"{option_text}Выберите способ оплаты:",
             reply_markup=keyboard
         )
     except Exception:
         bot.send_message(
             message.chat.id,
-            "Выберите способ оплаты",
+            f"{option_text}Выберите способ оплаты: " ,
             reply_markup=keyboard
         )
