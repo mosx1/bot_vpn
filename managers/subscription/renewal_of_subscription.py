@@ -18,7 +18,7 @@ def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None
     if serverNew == None:
         serverNew = user.server_id
 
-    if user.server_id != serverNew:
+    if user.server_id != serverNew and intervalSql != " + INTERVAL '0 months'": #костыль для ускорения
         try:
 
             controllerFastApi.del_users({user.telegram_id}, user.server_id)
