@@ -2,7 +2,7 @@ import config, logging
 
 from connect import token, bot
 
-from yoomoney import Quickpay, Client
+from yoomoney import History, Quickpay, Client
 
 from configparser import ConfigParser
 
@@ -22,23 +22,20 @@ def getInfoLastPayment(label: str) -> dict:
     conf.read(config.FILE_URL + 'config.ini')
 
     client = Client(conf['Umani'].get('token'))
-    try:
-        history = client.operation_history(label=label)
 
-        for operation in history.operations:
+    history: History = client.operation_history(label=label)
 
-            return {
-                "status": operation.status,
-                "message": "{}\nstatus: {}\ndatetime: {}\nсумма: {}".format(operation.title,
-                                                                            operation.status,
-                                                                            operation.datetime,
-                                                                            operation.amount)
-            }
-    except Exception as e:
+    for operation in history.operations:
 
-        logging.error("Неудачная попытка проверки последнего платежа")
-
-        return getInfoLastPayment(label)
+        return {
+            "status": operation.status,
+            "message": "{}\nstatus: {}\ndatetime: {}\nсумма: {}".format(
+                operation.title,
+                operation.status,
+                operation.datetime,
+                operation.amount
+            )
+        }
         
         # print("Operation:",operation.operation_id)
         # print("\tStatus     -->", operation.status)

@@ -77,6 +77,8 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
 
         while True:
 
+            res = None
+
             time.sleep(3)
             currentDateTime: datetime.datetime = datetime.datetime.now(pytz.timezone('Europe/Moscow'))
             try:
@@ -296,7 +298,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
 
             case "getLinkPayment":
                 
-                label = (str(call.from_user.id) + 
+                label: str = (str(call.from_user.id) + 
                     str(datetime.datetime.now(pytz.timezone('Europe/Moscow')))).replace(" ", "").replace("-","").replace("+", "").replace(".", "").replace(":", "")
                 
                 send_message_for_pay(bot, call.from_user.id, call_data['server'], call_data['month'], call.message, label)
