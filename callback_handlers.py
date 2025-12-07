@@ -7,6 +7,7 @@ from connect import db, logging
 import invite.methods
 
 from telebot import types
+from telebot.types import Message
 
 from managment_user import add_user, del_user, UserList, data_user, delete_not_subscription
 
@@ -61,13 +62,13 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
 
     def pollingInfoLastPayment(*args) -> dict:
         """
-            args - label, server, day, userId, messageId
+            args - label, server, day, userId, message
         """
         label = args[0]
         server = args[1]
         month = args[2]
         userId = args[3]
-        messageId = args[4]
+        message: Message = args[4]
         try:
             userName: str = args[5]
         except Exception:
@@ -80,12 +81,8 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
             res = None
 
             time.sleep(3)
-            currentDateTime: datetime.datetime = datetime.datetime.now(pytz.timezone('Europe/Moscow'))
-            try:
-                res = getInfoLastPayment(label)
-            except Exception as e:
-                bot.send_message(config.ADMINCHAT, str(e))
-                logging.error(str(e))
+            currentDateTime: datetime.datetime = datetime.datetime.now(pytz.timezone('Europe/Moscow')) 
+            res = getInfoLastPayment(label)
 
             if res:
 
@@ -98,34 +95,47 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     )
                 )
 
-                bot.edit_message_caption("Оплата получена, идет настройка конфигурации(это может занять несколько минут)...", userId, messageId)
+                bot.edit_message_text_or_caption(
+                    message,
+                    "Оплата получена, идет настройка конфигурации(это может занять несколько минут)..."
+                )
                 
                 userMessage: config.AddUserMessage = add_user(userId, month, server=server)
 
-                bot.send_message(config.ADMINCHAT,
-                                "[" + utils.form_text_markdownv2(userName) + "](tg://user?id\=" + str(userId) + ") оплатил",
-                                parse_mode=ParseMode.mdv2.value)
-                bot.delete_message(userId, messageId)
+                bot.send_message(
+                    config.ADMINCHAT,
+                    "[" + utils.form_text_markdownv2(userName) + "](tg://user?id\=" + str(userId) + ") оплатил",
+                    parse_mode=ParseMode.mdv2.value
+                )
                 
                 invite.methods.incrementBalance(userId, month=month)
-                
-                successfully_paid(userId, optionText=userMessage.value)
+                bot.delete_message(
+                    message.chat.id,
+                    message.id
+                )
+                successfully_paid(
+                    userId, 
+                    optionText=userMessage.value
+                )
 
                 return res
             
             if currentDateTime > stopDateTime:
-                bot.delete_message(userId, messageId)
+                bot.edit_message_text_or_caption(
+                    message,
+                    "Ошибка проверки платежа. Обратитесь в подержку для разрешения данной ситуации."
+                )
                 return 
             
             
     def pollingInfoLastPaymentGift(*args) -> dict:
         """
-        args - label, month, userId, messageId
+        args - label, month, userId, message
         """
         label = args[0]
         month = args[1]
         userId = args[2]
-        messageId = args[3]
+        message: Message = args[3]
         try:
             userName = args[5]
         except Exception:
@@ -135,7 +145,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
 
         while True:
 
-            time.sleep(2)
+            time.sleep(3)
             currentDateTime = datetime.datetime.now(pytz.timezone('Europe/Moscow'))
             res = getInfoLastPayment(label)
 
@@ -156,9 +166,12 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     "[{}](tg://user?id\={}) оплатил подарочную подписку".format(utils.form_text_markdownv2(userName), userId),
                     parse_mode=ParseMode.mdv2.value
                 )
-                bot.delete_message(userId, messageId)
+                bot.delete_message(
+                    message.chat.id, 
+                    message.id
+                )
 
-                photoMessage = bot.send_photo(
+                photoMessage: Message = bot.send_photo(
                     chat_id=userId,
                     photo=open(config.FILE_URL + "image/gift.png", "rb"),
                     caption=config.TextsMessages.giftPostcard.value.format(code=hash, date=month),
@@ -170,7 +183,10 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 return res
             
             if currentDateTime > stopDateTime:
-                bot.delete_message(userId, messageId)
+                bot.edit_message_text_or_caption(
+                    message,
+                    "Ошибка проверки платежа. Обратитесь в подержку для разрешения данной ситуации."
+                )
                 return 
 
     @bot.callback_query_handler(func=lambda call: str(call.data).startswith('{"key":'))
@@ -293,7 +309,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 
                 bot.edit_message_text_or_caption(call.message, config.TextsMessages.giftPay.value, reply_markup=keyboard)
 
-                checkPayment = Thread(target=pollingInfoLastPaymentGift, args=(label, call_data['month'], call.from_user.id, call.message.id, call.from_user.full_name))
+                checkPayment = Thread(target=pollingInfoLastPaymentGift, args=(label, call_data['month'], call.from_user.id, call.message, call.from_user.full_name))
                 checkPayment.start()
 
             case "getLinkPayment":
@@ -310,7 +326,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                         call_data['server'], 
                         call_data['month'], 
                         call.from_user.id, 
-                        call.message.id, 
+                        call.message, 
                         call.from_user.full_name
                     )
                 )

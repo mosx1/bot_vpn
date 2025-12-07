@@ -86,7 +86,7 @@ def successfully_paid(id, oldMessageId=None, optionText="") -> bool:
         else:
             return False
     else:
-        return bot.edit_message_caption(
+        return bot.edit_message_text_or_caption(
             chat_id=id, 
             message_id=oldMessageId,
             caption=optionText + text_for_message.format(
