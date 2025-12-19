@@ -225,7 +225,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
 
                 successfully_paid(
                     call.from_user.id, 
-                    oldMessage.id
+                    oldMessage
                 )
             
             case KeyCall.sale.value:
@@ -472,7 +472,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
         
             case "manualSettings":
 
-                manual_successfully_paid(call_data['id'], call.message.id)
+                manual_successfully_paid(call_data['id'], call.message)
 
             case KeyCall.backmanual_settings.value:
                 
@@ -481,7 +481,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 else:
                     id: int = call.from_user.id
 
-                successfully_paid(id, oldMessageId=call.message.id)
+                successfully_paid(id, oldMessageId=call.message)
 
             case "sendConf":
 
@@ -613,7 +613,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 renewalOfSubscription(user, "", get_very_free_server())
                 successfully_paid(
                     user.telegram_id,
-                    call.message.id,
+                    call.message,
                     "ПЕРЕНАСТРОЙТЕ ПРИЛОЖЕНИЕ!!!"
                 )
 

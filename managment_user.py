@@ -315,7 +315,7 @@ def del_user(id_user, noUpdate=None, no_message=None) -> bool | NetworkServiceEr
         else:
             db.rollback()
 
-        return controllerFastApi.suspend_users(
+        return controllerFastApi.del_users(
             {id_user}, 
             dataCur["server_id"]
         )
