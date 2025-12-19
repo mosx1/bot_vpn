@@ -79,7 +79,7 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
                     id
                 ),
                 reply_markup=keyboard, 
-                parse_mode=ParseMode.mdv2.value
+                parse_mode=ParseMode.mdv2
             ):
 
             return True
@@ -97,7 +97,7 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
                 id
             ),
             reply_markup=keyboard, 
-            parse_mode=ParseMode.mdv2.value
+            parse_mode=ParseMode.mdv2
         )
 
 
@@ -132,5 +132,5 @@ def manual_successfully_paid(id: int, old_message: Message) -> bool:
             utils.form_text_markdownv2(user.server_link)
         ),
         reply_markup=keyboard, 
-        parse_mode=ParseMode.mdv2.value
+        parse_mode=ParseMode.mdv2
     )
