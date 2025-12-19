@@ -481,7 +481,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 else:
                     id: int = call.from_user.id
 
-                successfully_paid(id, oldMessageId=call.message)
+                successfully_paid(id, call.message)
 
             case "sendConf":
 
