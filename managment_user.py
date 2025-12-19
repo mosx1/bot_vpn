@@ -325,79 +325,81 @@ def del_user(id_user, noUpdate=None, no_message=None) -> bool | NetworkServiceEr
 def chek_subscription():
 
     while True:
-
-        users: list[User] = get_user_by(
-            and_(
-                User.action == True,
-                User.exit_date < func.now()
+        try:
+            users: list[User] = get_user_by(
+                and_(
+                    User.action == True,
+                    User.exit_date < func.now()
+                )
             )
-        )
+                
+            for user in users:
+
+                del_user(user.telegram_id)
+
+            users: list[User] = get_user_by(
+                and_(
+                    User.action == True,
+                    User.exit_date - text("INTERVAL '3 days'") == func.now()
+                )
+            )
+
+            for user in users:
+
+                bot.send_message(
+                    user.telegram_id,
+                    "Через 3 дня окончится Ваша подписка на VPN. Чтобы не потерять доступ, продлите подписку.",
+                    reply_markup=keyboards.getInlineExtend()
+                )
+
+            users: list[User] = get_user_by(
+                and_(
+                    User.action == True,
+                    User.exit_date - text("INTERVAL '2 days'") == func.now()
+                )
+            )
+
+            for user in users:
+
+                bot.send_message(
+                    user.telegram_id,
+                    "Через 2 дня окончится Ваша подписка на VPN. Чтобы не потерять доступ, продлите подписку.",
+                    reply_markup=keyboards.getInlineExtend()
+                )
             
-        for user in users:
-
-            del_user(user.telegram_id)
-
-        users: list[User] = get_user_by(
-            and_(
-                User.action == True,
-                User.exit_date - text("INTERVAL '3 days'") == func.now()
-            )
-        )
-
-        for user in users:
-
-            bot.send_message(
-                user.telegram_id,
-                "Через 3 дня окончится Ваша подписка на VPN. Чтобы не потерять доступ, продлите подписку.",
-                reply_markup=keyboards.getInlineExtend()
+            users: list[User] = get_user_by(
+                and_(
+                    User.action == True,
+                    User.exit_date - text("INTERVAL '1 days'") == func.now()
+                )
             )
 
-        users: list[User] = get_user_by(
-            and_(
-                User.action == True,
-                User.exit_date - text("INTERVAL '2 days'") == func.now()
-            )
-        )
+            for user in users:
 
-        for user in users:
-
-            bot.send_message(
-                user.telegram_id,
-                "Через 2 дня окончится Ваша подписка на VPN. Чтобы не потерять доступ, продлите подписку.",
-                reply_markup=keyboards.getInlineExtend()
-            )
-        
-        users: list[User] = get_user_by(
-            and_(
-                User.action == True,
-                User.exit_date - text("INTERVAL '1 days'") == func.now()
-            )
-        )
-
-        for user in users:
-
-            bot.send_message(
-                user.telegram_id,
-                "Завтра в это же время окончится подписка на VPN. Чтобы не потерять доступ, продлите подписку.",
-                reply_markup=keyboards.getInlineExtend()
-            )
-        
-        users: list[User] = get_user_by(
-            and_(
-                User.action == True,
-                User.exit_date - text("INTERVAL '1 hours'") == func.now()
-            )
-        )
-
-        for user in users:
-
-            bot.send_message(
-                user.telegram_id,
-                "Уже через час окончится подписка на VPN. Чтобы не потерять доступ, продлите подписку.",
-                reply_markup=keyboards.getInlineExtend()
+                bot.send_message(
+                    user.telegram_id,
+                    "Завтра в это же время окончится подписка на VPN. Чтобы не потерять доступ, продлите подписку.",
+                    reply_markup=keyboards.getInlineExtend()
+                )
+            
+            users: list[User] = get_user_by(
+                and_(
+                    User.action == True,
+                    User.exit_date - text("INTERVAL '1 hours'") == func.now()
+                )
             )
 
-        time.sleep(60)
+            for user in users:
+
+                bot.send_message(
+                    user.telegram_id,
+                    "Уже через час окончится подписка на VPN. Чтобы не потерять доступ, продлите подписку.",
+                    reply_markup=keyboards.getInlineExtend()
+                )
+
+            time.sleep(60)
+        except Exception as e:
+            logging.error('tread check_subscription error: ' + str(e))
 
 
 def generate_alphanum_crypt_string():
@@ -525,9 +527,12 @@ def delete_not_subscription() -> None:
 def delete_not_subscription_tasks() -> NoReturn:
 
     while True:
-        if datetime.hour == 0:
-            delete_not_subscription()
-            time.sleep(86400)
+        try:
+            if datetime.hour == 0:
+                delete_not_subscription()
+                time.sleep(86400)
+        except Exception as e:
+            logging.error('tread delete_not_sub error: ' + str(e))
 
 
 chek_sub_thread = threading.Thread(target=chek_subscription)
