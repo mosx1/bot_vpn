@@ -1,6 +1,6 @@
 import enums.invite
 import enums.keyCall
-import json, config, os, utils, pytz, datetime, time, managment_user, invite, enums, keyboards
+import json, config, utils, pytz, datetime, time, managment_user, invite, enums, keyboards
 
 from connect import db, logging
 
@@ -9,28 +9,23 @@ import invite.methods
 from telebot import types
 from telebot.types import Message
 
-from managment_user import add_user, del_user, UserList, data_user, delete_not_subscription
-
-from filters import onlyAdminChat
+from managment_user import add_user, del_user, UserList, data_user
 
 from psycopg2.extras import DictCursor
                   
-from servers.server_list import Servers, Country
+from servers.server_list import Country
 from servers.methods import get_server_list, get_very_free_server
 
 from yoomoneyMethods import getInfoLastPayment, getLinkPayment
 
 from telebot.util import quick_markup
-from telebot.types import WebAppInfo
 
 from threading import Thread
 
-from enums.comands import Comands
 from enums.parse_mode import ParseMode
 from enums.keyCall import KeyCall
-from enums.chat_types import ChatTypes
 
-from giftUsers import genGiftCode, checkGiftCode
+from giftUsers import genGiftCode
 
 from messageForUser import successfully_paid, manual_successfully_paid
 
@@ -38,12 +33,8 @@ from tables import User
 
 from users.methods import get_user_by_id
 
-from sqlalchemy import func
-
 from payment.crypto.repository.methods import crypto_pay, PayingUser, TypeOfPurchase
 from payment.stars.handlers import handle_buy
-
-from statistic.tasks import start_statistic
 
 from configparser import ConfigParser
 
@@ -79,12 +70,15 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
         while True:
 
             res = None
+            t = ""
 
             time.sleep(3)
             currentDateTime: datetime.datetime = datetime.datetime.now(pytz.timezone('Europe/Moscow')) 
             res = getInfoLastPayment(label)
 
             if res:
+                
+                user: User = get_user_by_id(userId)
 
                 logging.info(
                     "user_id: {}; user_name:{}; Оплата подписки {} мес. сервер {}".format(
@@ -99,7 +93,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     message,
                     "Оплата получена, идет настройка конфигурации(это может занять несколько минут)..."
                 )
-                
+       
                 userMessage: config.AddUserMessage = add_user(userId, month, server=server)
 
                 bot.send_message(
@@ -113,9 +107,13 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     message.chat.id,
                     message.id
                 )
+
+                if not user.action:
+                    t = "В связи с тем, что вы продлили подписку уже после ее отключения, Вам нужно заново настроить все. Во избежании таких ситуаций в будущем - продлевайте подписку после первого уведомления.\n"
+                    
                 successfully_paid(
                     userId, 
-                    optionText=userMessage.value
+                    optionText=str(userMessage.value) + t
                 )
 
                 return res

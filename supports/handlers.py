@@ -18,7 +18,7 @@ from tables import User
 
 from filters import only_user_chat, only_user_chat_and_text
 
-from keyboards import KeyboardForUser, get_inline_keyboard_list_countries
+from keyboards import KeyboardForUser
 
 from users.methods import get_user_by_id
 
