@@ -345,12 +345,6 @@ def chek_subscription():
 
     while True:
         try:
-            users: list[User] = get_user_by(
-                and_(
-                    User.action == True,
-                    User.exit_date < func.now()
-                )
-            )
             with Session(engine) as session:
                 data = session.execute(
                     text(
