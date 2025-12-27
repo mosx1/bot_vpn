@@ -340,7 +340,8 @@ def chek_subscription():
             users: list[User] = get_user_by(
                 and_(
                     User.action == True,
-                    User.exit_date - text("INTERVAL '3 days'") == func.now()
+                    User.exit_date - text("INTERVAL '3 days'") <= func.now(),
+                    User.exit_date - text("INTERVAL '3 days'") + text("INTERVAL '1 minutes'") > func.now()
                 )
             )
 
@@ -355,7 +356,8 @@ def chek_subscription():
             users: list[User] = get_user_by(
                 and_(
                     User.action == True,
-                    User.exit_date - text("INTERVAL '2 days'") == func.now()
+                    User.exit_date - text("INTERVAL '2 days'") <= func.now(),
+                    User.exit_date - text("INTERVAL '2 days'") + text("INTERVAL '1 minutes'") > func.now()
                 )
             )
 
@@ -370,7 +372,8 @@ def chek_subscription():
             users: list[User] = get_user_by(
                 and_(
                     User.action == True,
-                    User.exit_date - text("INTERVAL '1 days'") == func.now()
+                    User.exit_date - text("INTERVAL '1 days'") <= func.now(),
+                    User.exit_date - text("INTERVAL '1 days'") + text("INTERVAL '1 minutes'") > func.now()
                 )
             )
 
@@ -385,7 +388,8 @@ def chek_subscription():
             users: list[User] = get_user_by(
                 and_(
                     User.action == True,
-                    User.exit_date - text("INTERVAL '1 hours'") == func.now()
+                    User.exit_date - text("INTERVAL '1 hours'") <= func.now(),
+                    User.exit_date - text("INTERVAL '1 hours'") + text("INTERVAL '1 minutes'") > func.now()
                 )
             )
 
