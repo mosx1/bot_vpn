@@ -619,7 +619,11 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     "ПЕРЕНАСТРОЙТЕ ПРИЛОЖЕНИЕ!!!"
                 )
             case KeyCall.transfer_other_server.value:
-
+                bot.edit_message_reply_markup(
+                    call.message.chat.id,
+                    call.message.id,
+                    reply_markup=keyboards.get_inline_loading()
+                )
                 user: User = get_user_by_id(call.from_user.id)
                 server_id = get_very_free_server(exclude_server_id=user.server_id)
                 res: bool | NetworkServiceError = del_users(
