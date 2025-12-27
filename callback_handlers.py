@@ -9,7 +9,7 @@ import invite.methods
 from telebot import types
 from telebot.types import Message
 
-from managment_user import add_user, del_user, UserList, data_user
+from managment_user import add_user, del_users, UserList, data_user
 
 from psycopg2.extras import DictCursor
                   
@@ -400,8 +400,12 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
             case KeyCall.deaction.name:
 
                 text = ""
-            
-                res: bool | NetworkServiceError = del_user(call_data['id'], no_message=True)
+                user: User = get_user_by_id(call_data['id'])
+                res: bool | NetworkServiceError = del_users(
+                    {user.telegram_id}, 
+                    user.server_id, 
+                    no_message=True
+                )
 
                 if not isinstance(res, NetworkServiceError):
 

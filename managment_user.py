@@ -17,8 +17,8 @@ from protocols import getNameProtocolById
 
 from managers.subscription.renewal_of_subscription import renewalOfSubscription
 
-from sqlalchemy.orm import Session
-from sqlalchemy import select, func, and_, text
+from sqlalchemy.orm import Session, query
+from sqlalchemy import select, func, and_, text, update
 
 from tables import User
 
@@ -148,7 +148,7 @@ class UserList:
 
         
     @classmethod
-    def addButtonKeyForUsersList(self, user: User | None = None, a: int = 0, buttonNav: list = None, textKeyWhere: str = None) -> InlineKeyboardMarkup:
+    def addButtonKeyForUsersList(cls, user: User | None = None, a: int = 0, buttonNav: list = None, textKeyWhere: str = None) -> InlineKeyboardMarkup:
         keyboard_offer_one = InlineKeyboardMarkup()
         if user:
             if user.action:
@@ -275,7 +275,11 @@ def add_user(
         elif user.action:
             # servers: list[ServersTable] = get_server_list()
             if server != user.server_id:
-                del_user(user_id, noUpdate=True)
+                del_users(
+                    {user_id},
+                    user.server_id,
+                    no_update=True
+                )
                 add_user(user_id, month, server=server)
 
                 return config.AddUserMessage.extended
@@ -291,38 +295,53 @@ def add_user(
     
 
 
-def del_user(id_user, noUpdate=None, no_message=None) -> bool | NetworkServiceError:
-    
-    name = ""
+def del_users(
+    user_ids: set[int], 
+    server_id: int, 
+    no_update: bool = False, 
+    no_message: bool = False
+) -> bool | NetworkServiceError:
 
-    with db.cursor(cursor_factory=DictCursor) as cursor:
-        
-        cursor.execute("UPDATE users_subscription SET action=False WHERE telegram_id=" + str(id_user) +
-                    "\nRETURNING protocol, server_id, name")
-        
-        dataCur = cursor.fetchone()
-        if noUpdate != True:
+    with Session(engine) as session:
+        query = update(User).where(User.telegram_id.in_(user_ids)).values(action=False)
+        session.execute(query)
 
-            db.commit()
+        if not no_update:
 
-            name = dataCur['name']
+            session.commit()
 
             if not no_message:
-                try:
-                    bot.send_message(id_user, "Подписка окончена.", reply_markup=keyboards.getInlineExtend())
-                except ApiTelegramException as e:
-                    bot.send_message(config.ADMINCHAT, str(e) + " " + name)
+                for user_id in user_ids:
+
+                    try:
+
+                        bot.send_message(
+                            user_id, 
+                            "Подписка окончена.", 
+                            reply_markup=keyboards.getInlineExtend()
+                        )
+                    except ApiTelegramException as e:
+
+                        conf = ConfigParser()
+                        conf.read(config.FILE_URL + 'config.ini')
+
+                        bot.send_message(
+                            conf['Telegram'].getint('admin_chat'), 
+                            str(e) + " id:" + str(user_id)
+                        )
         else:
-            db.rollback()
+            session.rollback()
 
         return controllerFastApi.del_users(
-            {id_user}, 
-            dataCur["server_id"]
+            user_ids, 
+            server_id
         )
         
 
 
 def chek_subscription():
+
+    second_sleep = 60
 
     while True:
         try:
@@ -332,16 +351,29 @@ def chek_subscription():
                     User.exit_date < func.now()
                 )
             )
+            with Session(engine) as session:
+                data = session.execute(
+                    text(
+                        "SELECT server_id, array_agg(DISTINCT telegram_id) as telegram_ids" +
+                        "\nFROM users_subscription" +
+                        "\nWHERE action = True AND exit_date < now()" +
+                        "\nGROUP BY server_id"
+                    )
+                )
+                server_to_users_for_delete = data.fetchall()
                 
-            for user in users:
-
-                del_user(user.telegram_id)
+                for server_to_users_for_delete_item in server_to_users_for_delete:
+                    
+                    del_users(
+                        set(server_to_users_for_delete_item.telegram_ids),
+                        int(server_to_users_for_delete_item.server_id)
+                    )
 
             users: list[User] = get_user_by(
                 and_(
                     User.action == True,
                     User.exit_date - text("INTERVAL '3 days'") <= func.now(),
-                    User.exit_date - text("INTERVAL '3 days'") + text("INTERVAL '1 minutes'") > func.now()
+                    User.exit_date - text("INTERVAL '3 days'") + text(f"INTERVAL '{second_sleep} seconds'") > func.now()
                 )
             )
 
@@ -357,7 +389,7 @@ def chek_subscription():
                 and_(
                     User.action == True,
                     User.exit_date - text("INTERVAL '2 days'") <= func.now(),
-                    User.exit_date - text("INTERVAL '2 days'") + text("INTERVAL '1 minutes'") > func.now()
+                    User.exit_date - text("INTERVAL '2 days'") + text(f"INTERVAL '{second_sleep} seconds'") > func.now()
                 )
             )
 
@@ -373,7 +405,7 @@ def chek_subscription():
                 and_(
                     User.action == True,
                     User.exit_date - text("INTERVAL '1 days'") <= func.now(),
-                    User.exit_date - text("INTERVAL '1 days'") + text("INTERVAL '1 minutes'") > func.now()
+                    User.exit_date - text("INTERVAL '1 days'") + text(f"INTERVAL '{second_sleep} seconds'") > func.now()
                 )
             )
 
@@ -389,7 +421,7 @@ def chek_subscription():
                 and_(
                     User.action == True,
                     User.exit_date - text("INTERVAL '1 hours'") <= func.now(),
-                    User.exit_date - text("INTERVAL '1 hours'") + text("INTERVAL '1 minutes'") > func.now()
+                    User.exit_date - text("INTERVAL '1 hours'") + text(f"INTERVAL '{second_sleep} seconds'") > func.now()
                 )
             )
 
