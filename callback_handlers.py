@@ -187,7 +187,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 )
                 return 
 
-    @bot.callback_query_handler(func=lambda call: str(call.data).startswith('{"key":'))
+    @bot.callback_query_handler(func=lambda call: call.data and isinstance(call.data, str) and call.data.startswith('{"key":'))
     def _(call: types.CallbackQuery):
 
         call_data = json.loads(call.data)
@@ -618,7 +618,31 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     call.message,
                     "ПЕРЕНАСТРОЙТЕ ПРИЛОЖЕНИЕ!!!"
                 )
+            case KeyCall.transfer_other_server.value:
 
+                user: User = get_user_by_id(call.from_user.id)
+                server_id = get_very_free_server(exclude_server_id=user.server_id)
+                res: bool | NetworkServiceError = del_users(
+                    {user.telegram_id}, 
+                    user.server_id, 
+                    no_message=True
+                )
+                add_user(
+                    user.telegram_id, 
+                    0, 
+                    name_user=user.name, 
+                    server=server_id
+                )
+                successfully_paid(
+                    user.telegram_id,
+                    optionText="Сервер изменен",
+                    old_message=call.message
+                )
+                bot.answer_callback_query(
+                    callback_query_id=call.id,
+                    text='Сервер успешно изменен',
+                    show_alert=False
+                )
             case _:
 
                 bot.answer_callback_query(

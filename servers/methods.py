@@ -41,7 +41,7 @@ def get_server_name_by_id(server_id: int) -> str:
         return "Неизвестное наименование сервера"
     
 
-def get_very_free_server(country: Country | None = None) -> int:
+def get_very_free_server(country: Country | None = None, exclude_server_id: int | None = None) -> int:
     """
         Возвращает менее загруженный сервер по стране
         Если страна не передана - ищет по всем странам
@@ -80,6 +80,9 @@ def get_very_free_server(country: Country | None = None) -> int:
                     )
                 )
             )
+
+        if exclude_server_id:
+            query = query.filter(ServersTable.id != exclude_server_id)
 
         query = (
             query
