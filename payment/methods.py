@@ -1,4 +1,4 @@
-import json, config, pytz, datetime, enums, keyboards, enums.keyCall
+import json, config, enums, keyboards, enums.keyCall
 
 from servers.methods import get_very_free_server
 
@@ -17,11 +17,18 @@ from configparser import ConfigParser
 from core.telebot import TeleBotMod
 from telebot.types import Message
 
+from enums.parse_mode import ParseMode
+
 
 def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: int, message: Message, label):
 
     conf = ConfigParser()
     conf.read(config.FILE_URL + 'config.ini')
+    
+    bot.send_message(
+        conf['Telegram']['admin_chat'],
+        f"Пользователь запросил ссылку на оплату\n{user_id}"
+    )
     
     user: User = get_user_by_id(user_id)
     

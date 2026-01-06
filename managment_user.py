@@ -11,18 +11,16 @@ from enums.invite import CallbackKeys
 from enums.keyCall import KeyCall
 from enums.parse_mode import ParseMode
 
-from psycopg2.extras import DictCursor
-
 from protocols import getNameProtocolById
 
 from managers.subscription.renewal_of_subscription import renewalOfSubscription
 
-from sqlalchemy.orm import Session, query
+from sqlalchemy.orm import Session
 from sqlalchemy import select, func, and_, text, update
 
 from tables import User
 
-from users.methods import get_user_by_id, get_user_by, add_subscription_for_user
+from users.methods import get_user_by_id, get_user_by
 
 from servers.methods import get_server_name_by_id, get_very_free_server
 

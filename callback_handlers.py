@@ -1,6 +1,6 @@
 import enums.invite
 import enums.keyCall
-import json, config, utils, pytz, datetime, time, managment_user, invite, enums, keyboards
+import json, config, utils, pytz, datetime, time, managment_user, invite, enums, keyboards, uuid
 
 from connect import db, logging
 
@@ -46,8 +46,6 @@ from core.telebot import TeleBotMod
 from managers.subscription.renewal_of_subscription import renewalOfSubscription
 
 from payment.methods import send_message_for_pay
-
-
 
 def register_callback_handlers(bot: TeleBotMod) -> None:
 
@@ -293,9 +291,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     TypeOfPurchase.gift
                 )
 
-                label = (str(call.from_user.id) + 
-                        str(datetime.datetime.now(pytz.timezone('Europe/Moscow')))).replace(" ", "").replace("-","").replace("+", "").replace(".", "").replace(":", "")
-
+                label = uuid.uuid4()
                 keyboard = quick_markup(
                     {
                         'Оплата рублями': {'url': getLinkPayment(label, call_data['month'])},
@@ -305,18 +301,14 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     row_width=1
                 )
                 
-                bot.edit_message_text_or_caption(call.message, config.TextsMessages.giftPay.value, reply_markup=keyboard)
-
                 checkPayment = Thread(target=pollingInfoLastPaymentGift, args=(label, call_data['month'], call.from_user.id, call.message, call.from_user.full_name))
                 checkPayment.start()
 
-            case "getLinkPayment":
-                
-                label: str = (str(call.from_user.id) + 
-                    str(datetime.datetime.now(pytz.timezone('Europe/Moscow')))).replace(" ", "").replace("-","").replace("+", "").replace(".", "").replace(":", "")
-                
-                send_message_for_pay(bot, call.from_user.id, call_data['server'], call_data['month'], call.message, label)
+                bot.edit_message_text_or_caption(call.message, config.TextsMessages.giftPay.value, reply_markup=keyboard)
 
+            case KeyCall.get_link_payment.value:
+                
+                label = uuid.uuid4()
                 checkPayment = Thread(
                     target=pollingInfoLastPayment, 
                     args=(
@@ -327,6 +319,14 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                         call.message, 
                         call.from_user.full_name
                     )
+                )
+                send_message_for_pay(
+                    bot, 
+                    call.from_user.id, 
+                    call_data['server'], 
+                    call_data['month'], 
+                    call.message, 
+                    label
                 )
                 checkPayment.start()
 
@@ -619,6 +619,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     "ПЕРЕНАСТРОЙТЕ ПРИЛОЖЕНИЕ!!!"
                 )
             case KeyCall.transfer_other_server.value:
+                
                 bot.edit_message_reply_markup(
                     call.message.chat.id,
                     call.message.id,
