@@ -17,8 +17,6 @@ from configparser import ConfigParser
 from core.telebot import TeleBotMod
 from telebot.types import Message
 
-from enums.parse_mode import ParseMode
-
 
 def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: int, message: Message, label):
 
@@ -29,7 +27,7 @@ def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: i
         conf['Telegram']['admin_chat'],
         f"Пользователь запросил ссылку на оплату\n{user_id}"
     )
-    
+
     user: User = get_user_by_id(user_id)
     
     if user.action:

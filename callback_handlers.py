@@ -35,6 +35,7 @@ from users.methods import get_user_by_id
 
 from payment.crypto.repository.methods import crypto_pay, PayingUser, TypeOfPurchase
 from payment.stars.handlers import handle_buy
+from payment.methods import send_message_for_pay
 
 from configparser import ConfigParser
 
@@ -45,7 +46,6 @@ from core.telebot import TeleBotMod
 
 from managers.subscription.renewal_of_subscription import renewalOfSubscription
 
-from payment.methods import send_message_for_pay
 
 def register_callback_handlers(bot: TeleBotMod) -> None:
 

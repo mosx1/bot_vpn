@@ -17,4 +17,3 @@ class KeyCall(Enum):
     transfer_from_nid: str = "transfer_from_nid"
     get_link_payment: str = "getLinkPayment"
     transfer_other_server: str = "transfer_other_server"
-    get_link_payment: str = "getLinkPayment"
