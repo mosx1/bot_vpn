@@ -60,7 +60,7 @@ def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None
 
             case NetworkServiceError():
                 
-                text = f"{result_add_vpn_user.caption}\nЗапрос:\n{result_add_vpn_user.response}"
+                text = f"{result_add_vpn_user.caption}\nОтвет сервера:\n{result_add_vpn_user.response}"
 
                 bot.send_message(
                     admin_chat_id,

@@ -251,7 +251,7 @@ def add_user(
 
                 case controllerFastApi.NetworkServiceError():
                     
-                    text: str = f"{result_add_vpn_user.caption}\nЗапрос:\n{result_add_vpn_user.response}"
+                    text: str = f"{result_add_vpn_user.caption}\nОтвет сервера:\n{result_add_vpn_user.response}"
 
                     bot.send_message(
                         admin_chat_id,
