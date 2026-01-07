@@ -12,11 +12,3 @@ class Comands(Enum):
     actionUsersCount: str = "action_users_count"
     start: str = "start"
     checkSubscription: str = 'checkSubscription'
-
-    @property
-    def admin_panel(self) -> str:
-
-        conf = ConfigParser()
-        conf.read('config.ini')
-
-        return conf['Telegram'].get('admin_password')

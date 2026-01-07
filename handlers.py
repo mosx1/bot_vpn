@@ -51,7 +51,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
 
     def add_key_admin(message: types.Message):
         keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        keyboard.add(types.KeyboardButton(text=f'/{Comands.admin_panel.value}'),
+        keyboard.add(types.KeyboardButton(text=f'/{conf['BaseConfig'].get('admin_password')}'),
                     types.KeyboardButton(text=f'/{Comands.actionUsersCount.value}'))
         keyboard.add(
             types.KeyboardButton(text=f'/{Comands.statistic.value}'),
@@ -66,7 +66,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
         treadCheckUsersSubscription.start()
 
     
-    @bot.message_handler(commands=[conf['Telegram'].get('admin_password')], func=onlyAdminChat())
+    @bot.message_handler(commands=[config.ADMINPASSWORD], func=onlyAdminChat())
     def d(message):
         add_key_admin(message)
         managment_user.manager_users_list = UserList(message)
