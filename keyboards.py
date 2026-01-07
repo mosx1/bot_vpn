@@ -1,14 +1,12 @@
 from telebot.types import InlineKeyboardMarkup
 from telebot.util import quick_markup
 
-from servers.server_list import Country, Servers
+from servers.server_list import Country
 from servers.methods import get_very_free_server
 
 from enum import Enum
 
 from enums.keyCall import KeyCall
-
-from utils import callBackBilder
 
 
 class KeyboardForUser(Enum):

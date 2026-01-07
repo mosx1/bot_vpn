@@ -1,12 +1,10 @@
-import config, logging
+import config
 
-from connect import token, bot
+from connect import token
 
 from yoomoney import History, Quickpay, Client
 
 from configparser import ConfigParser
-
-from requests.exceptions import ReadTimeout
 
 
 test = "https://api.telegram.org/bot" + token + "/getMe"
