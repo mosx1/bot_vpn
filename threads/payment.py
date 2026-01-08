@@ -43,8 +43,6 @@ def check_payments() -> None:
 
             for invoice, stop_date_time, current_date_time in invoices:
 
-                res = None
-                t = ""
                 res = getInfoLastPayment(invoice.label)
 
                 if res:
@@ -87,14 +85,11 @@ def check_payments() -> None:
                         invoice.telegram_id, 
                         month=invoice.month_count
                     )
-
-                    if not user.action:
-                        t = "В связи с тем, что вы продлили подписку уже после ее отключения, Вам нужно заново настроить все\. Во избежании таких ситуаций в будущем \- продлевайте подписку после первого уведомления\.\n"
                         
                     successfully_paid(
                         invoice.telegram_id,
                         old_message,
-                        optionText=str(userMessage.value) + t
+                        optionText=str(userMessage.value)
                     )
                 
                 if (current_date_time > stop_date_time) or res:
@@ -104,6 +99,6 @@ def check_payments() -> None:
                         session.commit()
 
             time.sleep(4)
-            
+
         except Exception as e:
             logging.error('tread check_payments error: ' + str(e))
