@@ -10,8 +10,8 @@ import game.handlers
 import payment
 import managers.handlers
 import callback_handlers
-from connect import bot, storage
 import threads
+from connect import bot, storage
 
 bot.remove_webhook()
 

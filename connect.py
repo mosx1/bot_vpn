@@ -1,4 +1,4 @@
-import logging, requests, time, threading, psycopg2
+import logging, psycopg2
 
 from telebot.storage import StateMemoryStorage
 
@@ -6,13 +6,11 @@ from configparser import ConfigParser
 
 from sqlalchemy import Engine, create_engine
 
-from config import FILE_URL
-
 from core.telebot import TeleBotMod
 
 
 conf = ConfigParser()
-conf.read(FILE_URL + 'config.ini')
+conf.read('config.ini')
 
 token = conf['Telegram']['token_prod'] #general
 
@@ -25,7 +23,7 @@ bot = TeleBotMod(
 
 logging.basicConfig(
     level=logging.INFO,
-    filename = FILE_URL + "logs.txt",
+    filename = "logs.txt",
     format="%(asctime)s %(levelname)s %(message)s"
 )
 postgres = conf['Postgres']
@@ -49,12 +47,3 @@ engine: Engine = create_engine('postgresql+psycopg2://', creator=lambda: db)
 
 session = {}
 len_offers_page = 4
-
-def updateConnect():
-    while True:
-        requests.post(f"https://api.telegram.org/bot{token}/getUpdates")
-        time.sleep(5)
-        
-
-update_tread = threading.Thread(target=updateConnect)
-update_tread.start()
