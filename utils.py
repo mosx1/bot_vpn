@@ -47,7 +47,7 @@ def form_text_markdownv2(message_text: str, delete=None):
     try:
         for escaped_characters in ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']:
             if escaped_characters in message_text:
-                if delete == True:
+                if delete:
                     message_text = str(message_text).replace(escaped_characters, " ")
                 else:
                     message_text = str(message_text).replace(escaped_characters, "\\" + escaped_characters)

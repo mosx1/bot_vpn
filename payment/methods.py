@@ -1,4 +1,4 @@
-import json, config, enums, keyboards, enums.keyCall
+import json, enums, keyboards, enums.keyCall
 
 from servers.methods import get_very_free_server
 
@@ -17,15 +17,22 @@ from configparser import ConfigParser
 from core.telebot import TeleBotMod
 from telebot.types import Message
 
+from sqlalchemy.orm import Session
+
+from tables import SaleInvoicesInProgress
+
+from connect import engine
+
 
 def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: int, message: Message, label):
 
     conf = ConfigParser()
-    conf.read(config.FILE_URL + 'config.ini')
+    conf.read('config.ini')
     
     bot.send_message(
         conf['Telegram']['admin_chat'],
-        f"Пользователь запросил ссылку на оплату\n{user_id}"
+        f"Пользователь запросил ссылку на оплату\nid:{user_id}",
+        disable_notification=True
     )
 
     user: User = get_user_by_id(user_id)
@@ -66,18 +73,36 @@ def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: i
     
 
     option_text = ""
+    
     if int(user.server_id) != int(server_id):
         option_text = "Внимание! После оплаты необходимо будет заново настроить VPN по инструкции, которую отправит вам бот.\n\n"
+
+    text_for_message = f"{option_text}Выберите способ оплаты (платежные ссылки действуют 1 час):"
 
     try:
         bot.edit_message_text_or_caption(
             message, 
-            f"{option_text}Выберите способ оплаты:",
+            text_for_message,
             reply_markup=keyboard
         )
     except Exception:
         bot.send_message(
             message.chat.id,
-            f"{option_text}Выберите способ оплаты: " ,
+            text_for_message,
             reply_markup=keyboard
         )
+
+
+def add_sale_invoice(label: str, user_id: int, server_id: int, month_count: int, chat_id: int, message_id: int) -> None:
+    with Session(engine) as session:
+        session.add(
+            SaleInvoicesInProgress(
+                telegram_id=user_id,
+                label=label,
+                server_id=server_id,
+                month_count=month_count,
+                chat_id=chat_id,
+                message_id=message_id
+            )
+        )
+        session.commit()

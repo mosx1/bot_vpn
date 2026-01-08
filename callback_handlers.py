@@ -35,7 +35,7 @@ from users.methods import get_user_by_id
 
 from payment.crypto.repository.methods import crypto_pay, PayingUser, TypeOfPurchase
 from payment.stars.handlers import handle_buy
-from payment.methods import send_message_for_pay
+from payment.methods import send_message_for_pay, add_sale_invoice
 
 from configparser import ConfigParser
 
@@ -47,82 +47,7 @@ from core.telebot import TeleBotMod
 from managers.subscription.renewal_of_subscription import renewalOfSubscription
 
 
-def register_callback_handlers(bot: TeleBotMod) -> None:
-
-    def pollingInfoLastPayment(*args) -> dict:
-        """
-            args - label, server, day, userId, message
-        """
-        label = args[0]
-        server = args[1]
-        month = args[2]
-        userId = args[3]
-        message: Message = args[4]
-        try:
-            userName: str = args[5]
-        except Exception:
-            userName = userId
-
-        stopDateTime = datetime.datetime.now(pytz.timezone('Europe/Moscow')) + datetime.timedelta(hours=1)
-
-        while True:
-
-            res = None
-            t = ""
-
-            time.sleep(3)
-            currentDateTime: datetime.datetime = datetime.datetime.now(pytz.timezone('Europe/Moscow')) 
-            res = getInfoLastPayment(label)
-
-            if res:
-                
-                user: User = get_user_by_id(userId)
-
-                logging.info(
-                    "user_id: {}; user_name:{}; Оплата подписки {} мес. сервер {}".format(
-                        userId,
-                        userName,
-                        month,
-                        utils.get_server_name_by_id(server)
-                    )
-                )
-
-                bot.edit_message_text_or_caption(
-                    message,
-                    "Оплата получена, идет настройка конфигурации(это может занять несколько минут)..."
-                )
-       
-                userMessage: config.AddUserMessage = add_user(userId, month, server=server)
-
-                bot.send_message(
-                    config.ADMINCHAT,
-                    "[" + utils.form_text_markdownv2(userName) + "](tg://user?id\=" + str(userId) + ") оплатил",
-                    parse_mode=ParseMode.mdv2.value
-                )
-                
-                invite.methods.incrementBalance(userId, month=month)
-                bot.delete_message(
-                    message.chat.id,
-                    message.id
-                )
-
-                if not user.action:
-                    t = "В связи с тем, что вы продлили подписку уже после ее отключения, Вам нужно заново настроить все. Во избежании таких ситуаций в будущем - продлевайте подписку после первого уведомления.\n"
-                    
-                successfully_paid(
-                    userId, 
-                    optionText=str(userMessage.value) + t
-                )
-
-                return res
-            
-            if currentDateTime > stopDateTime:
-                bot.edit_message_text_or_caption(
-                    message,
-                    "Ошибка проверки платежа. Обратитесь в подержку для разрешения данной ситуации."
-                )
-                return 
-            
+def register_callback_handlers(bot: TeleBotMod) -> None:     
             
     def pollingInfoLastPaymentGift(*args) -> dict:
         """
@@ -309,16 +234,14 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
             case KeyCall.get_link_payment.value:
                 
                 label = uuid.uuid4()
-                checkPayment = Thread(
-                    target=pollingInfoLastPayment, 
-                    args=(
-                        label, 
-                        call_data['server'], 
-                        call_data['month'], 
-                        call.from_user.id, 
-                        call.message, 
-                        call.from_user.full_name
-                    )
+
+                add_sale_invoice(
+                    label,
+                    call.from_user.id,
+                    call_data['server'],
+                    call_data['month'],
+                    call.message.chat.id,
+                    call.message.id
                 )
                 send_message_for_pay(
                     bot, 
@@ -328,7 +251,6 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     call.message, 
                     label
                 )
-                checkPayment.start()
 
             case "connect":
 

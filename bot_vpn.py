@@ -11,6 +11,7 @@ import payment
 import managers.handlers
 import callback_handlers
 from connect import bot, storage
+import threads
 
 bot.remove_webhook()
 
