@@ -1,6 +1,6 @@
 from connect import engine
 
-from sqlalchemy import Column,Numeric, BIGINT, TEXT, TIMESTAMP, BOOLEAN, String, ForeignKeyConstraint, INTEGER, VARCHAR, TIME, func, SMALLINT
+from sqlalchemy import Column,Numeric, BIGINT, TEXT, TIMESTAMP, BOOLEAN, String, ForeignKeyConstraint, INTEGER, VARCHAR, TIME, SMALLINT,func, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -102,7 +102,7 @@ class SaleInvoicesInProgress(Base):
     month_count: Column = Column(SMALLINT, nullable=False)
     message_id: Column = Column(BIGINT, nullable=False)
     chat_id: Column = Column(BIGINT, nullable=False)
-    create_date: Column = Column(TIMESTAMP, nullable=False, default=func.now())
+    create_date: Column = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
     __table_agrs___ = (
         ForeignKeyConstraint(['telegram_id'], ['users_subscription.telegram_id']),

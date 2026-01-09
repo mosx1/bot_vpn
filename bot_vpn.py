@@ -13,6 +13,8 @@ import callback_handlers
 import threads
 from connect import bot, storage
 
+from payment.methods import add_sale_invoice
+
 bot.remove_webhook()
 
 warnings.filterwarnings("ignore", category=SyntaxWarning)
@@ -23,7 +25,6 @@ spam.handlers.register_message_handlers(bot)
 payment.stars.handlers.register_message_handlers(bot)
 game.handlers.register_handlers(bot, storage)
 managers.handlers.register_message_handlers(bot)
-
 
 print('БОТ ЗАПУЩЕН')
 bot.infinity_polling()
