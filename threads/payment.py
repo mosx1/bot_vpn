@@ -1,6 +1,6 @@
 import time
 import utils
-import invite
+import invite.methods
 
 from connect import bot, logging, engine
 
