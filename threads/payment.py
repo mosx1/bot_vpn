@@ -35,7 +35,7 @@ def check_payments() -> None:
             with Session(engine) as session:
                 query = select(
                     SaleInvoicesInProgress, 
-                    (func.timezone('UTC', SaleInvoicesInProgress.create_date) - text("INTERVAL '1 hour'")).label("stop_date_time"),
+                    (func.now() + text("INTERVAL '1 hour'")).label("stop_date_time"),
                     func.now().label("current_date_time")
                 )
                 result: Result = session.execute(query)
@@ -91,7 +91,7 @@ def check_payments() -> None:
                         old_message,
                         optionText=str(userMessage.value)
                     )
-                
+
                 if (current_date_time > stop_date_time) or res:
                     with Session(engine) as session:
                         query = delete(SaleInvoicesInProgress).where(SaleInvoicesInProgress.id == invoice.id)

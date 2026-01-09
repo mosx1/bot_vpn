@@ -13,8 +13,6 @@ import callback_handlers
 import threads
 from connect import bot, storage
 
-from payment.methods import add_sale_invoice
-
 bot.remove_webhook()
 
 warnings.filterwarnings("ignore", category=SyntaxWarning)

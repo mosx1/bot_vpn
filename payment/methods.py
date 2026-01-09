@@ -18,10 +18,11 @@ from core.telebot import TeleBotMod
 from telebot.types import Message
 
 from sqlalchemy.orm import Session
+from sqlalchemy import insert
 
 from tables import SaleInvoicesInProgress
 
-from connect import engine, logging
+from connect import engine
 
 
 def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: int, message: Message, label):
@@ -94,19 +95,14 @@ def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: i
 
 
 def add_sale_invoice(label: str, user_id: int, server_id: int, month_count: int, chat_id: int, message_id: int) -> None:
-    try:
-        with Session(engine) as session:
-            invoice = SaleInvoicesInProgress(
-                telegram_id=user_id,
-                label=label,
-                server_id=server_id,
-                month_count=month_count,
-                chat_id=chat_id,
-                message_id=message_id
-            )
-            session.add(invoice)
-            session.commit()
-            logging.info(f"Successfully added sale invoice: id={invoice.id}, user_id={user_id}, label={label}, server_id={server_id}")
-    except Exception as e:
-        logging.error(f"Error adding sale invoice: {str(e)}, user_id={user_id}, label={label}, server_id={server_id}, month_count={month_count}")
-        raise
+    with Session(engine) as session:
+        query = insert(SaleInvoicesInProgress).values(
+            telegram_id=user_id,
+            label=label,
+            server_id=server_id,
+            month_count=month_count,
+            chat_id=chat_id,
+            message_id=message_id
+        )
+        session.execute(query)
+        session.commit()
