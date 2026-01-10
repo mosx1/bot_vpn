@@ -61,6 +61,19 @@ def check_payments() -> None:
                                 utils.get_server_name_by_id(invoice.server_id)
                             )
                         )
+                        
+                        try:
+                            bot.delete_message(
+                                user.telegram_id,
+                                invoice.message_id
+                            )
+                        except Exception as e:
+                            bot.send_message(
+                                config['Telegram']['admin_chat'],
+                                f'Не удалено сообщение\nпоток: check_payments\nerror: ```' +str(e) + "``` id:" + str(user.telegram_id),
+                                parse_mode=ParseMode.mdv2.value
+                            )
+
                         try:
                             old_message: Message = bot.send_photo(
                                 user.telegram_id,
@@ -68,7 +81,11 @@ def check_payments() -> None:
                                 caption="Оплата получена, идет настройка конфигурации(это может занять несколько минут)..."
                             )
                         except Exception as e:
-                            print(str(e))
+                            bot.send_message(
+                                config['Telegram']['admin_chat'],
+                                f'Не отправлено сообщение\nпоток: check_payments\nerror: ```' +str(e) + "``` id:" + str(user.telegram_id),
+                                parse_mode=ParseMode.mdv2.value
+                            )
 
                         userMessage = add_user(
                             user.telegram_id,
@@ -94,7 +111,11 @@ def check_payments() -> None:
                                 optionText=str(userMessage.value)
                             )
                         except Exception as e:
-                            print(str(e))
+                            bot.send_message(
+                                config['Telegram']['admin_chat'],
+                                f'Не изменено сообщение\nпоток: check_payments\nerror: ```' +str(e) + "``` id:" + str(user.telegram_id),
+                                parse_mode=ParseMode.mdv2.value
+                            )
                             
                     if (current_date_time > stop_date_time) or info_last_payment:
                         with Session(engine) as session:
