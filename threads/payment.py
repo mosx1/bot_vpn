@@ -70,7 +70,7 @@ def check_payments() -> None:
                         except Exception as e:
                             bot.send_message(
                                 config['Telegram']['admin_chat'],
-                                f'Не удалено сообщение\nпоток: check_payments\nerror: ```' +str(e) + "``` id:" + str(user.telegram_id),
+                                f'Не удалено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id),
                                 parse_mode=ParseMode.mdv2.value
                             )
 
@@ -83,7 +83,7 @@ def check_payments() -> None:
                         except Exception as e:
                             bot.send_message(
                                 config['Telegram']['admin_chat'],
-                                f'Не отправлено сообщение\nпоток: check_payments\nerror: ```' +str(e) + "``` id:" + str(user.telegram_id),
+                                f'Не отправлено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id),
                                 parse_mode=ParseMode.mdv2.value
                             )
 
@@ -113,7 +113,7 @@ def check_payments() -> None:
                         except Exception as e:
                             bot.send_message(
                                 config['Telegram']['admin_chat'],
-                                f'Не изменено сообщение\nпоток: check_payments\nerror: ```' +str(e) + "``` id:" + str(user.telegram_id),
+                                f'Не изменено сообщение\nпоток: check_payments\nerror: ```' +utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id),
                                 parse_mode=ParseMode.mdv2.value
                             )
                             
