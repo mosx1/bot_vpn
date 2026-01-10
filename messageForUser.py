@@ -101,7 +101,7 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
                 id
             ),
             reply_markup=keyboard, 
-            parse_mode=ParseMode.mdv2.value
+            parse_mode=ParseMode.mdv2
         )
 
 
