@@ -40,65 +40,69 @@ def check_payments() -> None:
                 )
                 result: Result = session.execute(query)
                 invoices = result.fetchall()
-
-            for invoice, stop_date_time, current_date_time in invoices:
-
-                res = getInfoLastPayment(invoice.label)
-
-                if res:
+                
+                for invoice_item in invoices:
                     
-                    user: User = get_user_by_id(invoice.telegram_id)
+                    invoice = invoice_item[0]
+                    stop_date_time = invoice_item[1]
+                    current_date_time = invoice_item[2]
 
-                    logging.info(
-                        "user_id: {}; user_name:{}; Оплата подписки {} мес. сервер {}".format(
-                            invoice.telegram_id,
-                            user.name,
-                            invoice.month_count,
-                            utils.get_server_name_by_id(invoice.server_id)
-                        )
-                    )
+                    info_last_payment: dict | None = getInfoLastPayment(invoice.label)
 
-                    bot.delete_message(
-                        invoice.chat_id,
-                        invoice.message_id
-                    )
+                    if info_last_payment:
 
-                    old_message: Message = bot.send_photo(
-                        chat_id=user.telegram_id,
-                        photo=open("4rrr.jpg", "rb"),
-                        caption="Оплата получена, идет настройка конфигурации(это может занять несколько минут)..."
-                    )
-            
-                    userMessage = add_user(
-                        invoice.telegram_id,
-                        invoice.month_count,
-                        server=invoice.server_id
-                    )
-
-                    bot.send_message(
-                        config['Telegram']['admin_chat'],
-                        "[" + utils.form_text_markdownv2(user.name) + "](tg://user?id\=" + str(user.telegram_id) + ") оплатил",
-                        parse_mode=ParseMode.mdv2.value
-                    )
-                    
-                    invite.methods.incrementBalance(
-                        invoice.telegram_id, 
-                        month=invoice.month_count
-                    )
+                        user: User = get_user_by_id(invoice.telegram_id)
                         
-                    successfully_paid(
-                        invoice.telegram_id,
-                        old_message,
-                        optionText=str(userMessage.value)
-                    )
+                        logging.info(
+                            "user_id: {}; user_name:{}; Оплата подписки {} мес. сервер {}".format(
+                                user.telegram_id,
+                                user.name,
+                                invoice.month_count,
+                                utils.get_server_name_by_id(invoice.server_id)
+                            )
+                        )
+                        try:
+                            old_message: Message = bot.send_photo(
+                                user.telegram_id,
+                                photo=open("4rrr.jpg", "rb"),
+                                caption="Оплата получена, идет настройка конфигурации(это может занять несколько минут)..."
+                            )
+                        except Exception as e:
+                            print(str(e))
 
-                if (current_date_time > stop_date_time) or res:
-                    with Session(engine) as session:
-                        query = delete(SaleInvoicesInProgress).where(SaleInvoicesInProgress.id == invoice.id)
-                        session.execute(query)
-                        session.commit()
+                        userMessage = add_user(
+                            user.telegram_id,
+                            invoice.month_count,
+                            server=invoice.server_id
+                        )
 
-            time.sleep(4)
+                        bot.send_message(
+                            config['Telegram']['admin_chat'],
+                            "[" + utils.form_text_markdownv2(user.name) + "](tg://user?id\=" + str(user.telegram_id) + ") оплатил",
+                            parse_mode=ParseMode.mdv2.value
+                        )
+
+                        invite.methods.incrementBalance(
+                            user.telegram_id, 
+                            month=invoice.month_count
+                        )
+
+                        try:
+                            successfully_paid(
+                                user.telegram_id,
+                                old_message,
+                                optionText=str(userMessage.value)
+                            )
+                        except Exception as e:
+                            print(str(e))
+                            
+                    if (current_date_time > stop_date_time) or info_last_payment:
+                        with Session(engine) as session:
+                            query = delete(SaleInvoicesInProgress).where(SaleInvoicesInProgress.id == invoice.id)
+                            session.execute(query)
+                            session.commit()
+
+                time.sleep(3)
 
         except Exception as e:
-            logging.error('tread check_payments error: ' + str(e))
+            print(str(e))
