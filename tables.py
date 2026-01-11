@@ -1,6 +1,6 @@
 from connect import engine
 
-from sqlalchemy import Column,Numeric, BIGINT, TEXT, TIMESTAMP, BOOLEAN, String, ForeignKeyConstraint, INTEGER, VARCHAR, TIME, SMALLINT,func, text
+from sqlalchemy import Column,Numeric, BIGINT, TEXT, TIMESTAMP, BOOLEAN, String, ForeignKeyConstraint, INTEGER, VARCHAR, TIME, SMALLINT,func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import JSONB
 

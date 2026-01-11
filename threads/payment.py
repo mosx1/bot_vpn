@@ -121,8 +121,8 @@ def check_payments() -> None:
                                 f'Не изменено сообщение\nпоток: check_payments\nerror: ```' +utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id),
                                 parse_mode=ParseMode.mdv2.value
                             )
-                        
-                    if (current_date_time > stop_date_time) or info_last_payment:
+
+                    if (current_date_time.strftime("%Y-%m-%d %H:%M:%S") > stop_date_time.strftime("%Y-%m-%d %H:%M:%S")) or info_last_payment:
                         with Session(engine) as session:
                             query = delete(SaleInvoicesInProgress).where(SaleInvoicesInProgress.id == invoice.id)
                             session.execute(query)
