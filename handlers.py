@@ -118,7 +118,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
     @bot.message_handler(commands=["log", "лог"], func=onlyAdminChat())
     def _(message: types.Message):
 
-        bot.send_document(message.chat.id, document=open(config.FILE_URL + "logs.txt","rb"))
+        bot.send_document(message.chat.id, document=open("logs.txt","rb"))
 
 
     @bot.message_handler(
@@ -198,7 +198,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                 try:
                     bot.send_photo(
                         chat_id=item,
-                        photo=open(config.FILE_URL + "image/gift.png", "rb"),
+                        photo=open("image/gift.png", "rb"),
                         caption=config.TextsMessages.giftSpamCaption.value,
                         reply_markup=key
                     )
@@ -230,7 +230,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
         )
         bot.send_photo(
             chat_id=message.from_user.id,
-            photo = open(config.FILE_URL + "vpn_option.png", "rb"),
+            photo = open("vpn_option.png", "rb"),
             caption="Для оформления подарка нажмите кнопку ниже",
             reply_markup=key
         )

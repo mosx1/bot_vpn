@@ -58,7 +58,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
             case KeyboardForUser.buy.value:
 
                 conf = ConfigParser()
-                conf.read(config.FILE_URL + 'config.ini')
+                conf.read('config.ini')
 
                 server_id: int = get_very_free_server()
 

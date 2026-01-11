@@ -1,8 +1,4 @@
-import config
-
 from enum import Enum
-
-from configparser import ConfigParser
 
 class Comands(Enum):
     

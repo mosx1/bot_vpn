@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 
 from enum import Enum
 
-from config import AddUserMessage, ADMINCHAT, FILE_URL, TextsMessages
+from config import AddUserMessage, ADMINCHAT, TextsMessages
 from connect import logging, engine, bot
 
 from sqlalchemy.orm import Session
@@ -82,7 +82,7 @@ class CryptoPay:
         self.ids: dict[PayingUser] = {}
 
         configInit = ConfigParser()
-        configInit.read(FILE_URL + 'config.ini')
+        configInit.read('config.ini')
         config = configInit['CryptoPay']
 
         self.token: str = config.get('token')
@@ -225,7 +225,7 @@ class CryptoPay:
 
                                 photoMessage = bot.send_photo(
                                     chat_id=user.telegram_id,
-                                    photo=open(FILE_URL + "image/gift.png", "rb"),
+                                    photo=open("image/gift.png", "rb"),
                                     caption=TextsMessages.giftPostcard.format(code=hash, date=paying_user.count_month),
                                     parse_mode=ParseMode.mdv2.value
                                 )

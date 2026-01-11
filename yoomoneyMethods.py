@@ -17,7 +17,7 @@ def getInfoLastPayment(label: str) -> dict:
     """
 
     conf = ConfigParser()
-    conf.read(config.FILE_URL + 'config.ini')
+    conf.read('config.ini')
 
     client = Client(conf['Umani'].get('token'))
 
@@ -47,7 +47,7 @@ def getLinkPayment(label: str, month: int) -> str:
         Создает ссылку на платеж
     """
     conf = ConfigParser()
-    conf.read(config.FILE_URL + 'config.ini')
+    conf.read('config.ini')
 
     quickpay = Quickpay(
         receiver=config.WALLET_YOOMONEY_ID,

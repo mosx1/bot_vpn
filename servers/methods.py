@@ -11,8 +11,6 @@ from servers.server_list import Country, Servers
 
 from configparser import ConfigParser
 
-from config import FILE_URL
-
 
 def get_server_list(filter: BinaryExpression | None = None) -> list[ServersTable]:
     with Session(engine) as session:
@@ -48,7 +46,7 @@ def get_very_free_server(country: Country | None = None, exclude_server_id: int 
     """
 
     conf = ConfigParser()
-    conf.read(FILE_URL + 'config.ini')
+    conf.read('config.ini')
 
     with Session(engine) as session:
 
@@ -100,7 +98,7 @@ def get_info_all_servers() -> Row[Tuple]:
         Информация по всем серверам вместе
     """
     conf = ConfigParser()
-    conf.read(FILE_URL + 'config.ini')
+    conf.read('config.ini')
     
     with Session(engine) as session:
             
@@ -117,7 +115,7 @@ def get_info_servers() -> Sequence[Row[Tuple]]:
         Информация отдельно по каждому серверу
     """
     conf = ConfigParser()
-    conf.read(FILE_URL + 'config.ini')
+    conf.read('config.ini')
     
     with Session(engine) as session:
             

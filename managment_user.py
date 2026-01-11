@@ -200,7 +200,7 @@ def add_user(
 ) -> config.AddUserMessage:
     
     conf = ConfigParser()
-    conf.read(config.FILE_URL + "config.ini")
+    conf.read("config.ini")
 
     admin_chat_id: int = conf['Telegram'].getint('admin_chat')
     
@@ -318,7 +318,7 @@ def del_users(
                     except ApiTelegramException as e:
 
                         conf = ConfigParser()
-                        conf.read(config.FILE_URL + 'config.ini')
+                        conf.read('config.ini')
 
                         bot.send_message(
                             conf['Telegram'].getint('admin_chat'), 
@@ -418,7 +418,7 @@ def paidCheckActive(item: bool) -> str:
 def delete_not_subscription() -> None:
 
     conf = ConfigParser()
-    conf.read(config.FILE_URL + 'config.ini')
+    conf.read('config.ini')
     admin_chat_id: int = conf['Telegram'].getint('admin_chat')
 
     with Session(engine) as session:

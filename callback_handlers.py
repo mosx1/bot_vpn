@@ -60,12 +60,12 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
             case "try":
                 
                 conf = ConfigParser()
-                conf.read(config.FILE_URL + 'config.ini')
+                conf.read('config.ini')
 
                 bot.delete_message(call.message.chat.id, call.message.id)
                 oldMessage: types.Message = bot.send_photo(
                     chat_id=call.from_user.id, 
-                    photo=open(config.FILE_URL + "4rrr.jpg", "rb"),
+                    photo=open("4rrr.jpg", "rb"),
                     caption="Идет формирование конфигурации. Это может занять несколько минут..."
                 )
                 add_user(
@@ -102,7 +102,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
 
                 bot.send_photo(
                     call.from_user.id,
-                    photo = open(config.FILE_URL + "vpn_option.png", "rb"),
+                    photo = open("vpn_option.png", "rb"),
                     caption = utils.form_text_markdownv2(config.TextsMessages.select_country.value),
                     parse_mode=ParseMode.mdv2.value,
                     reply_markup=keyboards.get_inline_keyboard_list_countries(user.server_id)
@@ -121,7 +121,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
             case KeyCall.pollCountMonth.value:
 
                 conf = ConfigParser()
-                conf.read(config.FILE_URL + 'config.ini')
+                conf.read('config.ini')
 
                 server_id: int = get_very_free_server()
 
@@ -301,11 +301,11 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
 
             case "faq_video":
 
-                bot.send_video(call.from_user.id, open(f"{config.FILE_URL}video/0809.mp4", "rb"), width=888, height=1920)
+                bot.send_video(call.from_user.id, open("video/0809.mp4", "rb"), width=888, height=1920)
 
             case "comands_video":
 
-                bot.send_video(call.from_user.id, open(f"{config.FILE_URL}video/08.mp4", "rb"), width=888, height=1920)
+                bot.send_video(call.from_user.id, open("video/08.mp4", "rb"), width=888, height=1920)
 
             case "page_client_next":
                 

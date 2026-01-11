@@ -36,7 +36,7 @@ def register_message_handlers(bot: TeleBot) -> None:
     def handle_successful_payment(message: Message) -> None:
         
         conf = ConfigParser()
-        conf.read(config.FILE_URL + 'config.ini')
+        conf.read('config.ini')
         price_stars: int = conf['Price'].getint('star')
         summ: int = message.successful_payment.total_amount
         month = int(summ / price_stars)
@@ -128,7 +128,7 @@ def handler_get_pay(
 def handle_buy(message: Message, amount: int, server: int) -> None:
 
     conf = ConfigParser()
-    conf.read(config.FILE_URL + 'config.ini')
+    conf.read('config.ini')
     price_stars: int = conf['Price'].getint('star')
     count_mount: int = int(amount / price_stars)
 
@@ -141,5 +141,5 @@ def handle_buy(message: Message, amount: int, server: int) -> None:
         currency="XTR",  # Валюта (Telegram Stars работают через USD/XTR)
         prices=[LabeledPrice(label="XTR", amount=amount)],  # 1000 = 10 Stars (1 Star = 100 единиц)
         start_parameter="start_param",  # Параметр для deep-linking
-        #photo_url=open(config.FILE_URL + "vpn_option.png", "rb"),  # Картинка товара (опционально)
+        #photo_url=open("vpn_option.png", "rb"),  # Картинка товара (опционально)
     )

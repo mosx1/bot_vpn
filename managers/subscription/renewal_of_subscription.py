@@ -12,7 +12,7 @@ from network_service.entity import NetworkServiceError
 def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None:
     
     conf = ConfigParser()
-    conf.read(config.FILE_URL + 'config.ini')
+    conf.read('config.ini')
     admin_chat_id: int = conf['Telegram'].getint('admin_chat')
 
     if serverNew == None:

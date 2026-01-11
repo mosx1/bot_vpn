@@ -1,5 +1,3 @@
-import config
-
 from connect import db, bot
 
 from managment_user import add_user
@@ -36,7 +34,7 @@ def addInvitedBonus(userId):
     user: User = get_user_by_id(userId)
     bot.send_photo(
         userId,
-        photo=open(config.FILE_URL + "image/referalYes.png", "rb"),
+        photo=open("image/referalYes.png", "rb"),
         caption=f"Дата окончания подписки изменена\: {replaceMonthOnRuText(user.exit_date)}",
         parse_mode=ParseMode.mdv2.value
     )
@@ -49,7 +47,7 @@ def incrementBalance(userId: str, month=None, summ=None):
         В метод передается id пользователя который оплатил, а начисляется тому, кто пригласил
     """
     conf = ConfigParser()
-    conf.read(config.FILE_URL + 'config.ini')
+    conf.read('config.ini')
     
     if month:
         summ = conf['Price'].getint('RUB') * month

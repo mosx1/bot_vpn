@@ -15,8 +15,6 @@ from connect import engine, bot
 
 from configparser import ConfigParser
 
-from config import FILE_URL
-
 from humanize import naturalsize
 
 
@@ -26,7 +24,7 @@ def get_statistics_by_server(*args) -> None:
     """
     server: ServersTable = args[0]
     conf = ConfigParser()
-    conf.read(FILE_URL + 'config.ini')
+    conf.read('config.ini')
     old_message: Message = bot.send_message(
         conf['Telegram']['admin_chat'],
         f"Начат сбор статистики по серверу {server.name}"

@@ -1,4 +1,4 @@
-import config, utils
+import utils
 
 from connect import bot
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
@@ -22,7 +22,7 @@ from network_service.controller_flask_api import get_subscription_link
 def successfully_paid(id, old_message: Message | None =None, optionText="") -> Message | bool:
 
     conf = ConfigParser()
-    conf.read(config.FILE_URL + 'config.ini')
+    conf.read('config.ini')
 
     user: User = get_user_by_id(id)
     keyboard = InlineKeyboardMarkup()
@@ -73,7 +73,7 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
     
         if t := bot.send_photo(
                 chat_id=id,
-                photo=open(config.FILE_URL + "4rrr.jpg", "rb"),
+                photo=open("4rrr.jpg", "rb"),
                 caption=optionText + text_for_message.format(
                     user.telegram_id,
                     utils.replaceMonthOnRuText(user.exit_date),
@@ -116,7 +116,7 @@ def manual_successfully_paid(id: int, old_message: Message) -> bool:
     )
 
     conf = ConfigParser()
-    conf.read(config.FILE_URL + 'config.ini')
+    conf.read('config.ini')
 
     caption_for_message: str = conf['MessagesTextMD'].get('successfully_subscription')
 
