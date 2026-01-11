@@ -35,7 +35,7 @@ def check_payments() -> None:
             with Session(engine) as session:
                 query = select(
                     SaleInvoicesInProgress, 
-                    (func.now() + text("INTERVAL '1 hour'")).label("stop_date_time"),
+                    (SaleInvoicesInProgress.create_date + text("INTERVAL '1 hour'")).label("stop_date_time"),
                     func.now().label("current_date_time")
                 )
                 result: Result = session.execute(query)
@@ -116,14 +116,14 @@ def check_payments() -> None:
                                 f'Не изменено сообщение\nпоток: check_payments\nerror: ```' +utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id),
                                 parse_mode=ParseMode.mdv2.value
                             )
-                            
+                        
                     if (current_date_time > stop_date_time) or info_last_payment:
                         with Session(engine) as session:
                             query = delete(SaleInvoicesInProgress).where(SaleInvoicesInProgress.id == invoice.id)
                             session.execute(query)
                             session.commit()
 
-                time.sleep(3)
+                time.sleep(1)
 
         except Exception as e:
             print(str(e))
