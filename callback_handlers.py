@@ -1,13 +1,12 @@
 import enums.invite
 import enums.keyCall
-import json, config, utils, pytz, datetime, time, managment_user, invite, enums, keyboards, uuid
+import json, config, utils, managment_user, invite, enums, keyboards, uuid
 
 from connect import db, logging
 
 import invite.methods
 
 from telebot import types
-from telebot.types import Message
 
 from managment_user import add_user, del_users, UserList, data_user
 
@@ -16,7 +15,7 @@ from psycopg2.extras import DictCursor
 from servers.server_list import Country
 from servers.methods import get_server_list, get_very_free_server
 
-from yoomoneyMethods import getInfoLastPayment, getLinkPayment
+from yoomoneyMethods import getLinkPayment
 
 from telebot.util import quick_markup
 
@@ -24,8 +23,6 @@ from threading import Thread
 
 from enums.parse_mode import ParseMode
 from enums.keyCall import KeyCall
-
-from giftUsers import genGiftCode
 
 from messageForUser import successfully_paid, manual_successfully_paid
 
@@ -46,70 +43,10 @@ from core.telebot import TeleBotMod
 
 from managers.subscription.renewal_of_subscription import renewalOfSubscription
 
+from threads.payment import polling_info_last_payment_gift
+
 
 def register_callback_handlers(bot: TeleBotMod) -> None:     
-            
-    def pollingInfoLastPaymentGift(*args) -> dict:
-        """
-        args - label, month, userId, message
-        """
-        label = args[0]
-        month = args[1]
-        userId = args[2]
-        message: Message = args[3]
-        try:
-            userName = args[5]
-        except Exception:
-            userName = userId
-
-        stopDateTime = datetime.datetime.now(pytz.timezone('Europe/Moscow')) + datetime.timedelta(hours=1)
-
-        while True:
-
-            time.sleep(3)
-            currentDateTime = datetime.datetime.now(pytz.timezone('Europe/Moscow'))
-            res = getInfoLastPayment(label)
-
-            if res or userId == config.ADMINCHAT:
-
-                logging.info(
-                    "user_id: {}; user_name:{}; Оплата подарочной подписки {} мес.".format(
-                        userId,
-                        userName,
-                        month
-                    )
-                )
-
-                hash = genGiftCode(month)
-
-                bot.send_message(
-                    config.ADMINCHAT,
-                    "[{}](tg://user?id\={}) оплатил подарочную подписку".format(utils.form_text_markdownv2(userName), userId),
-                    parse_mode=ParseMode.mdv2.value
-                )
-                bot.delete_message(
-                    message.chat.id, 
-                    message.id
-                )
-
-                photoMessage: Message = bot.send_photo(
-                    chat_id=userId,
-                    photo=open(config.FILE_URL + "image/gift.png", "rb"),
-                    caption=config.TextsMessages.giftPostcard.value.format(code=hash, date=month),
-                    parse_mode=ParseMode.mdv2.value
-                )
-
-                bot.reply_to(photoMessage, "Перешлите это сообщение другу в качестве подарка. Спасибо что помогаете нам делать интернет доступнее.")
-
-                return res
-            
-            if currentDateTime > stopDateTime:
-                bot.edit_message_text_or_caption(
-                    message,
-                    "Ошибка проверки платежа. Обратитесь в подержку для разрешения данной ситуации."
-                )
-                return 
-
     @bot.callback_query_handler(func=lambda call: call.data and isinstance(call.data, str) and call.data.startswith('{"key":'))
     def _(call: types.CallbackQuery):
 
@@ -226,7 +163,16 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     row_width=1
                 )
                 
-                checkPayment = Thread(target=pollingInfoLastPaymentGift, args=(label, call_data['month'], call.from_user.id, call.message, call.from_user.full_name))
+                checkPayment = Thread(
+                    target=polling_info_last_payment_gift, 
+                    args=(
+                        label, 
+                        call_data['month'], 
+                        call.from_user.id, 
+                        call.message, 
+                        call.from_user.full_name
+                    )
+                )
                 checkPayment.start()
 
                 bot.edit_message_text_or_caption(call.message, config.TextsMessages.giftPay.value, reply_markup=keyboard)

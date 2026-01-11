@@ -1,6 +1,7 @@
 import time
 import utils
 import invite.methods
+import pytz
 
 from connect import bot, logging, engine
 
@@ -23,6 +24,10 @@ from configparser import ConfigParser
 from sqlalchemy.orm import Session
 from sqlalchemy import select, delete, text, func
 from sqlalchemy.engine import Result
+
+from datetime import datetime, timedelta
+
+from giftUsers import genGiftCode
 
 
 def check_payments() -> None:
@@ -127,3 +132,64 @@ def check_payments() -> None:
 
         except Exception as e:
             print(str(e))
+
+
+def polling_info_last_payment_gift(*args) -> dict:
+    """
+        args - label, month, userId, message
+    """
+    label = args[0]
+    month = args[1]
+    userId = int(args[2])
+    message: Message = args[3]
+    try:
+        userName = args[5]
+    except Exception:
+        userName = userId
+
+    stopDateTime = datetime.now(pytz.timezone('Europe/Moscow')) + timedelta(hours=1)
+
+    while True:
+
+        time.sleep(3)
+        currentDateTime = datetime.now(pytz.timezone('Europe/Moscow'))
+        res = getInfoLastPayment(label)
+
+        config = ConfigParser()
+        config.read('config.ini')
+
+        if res or userId == config['Telegram'].getint('admin_chat'):
+
+            logging.info(
+                "user_id: {}; user_name:{}; Оплата подарочной подписки {} мес.".format(
+                    userId,
+                    userName,
+                    month
+                )
+            )
+
+            hash = genGiftCode(month)
+
+            bot.send_message(
+                config['Telegram'].getint('admin_chat'),
+                "[{}](tg://user?id\={}) оплатил подарочную подписку".format(utils.form_text_markdownv2(userName), userId),
+                parse_mode=ParseMode.mdv2.value
+            )
+            bot.delete_message(
+                message.chat.id, 
+                message.id
+            )
+
+            photoMessage: Message = bot.send_photo(
+                chat_id=userId,
+                photo=open("image/gift.png", "rb"),
+                caption=config['MessagesTextMD'].get('gift_postcard').format(code=hash, date=month),
+                parse_mode=ParseMode.mdv2.value
+            )
+
+            bot.reply_to(photoMessage, "Перешлите это сообщение другу в качестве подарка. Спасибо что помогаете нам делать интернет доступнее.")
+
+            return res
+        
+        if currentDateTime > stopDateTime:
+            return 

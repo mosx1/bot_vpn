@@ -66,7 +66,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
         treadCheckUsersSubscription.start()
 
     
-    @bot.message_handler(commands=[config.ADMINPASSWORD], func=onlyAdminChat())
+    @bot.message_handler(commands=[conf['BaseConfig'].get('admin_password')], func=onlyAdminChat())
     def d(message):
         add_key_admin(message)
         managment_user.manager_users_list = UserList(message)

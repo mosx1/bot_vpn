@@ -33,7 +33,7 @@ class UserList:
     def __init__(self, message = None, filter = None) -> None:
 
         conf = ConfigParser()
-        conf.read(f'{config.FILE_URL}config.ini')
+        conf.read('config.ini')
 
         self.config = conf['UserList']
         self.mes_arr = []
