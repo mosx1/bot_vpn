@@ -48,12 +48,16 @@ def check_payments() -> None:
                 
                 for invoice_item in invoices:
                     
-                    invoice = invoice_item[0]
+                    invoice: SaleInvoicesInProgress = invoice_item[0]
                     stop_date_time = invoice_item[1]
                     current_date_time = invoice_item[2]
 
-                    info_last_payment: dict | None = getInfoLastPayment(invoice.label)
-
+                    try:
+                        info_last_payment: dict | None = getInfoLastPayment(invoice.label)
+                    except Exception as e:
+                        print(str(e))
+                        continue
+                    
                     if info_last_payment:
 
                         user: User = get_user_by_id(invoice.telegram_id)
@@ -66,7 +70,7 @@ def check_payments() -> None:
                                 utils.get_server_name_by_id(invoice.server_id)
                             )
                         )
-                        
+
                         try:
                             bot.delete_message(
                                 user.telegram_id,
@@ -75,8 +79,7 @@ def check_payments() -> None:
                         except Exception as e:
                             bot.send_message(
                                 config['Telegram']['admin_chat'],
-                                f'Не удалено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id),
-                                parse_mode=ParseMode.mdv2.value
+                                f'Не удалено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id)
                             )
 
                         try:
@@ -88,8 +91,7 @@ def check_payments() -> None:
                         except Exception as e:
                             bot.send_message(
                                 config['Telegram']['admin_chat'],
-                                f'Не отправлено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id),
-                                parse_mode=ParseMode.mdv2.value
+                                f'Не отправлено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id)
                             )
 
                         userMessage = add_user(
@@ -118,8 +120,7 @@ def check_payments() -> None:
                         except Exception as e:
                             bot.send_message(
                                 config['Telegram']['admin_chat'],
-                                f'Не изменено сообщение\nпоток: check_payments\nerror: ```' +utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id),
-                                parse_mode=ParseMode.mdv2.value
+                                f'Не изменено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id)
                             )
 
                     if (current_date_time.strftime("%Y-%m-%d %H:%M:%S") > stop_date_time.strftime("%Y-%m-%d %H:%M:%S")) or info_last_payment:
