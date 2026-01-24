@@ -30,11 +30,11 @@ def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: i
     conf = ConfigParser()
     conf.read('config.ini')
     
-    bot.send_message(
-        conf['Telegram']['admin_chat'],
-        f"Пользователь запросил ссылку на оплату\nid:{user_id}",
-        disable_notification=True
-    )
+    # bot.send_message(
+    #     conf['Telegram']['admin_chat'],
+    #     f"Пользователь запросил ссылку на оплату\nid:{user_id}",
+    #     disable_notification=True
+    # )
 
     user: User = get_user_by_id(user_id)
     
