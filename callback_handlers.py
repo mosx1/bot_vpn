@@ -516,6 +516,16 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     text='Сервер успешно изменен',
                     show_alert=False
                 )
+            case KeyCall.pay_router.value:
+                
+                conf = ConfigParser()
+                conf.read('config.ini')
+                
+                bot.edit_message_text_or_caption(
+                    call.message,
+                    conf['MessagesText'].get('pay_router_message'),
+                    reply_markup=keyboards.get_inline_back_to_main(call.from_user.id)
+                )
             case _:
 
                 bot.answer_callback_query(

@@ -1,8 +1,7 @@
-import utils
+import utils, keyboards
 
 from connect import bot
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
-from telebot.util import quick_markup
 
 from enums.parse_mode import ParseMode
 from enums.keyCall import KeyCall
@@ -41,6 +40,12 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
         InlineKeyboardButton(
             text="Сменить сервер",
             callback_data='{"key": "' + KeyCall.transfer_other_server.value + '"}'
+        )
+    )
+    keyboard.add(
+        InlineKeyboardButton(
+            text="Купить роутер с этим сервисом.",
+            callback_data='{"key": "' + KeyCall.pay_router.value + '"}'
         )
     )
     keyboard.add(
@@ -122,19 +127,12 @@ def manual_successfully_paid(id: int, old_message: Message) -> bool:
 
     user: User = get_user_by_id(id)
 
-    keyboard: InlineKeyboardMarkup = quick_markup(
-        {
-            "<<<Назад": {"callback_data": '{"key": "backmanualSettings", "id": "' + str(id) +'"}'}
-        },
-        row_width=1
-    )
-
     bot.edit_message_text_or_caption(
         old_message,
         caption_for_message.format(
             get_subscription_link(id),
             utils.form_text_markdownv2(user.server_link)
         ),
-        reply_markup=keyboard, 
+        reply_markup=keyboards.get_inline_back_to_main(id), 
         parse_mode=ParseMode.mdv2
     )

@@ -64,3 +64,11 @@ def get_inline_loading() -> InlineKeyboardMarkup:
 
 def get_inline_transfer_for_nid() -> InlineKeyboardMarkup:
     return quick_markup({"Перейти на Немецкие сервера": {"callback_data": '{"key": "' + KeyCall.transfer_from_nid.value + '"}'}})
+
+def get_inline_back_to_main(user_id: int | str) -> InlineKeyboardMarkup:
+    return quick_markup(
+        {
+            "<<<Назад": {"callback_data": '{"key": "backmanualSettings", "id": "' + str(user_id) +'"}'}
+        },
+        row_width=1
+    )
