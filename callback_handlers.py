@@ -224,7 +224,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     *[
                         types.InlineKeyboardButton(
                             text=i,
-                            callback_data='{"key": "' + ReduceTime.commit.value + '", "id": "' + str(call_data['id']) + '", "month": "' + str(i) + '", "s":' + str(call_data['serverId']) + '}'
+                            callback_data='{"key": "' + ReduceTime.commit.value + '", "id": "' + str(call_data['id']) + '", "month": "' + str(i) + '}'
                         ) for i in range(0, 13)
                     ],
                     types.InlineKeyboardButton(text="Назад", callback_data='{"key": "backConnectKey", "id": "' + str(call_data['id']) + '"}')
