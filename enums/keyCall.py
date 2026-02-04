@@ -20,7 +20,7 @@ class KeyCall(Enum):
     pay_router: str = "pay_router"
 
 
-class ReduceTime(KeyCall):
+class ReduceTime(Enum):
 
     timing: str = "reduce_time_timing"
     commit: str = "reduce_time_commit"
