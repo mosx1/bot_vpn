@@ -22,13 +22,13 @@ from telebot.util import quick_markup
 from threading import Thread
 
 from enums.parse_mode import ParseMode
-from enums.keyCall import KeyCall
+from enums.keyCall import KeyCall, ReduceTime
 
 from messageForUser import successfully_paid, manual_successfully_paid
 
 from tables import User
 
-from users.methods import get_user_by_id
+from users.methods import get_user_by_id, reduce_time_by
 
 from payment.crypto.repository.methods import crypto_pay, PayingUser, TypeOfPurchase
 from payment.stars.handlers import handle_buy
@@ -215,6 +215,36 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     call.message.chat.id,
                     call.message.id,
                     reply_markup=key
+                )
+            
+            case ReduceTime.timing.value:
+
+                key = types.InlineKeyboardMarkup()
+                key.add(
+                    *[
+                        types.InlineKeyboardButton(
+                            text=i,
+                            callback_data='{"key": "' + ReduceTime.commit.value + '", "id": "' + str(call_data['id']) + '", "month": "' + str(i) + '", "s":' + str(call_data['serverId']) + '}'
+                        ) for i in range(0, 13)
+                    ],
+                    types.InlineKeyboardButton(text="Назад", callback_data='{"key": "backConnectKey", "id": "' + str(call_data['id']) + '"}')
+                )
+                
+                return bot.edit_message_reply_markup(
+                    call.message.chat.id,
+                    call.message.id,
+                    reply_markup=key
+                )
+            
+            case ReduceTime.commit.value:
+                
+                user: User = get_user_by_id(call_data['id'])
+                reduce_time_by(user, call_data['month'])
+                user: User = get_user_by_id(call_data['id'])
+                bot.send_message(
+                    user.telegram_id,
+                    f"Дата окончания подписки изменена\: {utils.replaceMonthOnRuText(user.exit_date)}",
+                    parse_mode=ParseMode.mdv2.value
                 )
             
             case "backConnectKey":

@@ -7,7 +7,7 @@ from telebot.apihelper import ApiTelegramException
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
 from enums.invite import CallbackKeys
-from enums.keyCall import KeyCall
+from enums.keyCall import KeyCall, ReduceTime
 from enums.parse_mode import ParseMode
 
 from protocols import getNameProtocolById
@@ -155,6 +155,13 @@ class UserList:
 
                 keyboard_offer_one.add(
                     inlineKeyConnect,
+                    InlineKeyboardButton(
+                        text="-",
+                        callback_data=utils.callBackBilder(
+                            ReduceTime.timing,
+                            id=user.telegram_id
+                        )
+                    ),
                     InlineKeyboardButton(
                         text="Отключить", 
                         callback_data='{"key": "deaction", "id": "' + str(user.telegram_id) + '"}'

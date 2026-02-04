@@ -3,7 +3,7 @@ from typing import Iterable
 from connect import engine
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select, and_, insert
+from sqlalchemy import select, and_, insert, update, func
 from sqlalchemy.sql.elements import BinaryExpression
 
 from tables import User, ServersTable, UserToSubscription
@@ -69,4 +69,27 @@ def add_subscription_for_user(telegram_id: int, server_link: str, server_id: str
             server_id=server_id
         )
         session.execute(query)
+        session.commit()
+
+
+def reduce_time_by(user: User, month: int) -> None:
+    """
+    Уменьшает кол-во месяцев на значение
+    
+    :param user:
+    :type user: User
+    :param month: кол-во месяцев уменьшения
+    :type month: int
+    """
+
+    with Session(engine) as session:
+        session.execute(
+            update(
+                User
+            ).where(
+                User.telegram_id == user.telegram_id
+            ).values(
+                exit_date = User.exit_date - func.make_interval(month=month)
+            )
+        )
         session.commit()
