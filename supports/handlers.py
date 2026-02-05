@@ -39,6 +39,8 @@ def register_message_handlers(bot: TeleBotMod) -> None:
     )
     def _(message: types.Message) -> bool | types.Message:
 
+        conf = ConfigParser()
+        conf.read('config.ini')
         user: User = get_user_by_id(message.from_user.id)
 
         if checkGiftCode(message):
@@ -56,10 +58,6 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                 )
             
             case KeyboardForUser.buy.value:
-
-                conf = ConfigParser()
-                conf.read('config.ini')
-
                 server_id: int = get_very_free_server()
 
                 keyboard = quick_markup(
@@ -86,10 +84,9 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                     parse_mode=ParseMode.mdv2.value,
                     reply_markup=UserList.addButtonKeyForUsersList(user)
                 )
-                return bot.send_message(
-                    chat_id=message.from_user.id, 
-                    reply_to_message_id=message.id,
-                    text="Отправлено администраторам. Ожидайте ответ..."
+                return bot.reply_to(
+                    message,
+                    conf['MessagesText'].get('reply_to_messageе')
                 )
             
 
