@@ -250,6 +250,12 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     f"Дата окончания подписки изменена\: {utils.replaceMonthOnRuText(user.exit_date)}",
                     parse_mode=ParseMode.mdv2.value
                 )
+                bot.edit_message_reply_markup(
+                    chat_id = call.message.chat.id, 
+                    message_id = call.message.id, 
+                    reply_markup = UserList.addButtonKeyForUsersList(user)
+                )
+                return
             
             case "backConnectKey":
 
