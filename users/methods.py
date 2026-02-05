@@ -3,7 +3,7 @@ from typing import Iterable
 from connect import engine
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select, and_, insert, update, func
+from sqlalchemy import select, and_, insert, update, text
 from sqlalchemy.sql.elements import BinaryExpression
 
 from tables import User, ServersTable, UserToSubscription
@@ -89,7 +89,7 @@ def reduce_time_by(user: User, month: int) -> None:
             ).where(
                 User.telegram_id == user.telegram_id
             ).values(
-                exit_date = User.exit_date - func.make_interval(month=month)
+                exit_date = text(f"exit_date - INTERVAL '{month} months'")
             )
         )
         session.commit()
