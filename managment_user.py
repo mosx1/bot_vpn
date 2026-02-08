@@ -1,6 +1,5 @@
 import config, string, secrets, utils, keyboards
 
-
 from connect import db, logging, bot, engine
 
 from telebot.apihelper import ApiTelegramException
@@ -112,7 +111,7 @@ class UserList:
             if user:
 
                     paid: str = paidCheckActive(user.paid)
-                    status: str = textCheckActive(user.action)
+                    status: str = utils.bool_in_circle_for_text(user.action)
                     name: str = utils.form_text_markdownv2(user.name)
                     telegram_id: str = str(user.telegram_id)
                     date: str = utils.replaceMonthOnRuText(user.exit_date)
@@ -394,7 +393,7 @@ def data_user(id: int, old_message: Message | None = None) -> Message:
     
     return bot.edit_message_text_or_caption(
         message,
-        paidCheckActive(user.paid) + textCheckActive(user.action) +
+        paidCheckActive(user.paid) + utils.bool_in_circle_for_text(user.action) +
         " [" + utils.form_text_markdownv2(user.name) + "](tg://user?id\=" + str(user.telegram_id) +
         ")\nДата окончания подписки: " + utils.form_text_markdownv2(str(user.exit_date)) +
         "\n" + "\nlink: `" + utils.form_text_markdownv2(user.server_link) +
@@ -408,12 +407,6 @@ def data_user(id: int, old_message: Message | None = None) -> Message:
         parse_mode=ParseMode.mdv2,
         reply_markup=keyboard
     )  
-
-
-def textCheckActive(item: bool) -> str:
-    if item:
-        return "🟢"
-    return "🔴"
     
 
 def paidCheckActive(item: bool) -> str:

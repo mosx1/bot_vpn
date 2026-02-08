@@ -120,3 +120,9 @@ def get_message_text_or_caption(message: Message) -> str | None:
     if message.content_type == ContentTypes.text.value:
         return message.text
     return message.caption
+
+
+def bool_in_circle_for_text(item: bool) -> str:
+    if item:
+        return "🟢"
+    return "🔴"

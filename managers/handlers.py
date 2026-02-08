@@ -1,3 +1,5 @@
+import utils
+
 from telebot import TeleBot
 from telebot.types import Message
 
@@ -15,7 +17,7 @@ def register_message_handlers(bot: TeleBot) -> None:
         message_text: str = f"{info_all_servers.count} | {info_all_servers.count_pay} : Всего активных\n"
 
         for item in get_info_servers():
-            message_text += f"{item.count} | {item.count_pay} | {item.load}% : {item.name} \n"
+            message_text += f"{utils.bool_in_circle_for_text(item.answers)}|{item.count}|{item.count_pay}|{item.load}%: {item.name} \n"
 
         bot.send_message(
             message.chat.id,

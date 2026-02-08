@@ -1,8 +1,11 @@
-import requests
+import gevent.monkey
+gevent.monkey.patch_socket()
+
+import requests, gevent
 
 from typing import Tuple
 
-from connect import engine
+from connect import engine, logging
 
 from sqlalchemy.orm import Session
 from sqlalchemy import Row, Sequence, select, func, and_, text, update
@@ -47,6 +50,7 @@ def get_very_free_server(country: Country | None = None, exclude_server_id: int 
         Возвращает менее загруженный сервер по стране
         Если страна не передана - ищет по всем странам
     """
+    check_answers_servers()
 
     conf = ConfigParser()
     conf.read('config.ini')
@@ -67,20 +71,13 @@ def get_very_free_server(country: Country | None = None, exclude_server_id: int 
                 ), 
                 isouter=True
             )
+            .filter(
+                ServersTable.answers == True
+            )
         )
         
         if country:
             query = query.filter(ServersTable.country == country.value)
-        else:
-            query = query.filter(
-                and_(
-                    ~ServersTable.id.in_(
-                        [
-                            Servers.niderlands2.value
-                        ]
-                    )
-                )
-            )
 
         if exclude_server_id:
             query = query.filter(ServersTable.id != exclude_server_id)
@@ -125,6 +122,7 @@ def get_info_servers() -> Sequence[Row[Tuple]]:
             query = (
                 select(
                     ServersTable.name.label("name"),
+                    ServersTable.answers,
                     func.count().label("count"),
                     func.count().filter(User.paid == True).label("count_pay"),
                     (func.count() / conf['BaseConfig'].getfloat('coefficient_load_servers') / ServersTable.speed * 100).label('load')
@@ -134,7 +132,8 @@ def get_info_servers() -> Sequence[Row[Tuple]]:
                     User.action == True
                 ).group_by(
                     ServersTable.name,
-                    ServersTable.speed
+                    ServersTable.speed,
+                    ServersTable.answers
                 )
             ).order_by(text('count_pay DESC'))
             
@@ -143,7 +142,7 @@ def get_info_servers() -> Sequence[Row[Tuple]]:
 
 def health_check(url: str) -> int:
     try:
-        res = requests.get(url, timeout=10)
+        res = requests.get(url, timeout=1)
         return res.status_code
     except Exception:
         pass
@@ -161,6 +160,20 @@ def update_answers_servers(server_id: int, answers: bool) -> None:
             )
         )
         session.commit()
+
+
+def health_check_and_update_answers(server: ServersTable):
+    code = health_check(f"http://{server.links}/config")
+    answers = bool(code == 200)
+    update_answers_servers(server.id, answers)
+    logging.info(f"health_chech_server: {str(server.name)} value: {answers}")
+    print(f"health_chech_server: {str(server.name)} value: {answers}")
+
+
+def check_answers_servers():
+    servers: Sequence[ServersTable] = get_server_list()
+    gevent.joinall([gevent.spawn(health_check_and_update_answers, server) for server in servers])
+        
 
 
 if __name__ == "__main__":

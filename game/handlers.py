@@ -1,5 +1,4 @@
 from telebot import TeleBot
-from telebot.states import State
 from telebot.types import Message, CallbackQuery
 from telebot.storage import StateMemoryStorage
 
@@ -29,7 +28,7 @@ def register_handlers(bot: TeleBot, storage: StateMemoryStorage) -> None:
         ]
     )
     def new_game(message: Message) -> None:
-        
+
         bot.set_state(
             message.from_user.id,
             GameStates.in_game,
@@ -40,7 +39,7 @@ def register_handlers(bot: TeleBot, storage: StateMemoryStorage) -> None:
             message.from_user.id,
             message.chat.id
         ) as data:
-            
+
             game_message: Message = bot.send_message(
                 message.chat.id,
                 'Загрузка...'
@@ -49,15 +48,18 @@ def register_handlers(bot: TeleBot, storage: StateMemoryStorage) -> None:
             data['games'] = {game_message.id: Game(message.from_user.id)}
             game: Game = data['games'][game_message.id]
 
+            # Get player nicknames
+            player_x_nickname = game.get_player_nickname(bot, message.chat.id, message.from_user.id)
+
             bot.edit_message_text(
                 chat_id=game_message.chat.id,
                 message_id=game_message.id,
-                text=f"Ход игрока {game.current_player}\n{game.print_board()}", 
+                text=f"Крестики: {player_x_nickname}\nНолики: Ожидание соперника\n\nХод: {player_x_nickname}\n{game.print_board()}",
                 reply_markup=game.create_markup()
             )
     
 
-    #k_query_handler(func=lambda call: not str(call.data).startswith('{"key":'))
+    @bot.callback_query_handler(func=lambda call: not str(call.data).startswith('{"key":'))
     def handle_move(call: CallbackQuery) -> None:
 
         storage_data: dict = storage.data.copy()
@@ -82,15 +84,15 @@ def register_handlers(bot: TeleBot, storage: StateMemoryStorage) -> None:
 
                                     if call.from_user.id in game.players and len(game.players) == 1:
                                         bot.answer_callback_query(
-                                            call.id, 
+                                            call.id,
                                             'Ожидайте первого хода соперника.'
                                         )
                                         return
-                                    
+
                                     if call.from_user.id not in game.players and len(game.players) == 1:
-                                 
-                                        game.players.add(call.from_user.id)
-     
+
+                                        game.add_player(call.from_user.id)
+
                                         bot.set_state(
                                             call.from_user.id,
                                             GameStates.in_game,
@@ -100,16 +102,33 @@ def register_handlers(bot: TeleBot, storage: StateMemoryStorage) -> None:
                                             call.from_user.id,
                                             call.message.chat.id
                                         ) as data:
-                                            
+
                                             data['games'] = {call.message.id: game}
-                                    
+
+                                        # Update game message to show both players
+                                        player_x_id = game.get_player_by_symbol('X')
+                                        player_o_id = game.get_player_by_symbol('O')
+
+                                        player_x_nickname = game.get_player_nickname(bot, call.message.chat.id, player_x_id)
+                                        player_o_nickname = game.get_player_nickname(bot, call.message.chat.id, player_o_id)
+
+                                        current_player_nickname = player_x_nickname if game.current_player_symbol == 'X' else player_o_nickname
+
+                                        bot.edit_message_text(
+                                            chat_id=call.message.chat.id,
+                                            message_id=call.message.message_id,
+                                            text=f"Крестики: {player_x_nickname}\nНолики: {player_o_nickname}\n\nХод: {current_player_nickname}\n{game.print_board()}",
+                                            reply_markup=game.create_markup()
+                                        )
+                                        return
+
                                     if call.from_user.id not in game.players and len(game.players) == 2:
                                         bot.answer_callback_query(
-                                            call.id, 
+                                            call.id,
                                             "Вы не можете войти в данную игру. Для создания своей нажмите /game"
                                         )
                                         return
-                                    
+
                                     if call.from_user.id == game.last_move_for:
                                         bot.answer_callback_query(
                                             call.id,
@@ -117,45 +136,59 @@ def register_handlers(bot: TeleBot, storage: StateMemoryStorage) -> None:
                                         )
                                         return
                                     i, j = map(int, call.data.split(','))
-                                    
+
                                     if game.board[i][j] != ' ':
                                         bot.answer_callback_query(call.id, "Эта клетка уже занята!")
                                         return
-                                    
-                                    game.board[i][j] = game.current_player
+
+                                    game.board[i][j] = game.current_player_symbol
                                     winner = game.check_winner()
-                                    
+
                                     if winner:
                                         if winner == 'Draw':
                                             text = "Ничья!"
                                         else:
-                                            text = f"Игрок {winner} победил!"
+                                            # Get winner's nickname
+                                            winner_id = game.get_player_by_symbol(winner)
+                                            winner_nickname = game.get_player_nickname(bot, call.message.chat.id, winner_id)
+                                            text = f"Победитель: {winner_nickname}!"
                                         bot.edit_message_text(
-                                            chat_id=call.message.chat.id, 
-                                            message_id=call.message.message_id, 
-                                            text=f"{text}\n{game.print_board()}"
+                                            chat_id=call.message.chat.id,
+                                            message_id=call.message.message_id,
+                                            text=f"{text}\n{game.print_board()}",
+                                            reply_markup=None  # Remove buttons after game ends
                                         )
                                         user_ids: set = game.players
-                                        
+
                                         for user_id in user_ids:
                                             bot.delete_state(
                                                 user_id,
                                                 call.message.chat.id
                                             )
                                     else:
-                                        
-                                        game.current_player = 'O' if game.current_player == 'X' else 'X'
+                                        # Switch to next player
+                                        game.current_player_symbol = 'O' if game.current_player_symbol == 'X' else 'X'
+                                        game.current_player_id = game.get_player_by_symbol(game.current_player_symbol)
                                         game.last_move_for = call.from_user.id
-                                        
+
+                                        # Update message with current player's nickname
+                                        player_x_id = game.get_player_by_symbol('X')
+                                        player_o_id = game.get_player_by_symbol('O')
+
+                                        player_x_nickname = game.get_player_nickname(bot, call.message.chat.id, player_x_id)
+                                        player_o_nickname = game.get_player_nickname(bot, call.message.chat.id, player_o_id)
+
+                                        current_player_nickname = player_x_nickname if game.current_player_symbol == 'X' else player_o_nickname
+
                                         bot.edit_message_text(
-                                            chat_id=call.message.chat.id, 
-                                            message_id=call.message.message_id, 
-                                            text=f"Ход игрока {game.current_player}\n{game.print_board()}", 
+                                            chat_id=call.message.chat.id,
+                                            message_id=call.message.message_id,
+                                            text=f"Крестики: {player_x_nickname}\nНолики: {player_o_nickname}\n\nХод: {current_player_nickname}\n{game.print_board()}",
                                             reply_markup=game.create_markup()
                                         )
-                                    
+
                                     bot.answer_callback_query(call.id)
                                 else:
                                     bot.answer_callback_query(call.id, "Игра не активна. Начните новую /game")
-                        
+
                         continue
