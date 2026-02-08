@@ -14,7 +14,7 @@ from protocols import getNameProtocolById
 from managers.subscription.renewal_of_subscription import renewalOfSubscription
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func, update
+from sqlalchemy import insert, select, func, update, text
 
 from tables import User
 
@@ -223,7 +223,7 @@ def add_user(
         else:
             server: int = get_very_free_server()
 
-    with db.cursor() as cursor:
+    with Session(engine) as session:
 
         if not user:
 
@@ -235,12 +235,24 @@ def add_user(
 
                 case str():
                     
-                    cursor.execute(
-                        "INSERT INTO users_subscription (telegram_id, name, exit_date, action, server_link, server_id, protocol)" +
-                        "\nVALUES ('" + str(user_id) + "', '" + str(name_user) + "', now() " + str(intervalSql) + ", True, '" + result_add_vpn_user + "', '" + str(server) + "', " + str(config.DEFAULTPROTOCOL) + ");"
+                    session.execute(
+                        insert(User).values(
+                            telegram_id=str(user_id),
+                            name=str(name_user),
+                            exit_date=text(f"now() {intervalSql}"),
+                            action=True,
+                            server_link=result_add_vpn_user,
+                            server_id=str(server),
+                            protocol=str(config.DEFAULTPROTOCOL)
+                        )
                     )
+                    session.commit()
+                    # cursor.execute(
+                    #     "INSERT INTO users_subscription (telegram_id, name, exit_date, action, server_link, server_id, protocol)" +
+                    #     "\nVALUES ('" + str(user_id) + "', '" + str(name_user) + "', now() " + str(intervalSql) + ", True, '" + result_add_vpn_user + "', '" + str(server) + "', " + str(config.DEFAULTPROTOCOL) + ");"
+                    # )
 
-                    db.commit()
+                    # db.commit()
 
                     bot.send_message(
                         config.ADMINCHAT, 
@@ -254,13 +266,13 @@ def add_user(
 
                 case controllerFastApi.NetworkServiceError():
                     
-                    text: str = f"{result_add_vpn_user.caption}\nОтвет сервера:\n{result_add_vpn_user.response}"
+                    _text: str = f"{result_add_vpn_user.caption}\nОтвет сервера:\n{result_add_vpn_user.response}"
 
                     bot.send_message(
                         admin_chat_id,
-                        text
+                        _text
                     )
-                    logging.error(text)
+                    logging.error(_text)
                     
                     return config.AddUserMessage.error
 
@@ -285,12 +297,20 @@ def add_user(
 
                 return config.AddUserMessage.extended
 
-            cursor.execute(
-                "UPDATE users_subscription" + 
-                "\nSET exit_date= exit_date " + intervalSql + ", paid=True" +
-                "\nWHERE telegram_id=" + str(user_id)
+            session.execute(
+                text(
+                    "UPDATE users_subscription" + 
+                    "\nSET exit_date= exit_date " + intervalSql + ", paid=True" +
+                    "\nWHERE telegram_id=" + str(user_id)
+                )
             )
-            db.commit()
+            session.commit()
+            # cursor.execute(
+            #     "UPDATE users_subscription" + 
+            #     "\nSET exit_date= exit_date " + intervalSql + ", paid=True" +
+            #     "\nWHERE telegram_id=" + str(user_id)
+            # )
+            # db.commit()
             
             return config.AddUserMessage.extended
     
