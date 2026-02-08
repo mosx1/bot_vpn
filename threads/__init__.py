@@ -3,15 +3,16 @@ from threading import Thread
 from .payment import check_payments
 from .managment_user import chek_subscription, delete_not_subscription_tasks
 from .connect import update_connect
+from .servers import health_check_task
 
 
-check_subscription_thread = Thread(target=chek_subscription)
-check_payments_thread = Thread(target=check_payments)
-del_not_sub_thread = Thread(target=delete_not_subscription_tasks)
-update_tread = Thread(target=update_connect)
+threads = [
+    Thread(target=chek_subscription),
+    Thread(target=check_payments),
+    Thread(target=delete_not_subscription_tasks),
+    Thread(target=update_connect),
+    Thread(target=health_check_task)
+]
 
-
-check_subscription_thread.start()
-check_payments_thread.start()
-del_not_sub_thread.start()
-update_tread.start()
+for thread in threads:
+    thread.start()

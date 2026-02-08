@@ -1,8 +1,11 @@
+import requests
+
 from typing import Tuple
+
 from connect import engine
 
 from sqlalchemy.orm import Session
-from sqlalchemy import Row, Sequence, select, func, and_, text
+from sqlalchemy import Row, Sequence, select, func, and_, text, update
 from sqlalchemy.sql.elements import BinaryExpression
 
 from tables import ServersTable, CountryTable, User
@@ -136,3 +139,29 @@ def get_info_servers() -> Sequence[Row[Tuple]]:
             ).order_by(text('count_pay DESC'))
             
             return session.execute(query).all()
+
+
+def health_check(url: str) -> int:
+    try:
+        res = requests.get(url, timeout=10)
+        return res.status_code
+    except Exception:
+        pass
+
+
+def update_answers_servers(server_id: int, answers: bool) -> None:
+    with Session(engine) as session:
+        session.execute(
+            update(
+                ServersTable
+            ).where(
+                ServersTable.id == server_id
+            ).values(
+                answers=answers
+            )
+        )
+        session.commit()
+
+
+if __name__ == "__main__":
+    health_check('http://de8.kuzmos.ru:8081/config')

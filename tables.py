@@ -1,6 +1,6 @@
 from connect import engine
 
-from sqlalchemy import Column,Numeric, BIGINT, TEXT, TIMESTAMP, BOOLEAN, String, ForeignKeyConstraint, INTEGER, VARCHAR, TIME, SMALLINT,func
+from sqlalchemy import Column,Numeric, BIGINT, TEXT, TIMESTAMP, BOOLEAN, String, ForeignKeyConstraint, INTEGER, VARCHAR, TIME, SMALLINT,func, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -38,7 +38,8 @@ class ServersTable(Base):
     links: Column = Column(TEXT, nullable=False)
     country: Column = Column(INTEGER, nullable=False)
     name: Column = Column(TEXT, nullable=False)
-    speed: Column[int] = Column(INTEGER)
+    speed: Column = Column(INTEGER)
+    answers: Column = Column(BOOLEAN, nullable=False, server_default=text("true"))
 
 
 class CountryTable(Base):
