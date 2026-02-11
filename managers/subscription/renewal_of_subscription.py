@@ -71,7 +71,7 @@ def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None
                 return
 
     except Exception as e:
-
+        
         text: str = "Ошибка добавления пользователя: " + str(user.telegram_id) + " с сервера: " + str(user.server_id)
 
         bot.send_message(
@@ -79,7 +79,7 @@ def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None
             text
         )
 
-        logging.error(text)
+        logging.error(text + str(e))
 
         return
 
