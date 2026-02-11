@@ -25,7 +25,9 @@ def add_vpn_user(
               token
               ),
           timeout=60
-         ).json()
+         )
+    print(response)
+    response = response.json()
     if response["success"]:
          return response["link"]
     

@@ -1,14 +1,13 @@
 from connect import db, bot, logging
 
-import network_service.controllerFastApi as controllerFastApi, config
+from network_service import controllerFastApi
+from network_service.entity import NetworkServiceError
 
 from servers.methods import get_server_name_by_id
 
 from configparser import ConfigParser
 
 from tables import User
-
-from network_service.entity import NetworkServiceError
 
 
 def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None:
