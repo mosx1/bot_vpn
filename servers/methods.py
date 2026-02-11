@@ -1,5 +1,5 @@
-import gevent.monkey
-gevent.monkey.patch_socket()
+# import gevent.monkey
+# gevent.monkey.patch_socket()
 
 import requests, gevent
 
