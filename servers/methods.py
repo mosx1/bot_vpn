@@ -142,7 +142,7 @@ def get_info_servers() -> Sequence[Row[Tuple]]:
 
 def health_check(url: str) -> int:
     try:
-        res = requests.get(url, timeout=1)
+        res = requests.get(url, timeout=5)
         return res.status_code
     except Exception:
         pass
