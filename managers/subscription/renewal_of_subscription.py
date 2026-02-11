@@ -9,7 +9,6 @@ from configparser import ConfigParser
 
 from tables import User
 
-
 def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None:
     
     conf = ConfigParser()
@@ -53,7 +52,7 @@ def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None
                         "\nEND,action=True, paid=True" + 
                         ", server_link='" + result_add_vpn_user + "'" +
                         ", server_id = '" + str(serverNew) + "'" +
-                        ", protocol=" + conf['BaseConfig'].get('default_protocol') + 
+                        ", protocol=" + str(conf['BaseConfig'].get('default_protocol')) + 
                         "\nWHERE telegram_id=" + str(user.telegram_id)
                     )
                     db.commit()
