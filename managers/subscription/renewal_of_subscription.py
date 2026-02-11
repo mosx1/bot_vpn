@@ -16,7 +16,7 @@ def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None
     conf.read('config.ini')
     admin_chat_id: int = conf['Telegram'].getint('admin_chat')
 
-    if serverNew == None:
+    if not serverNew:
         serverNew = user.server_id
 
     if user.server_id != serverNew and intervalSql != " + INTERVAL '0 months'": #костыль для ускорения
@@ -35,53 +35,53 @@ def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None
 
             logging.error(text)
 
-    # try:
+    try:
 
-    result_add_vpn_user: str | NetworkServiceError = controllerFastApi.add_vpn_user(user.telegram_id, serverNew)
+        result_add_vpn_user: str | NetworkServiceError = controllerFastApi.add_vpn_user(user.telegram_id, serverNew)
 
-    match result_add_vpn_user:
+        match result_add_vpn_user:
 
-        case str():
+            case str():
 
-            with db.cursor() as cursor:   
-                cursor.execute(
-                    "UPDATE users_subscription" + 
-                    "\nSET exit_date=" +
-                    "\nCASE WHEN exit_date > now()" +
-                    "\nTHEN exit_date" + str(intervalSql) +
-                    "\nELSE now()" + str(intervalSql) +
-                    "\nEND,action=True, paid=True" + 
-                    ", server_link='" + result_add_vpn_user + "'" +
-                    ", server_id = '" + str(serverNew) + "'" +
-                    ", protocol=" + conf['BaseConfig'].get('default_protocol') + 
-                    "\nWHERE telegram_id=" + str(user.telegram_id)
+                with db.cursor() as cursor:   
+                    cursor.execute(
+                        "UPDATE users_subscription" + 
+                        "\nSET exit_date=" +
+                        "\nCASE WHEN exit_date > now()" +
+                        "\nTHEN exit_date" + str(intervalSql) +
+                        "\nELSE now()" + str(intervalSql) +
+                        "\nEND,action=True, paid=True" + 
+                        ", server_link='" + result_add_vpn_user + "'" +
+                        ", server_id = '" + str(serverNew) + "'" +
+                        ", protocol=" + conf['BaseConfig'].get('default_protocol') + 
+                        "\nWHERE telegram_id=" + str(user.telegram_id)
+                    )
+                    db.commit()
+
+
+            case NetworkServiceError():
+                
+                text = f"{result_add_vpn_user.caption}\nОтвет сервера:\n{result_add_vpn_user.response}"
+
+                bot.send_message(
+                    admin_chat_id,
+                    text
                 )
-                db.commit()
+                logging.error(text)
+                
+                return
 
-
-        case NetworkServiceError():
-            
-            text = f"{result_add_vpn_user.caption}\nОтвет сервера:\n{result_add_vpn_user.response}"
-
-            bot.send_message(
-                admin_chat_id,
-                text
-            )
-            logging.error(text)
-            
-            return
-
-    # except Exception as e:
+    except Exception as e:
         
-    #     text: str = "Ошибка добавления пользователя: " + str(user.telegram_id) + " с сервера: " + get_server_name_by_id(user.server_id)
+        text: str = "Ошибка добавления пользователя: " + str(user.telegram_id) + " с сервера: " + get_server_name_by_id(user.server_id)
 
-    #     bot.send_message(
-    #         admin_chat_id,
-    #         text + str(e)
-    #     )
+        bot.send_message(
+            admin_chat_id,
+            text + str(e)
+        )
 
-    #     logging.error(text + str(e))
+        logging.error(text + str(e))
 
-    #     return
+        return
 
     
