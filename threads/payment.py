@@ -129,7 +129,7 @@ def check_payments() -> None:
                             session.execute(query)
                             session.commit()
 
-                time.sleep(1)
+                time.sleep(2)
 
         except Exception as e:
             print(str(e))
