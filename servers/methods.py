@@ -50,7 +50,7 @@ def get_very_free_server(country: Country | None = None, exclude_server_id: int 
         Возвращает менее загруженный сервер по стране
         Если страна не передана - ищет по всем странам
     """
-    check_answers_servers()
+    # check_answers_servers()
 
     conf = ConfigParser()
     conf.read('config.ini')

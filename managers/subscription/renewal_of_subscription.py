@@ -76,7 +76,7 @@ def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None
 
         bot.send_message(
             admin_chat_id,
-            text
+            text + str(e)
         )
 
         logging.error(text + str(e))
