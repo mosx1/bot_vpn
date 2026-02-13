@@ -14,7 +14,7 @@ from enums.parse_mode import ParseMode
 
 from users.methods import get_user_by, get_user_by_country
 
-from tables import User
+from database import User
 
 from connect import logging
 

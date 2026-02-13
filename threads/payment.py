@@ -3,13 +3,11 @@ import utils
 import invite.methods
 import pytz
 
-from connect import bot, logging, engine
+from connect import bot, logging
 
 from telebot.types import Message
 
-from tables import User, SaleInvoicesInProgress
-
-from users.methods import get_user_by_id
+from database import User, get_user_by_id, get_invoices_with_expiry, delete_invoice
 
 from yoomoneyMethods import getInfoLastPayment
 
@@ -20,10 +18,6 @@ from messageForUser import successfully_paid
 from managment_user import add_user
 
 from configparser import ConfigParser
-
-from sqlalchemy.orm import Session
-from sqlalchemy import select, delete, text, func
-from sqlalchemy.engine import Result
 
 from datetime import datetime, timedelta
 
@@ -37,99 +31,89 @@ def check_payments() -> None:
             config = ConfigParser()
             config.read('config.ini')
             
-            with Session(engine) as session:
-                query = select(
-                    SaleInvoicesInProgress, 
-                    (SaleInvoicesInProgress.create_date + text("INTERVAL '1 hour'")).label("stop_date_time"),
-                    func.now().label("current_date_time")
-                )
-                result: Result = session.execute(query)
-                invoices = result.fetchall()
+            invoices = get_invoices_with_expiry()
                 
-                for invoice_item in invoices:
+            for invoice_item in invoices:
+                
+                invoice = invoice_item[0]
+                stop_date_time = invoice_item[1]
+                current_date_time = invoice_item[2]
+
+                try:
+                    info_last_payment: dict | None = getInfoLastPayment(invoice.label)
+                except Exception as e:
+                    print(str(e))
+                    continue
+                
+                if info_last_payment:
+
+                    user: User = get_user_by_id(invoice.telegram_id)
                     
-                    invoice: SaleInvoicesInProgress = invoice_item[0]
-                    stop_date_time = invoice_item[1]
-                    current_date_time = invoice_item[2]
+                    logging.info(
+                        "user_id: {}; user_name:{}; Оплата подписки {} мес. сервер {}".format(
+                            user.telegram_id,
+                            user.name,
+                            invoice.month_count,
+                            utils.get_server_name_by_id(invoice.server_id)
+                        )
+                    )
 
                     try:
-                        info_last_payment: dict | None = getInfoLastPayment(invoice.label)
-                    except Exception as e:
-                        print(str(e))
-                        continue
-                    
-                    if info_last_payment:
-
-                        user: User = get_user_by_id(invoice.telegram_id)
-                        
-                        logging.info(
-                            "user_id: {}; user_name:{}; Оплата подписки {} мес. сервер {}".format(
-                                user.telegram_id,
-                                user.name,
-                                invoice.month_count,
-                                utils.get_server_name_by_id(invoice.server_id)
-                            )
-                        )
-
-                        try:
-                            bot.delete_message(
-                                user.telegram_id,
-                                invoice.message_id
-                            )
-                        except Exception as e:
-                            bot.send_message(
-                                config['Telegram']['admin_chat'],
-                                f'Не удалено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id)
-                            )
-
-                        try:
-                            old_message: Message = bot.send_photo(
-                                user.telegram_id,
-                                photo=open("4rrr.jpg", "rb"),
-                                caption="Оплата получена, идет настройка конфигурации(это может занять несколько минут)..."
-                            )
-                        except Exception as e:
-                            bot.send_message(
-                                config['Telegram']['admin_chat'],
-                                f'Не отправлено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id)
-                            )
-
-                        userMessage = add_user(
+                        bot.delete_message(
                             user.telegram_id,
-                            invoice.month_count,
-                            server=invoice.server_id
+                            invoice.message_id
                         )
-
+                    except Exception as e:
                         bot.send_message(
                             config['Telegram']['admin_chat'],
-                            "[" + utils.form_text_markdownv2(user.name) + "](tg://user?id\=" + str(user.telegram_id) + ") оплатил",
-                            parse_mode=ParseMode.mdv2.value
+                            f'Не удалено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id)
                         )
 
-                        invite.methods.incrementBalance(
-                            user.telegram_id, 
-                            month=invoice.month_count
+                    try:
+                        old_message: Message = bot.send_photo(
+                            user.telegram_id,
+                            photo=open("4rrr.jpg", "rb"),
+                            caption="Оплата получена, идет настройка конфигурации(это может занять несколько минут)..."
+                        )
+                    except Exception as e:
+                        bot.send_message(
+                            config['Telegram']['admin_chat'],
+                            f'Не отправлено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id)
                         )
 
-                        try:
-                            successfully_paid(
-                                user.telegram_id,
-                                old_message,
-                                optionText=str(userMessage.value)
-                            )
-                        except Exception as e:
-                            bot.send_message(
-                                config['Telegram']['admin_chat'],
-                                f'Не изменено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id)
-                            )
+                    userMessage = add_user(
+                        user.telegram_id,
+                        invoice.month_count,
+                        server=invoice.server_id
+                    )
 
-                    if (current_date_time.strftime("%Y-%m-%d %H:%M:%S") > stop_date_time.strftime("%Y-%m-%d %H:%M:%S")) or info_last_payment:
-                        with Session(engine) as session:
-                            query = delete(SaleInvoicesInProgress).where(SaleInvoicesInProgress.id == invoice.id)
-                            session.execute(query)
-                            session.commit()
+                    bot.send_message(
+                        config['Telegram']['admin_chat'],
+                        "[" + utils.form_text_markdownv2(user.name) + "](tg://user?id\=" + str(user.telegram_id) + ") оплатил",
+                        parse_mode=ParseMode.mdv2.value
+                    )
 
-                time.sleep(2)
+                    invite.methods.incrementBalance(
+                        user.telegram_id, 
+                        month=invoice.month_count
+                    )
+
+                    try:
+                        successfully_paid(
+                            user.telegram_id,
+                            old_message,
+                            optionText=str(userMessage.value)
+                        )
+                    except Exception as e:
+                        bot.send_message(
+                            config['Telegram']['admin_chat'],
+                            f'Не изменено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id)
+                        )
+
+                if (current_date_time.strftime("%Y-%m-%d %H:%M:%S") > stop_date_time.strftime("%Y-%m-%d %H:%M:%S")) or info_last_payment:
+                    delete_invoice(invoice.id)
+
+            time.sleep(2)
 
         except Exception as e:
             print(str(e))

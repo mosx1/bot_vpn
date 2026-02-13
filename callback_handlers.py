@@ -2,7 +2,7 @@ import enums.invite
 import enums.keyCall
 import json, config, utils, managment_user, invite, enums, keyboards, uuid
 
-from connect import db, logging
+from connect import logging
 
 import invite.methods
 
@@ -10,8 +10,6 @@ from telebot import types
 
 from managment_user import add_user, del_users, UserList, data_user
 
-from psycopg2.extras import DictCursor
-                  
 from servers.server_list import Country
 from servers.methods import get_server_list, get_very_free_server
 
@@ -26,9 +24,7 @@ from enums.keyCall import KeyCall, ReduceTime
 
 from messageForUser import successfully_paid, manual_successfully_paid
 
-from tables import User
-
-from users.methods import get_user_by_id, reduce_time_by
+from database import User, get_user_by_id, reduce_time_by, update_user_server_link
 
 from payment.crypto.repository.methods import crypto_pay, PayingUser, TypeOfPurchase
 from payment.stars.handlers import handle_buy
@@ -417,19 +413,11 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 )
             
             case enums.keyCall.KeyCall.refreshtoken.name:
-                
-                with db.cursor(cursor_factory=DictCursor) as cursor:
-                    
-                    user: User = get_user_by_id(call_data['user_id'])
-                    controllerFastApi.del_users({user.telegram_id}, user.server_id)
-                    link = controllerFastApi.add_vpn_user(user.telegram_id, user.server_id)
 
-                    cursor.execute(
-                        "UPDATE users_subscription" + 
-                        "\nSET server_link='" + str(link) + "'" +
-                        f"\nWHERE telegram_id={user.telegram_id}"
-                    )
-                    db.commit()
+                user: User = get_user_by_id(call_data['user_id'])
+                controllerFastApi.del_users({user.telegram_id}, user.server_id)
+                link = controllerFastApi.add_vpn_user(user.telegram_id, user.server_id)
+                update_user_server_link(user.telegram_id, str(link))
 
                 bot.answer_callback_query(
                     callback_query_id=call.id,

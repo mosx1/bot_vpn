@@ -1,8 +1,8 @@
-from connect import bot, logging, db
-from psycopg2.extras import DictCursor
+from connect import bot, logging
+
 from telebot import types
 
-from tables import User
+from database import User
 
 
 def spamMessage(message: types.Message, users: set[User], inlineKeyboard: types.InlineKeyboardButton | None = None) -> None:

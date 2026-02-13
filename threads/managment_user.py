@@ -5,7 +5,7 @@ from connect import logging, bot, engine
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, text
 
-from tables import User
+from database import User
 
 from users.methods import get_user_by
 

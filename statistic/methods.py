@@ -4,14 +4,14 @@ from telebot.types import Message
 
 from users.methods import get_user_by
 
-from tables import User, ServersTable
-
-from utils import get_token
+from database import User, ServersTable, get_token
 
 from sqlalchemy.orm import Session
 from sqlalchemy import Update, update, and_
 
-from connect import engine, bot
+from connect import bot
+
+from database.connection import engine
 
 from configparser import ConfigParser
 

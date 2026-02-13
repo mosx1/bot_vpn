@@ -14,7 +14,7 @@ from managment_user import UserList
 
 from messageForUser import successfully_paid
 
-from tables import User
+from database import User
 
 from filters import only_user_chat, only_user_chat_and_text
 

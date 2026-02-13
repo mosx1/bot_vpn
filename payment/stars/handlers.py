@@ -14,7 +14,7 @@ from messageForUser import successfully_paid
 
 from users.methods import get_user_by_id
 
-from tables import User
+from database import User
 
 from configparser import ConfigParser
 

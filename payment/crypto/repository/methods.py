@@ -16,7 +16,7 @@ from connect import logging, engine, bot
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
-from tables import User
+from database import User
 
 from servers.server_list import Servers
 from enums.parse_mode import ParseMode

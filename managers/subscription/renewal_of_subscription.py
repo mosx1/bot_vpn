@@ -1,15 +1,14 @@
-from connect import db, bot, logging
+from connect import bot, logging
 
 from network_service import controllerFastApi
 from network_service.entity import NetworkServiceError
 
-from servers.methods import get_server_name_by_id
+from database import User, get_server_name_by_id, update_user_renewal
 
 from configparser import ConfigParser
 
-from tables import User
 
-def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None:
+def renewalOfSubscription(user: User, intervalSql: str, serverNew=None) -> None:
     
     conf = ConfigParser()
     conf.read('config.ini')
@@ -41,21 +40,13 @@ def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None
         match result_add_vpn_user:
 
             case str():
-
-                with db.cursor() as cursor:   
-                    cursor.execute(
-                        "UPDATE users_subscription" + 
-                        "\nSET exit_date=" +
-                        "\nCASE WHEN exit_date > now()" +
-                        "\nTHEN exit_date" + str(intervalSql) +
-                        "\nELSE now()" + str(intervalSql) +
-                        "\nEND,action=True, paid=True" + 
-                        ", server_link='" + result_add_vpn_user + "'" +
-                        ", server_id = '" + str(serverNew) + "'" +
-                        ", protocol=" + str(conf['BaseConfig'].get('default_protocol')) + 
-                        "\nWHERE telegram_id=" + str(user.telegram_id)
-                    )
-                    db.commit()
+                update_user_renewal(
+                    telegram_id=user.telegram_id,
+                    interval_sql=intervalSql,
+                    server_link=result_add_vpn_user,
+                    server_id=serverNew,
+                    protocol=int(conf['BaseConfig'].get('default_protocol'))
+                )
 
 
             case NetworkServiceError():
@@ -72,7 +63,7 @@ def renewalOfSubscription(user: User,  intervalSql: str, serverNew=None) -> None
 
     except Exception as e:
         
-        text: str = "Ошибка добавления пользователя: " + str(user.telegram_id) + " с сервера: " + get_server_name_by_id(user.server_id)
+        text: str = "Ошибка добавления пользователя: " + str(user.telegram_id) + " на сервер: " + get_server_name_by_id(user.server_id)
 
         bot.send_message(
             admin_chat_id,

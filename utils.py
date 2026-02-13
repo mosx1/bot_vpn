@@ -1,12 +1,9 @@
-from connect import logging, engine
-
-from sqlalchemy.orm import Session
-from sqlalchemy import select
+from connect import logging
 
 from enums.logs import TypeLogs
 from enums.content_types import ContentTypes
 
-from tables import User, ServersTable, SecurityHashs
+from database import User, get_token, get_server_name_by_id, get_server_url_by_id
 
 from enum import Enum
 
@@ -56,13 +53,9 @@ def form_text_markdownv2(message_text: str, delete=None):
     return message_text
 
 
-#получает адрес сервера по ид
 def getUrlByIdServer(serverId: str) -> str:
-    with Session(engine) as session:
-        query = select(ServersTable).where(ServersTable.id == serverId)
-        server: ServersTable | None = session.execute(query).scalar()
-        return server.links
-        
+    """Получает адрес сервера по id."""
+    return get_server_url_by_id(int(serverId))
 
 
 def callBackBilder(callBackKey: Enum, **kwargs):
@@ -83,13 +76,6 @@ def callBackBilder(callBackKey: Enum, **kwargs):
 
 
 
-def get_token() -> str:
-    with Session(engine) as session:
-        query = select(SecurityHashs)
-        security_hash: SecurityHashs | None = session.execute(query).scalar()
-        return security_hash.hash
-    
-
 def write_log(type: TypeLogs, user: User, text: str) -> None:
 
     text = "user_id: " + str(user.telegram_id) + ", user_name:" + str(user.name) + ", " + text
@@ -100,17 +86,6 @@ def write_log(type: TypeLogs, user: User, text: str) -> None:
         case TypeLogs.error:
             logging.error(text)
 
-
-def get_server_name_by_id(server_id: int) -> str:
-    
-    query = select(ServersTable).filter(ServersTable.id == server_id)
-
-    with Session(engine) as session:
-        data: ServersTable | None = session.execute(query).scalar()
-        if data:
-            return data.name
-        return "Неизвестное наименование сервера"
-    
 
 def get_list_values_from_enum(data: Enum) -> list:
     return [item.value for item in data]

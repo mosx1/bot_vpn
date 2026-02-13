@@ -6,9 +6,7 @@ from yoomoneyMethods import getLinkPayment
 
 from telebot.util import quick_markup
 
-from tables import User
-
-from users.methods import get_user_by_id
+from database import User, get_user_by_id, add_sale_invoice
 
 from payment.crypto.repository.methods import crypto_pay, PayingUser, TypeOfPurchase
 
@@ -16,13 +14,6 @@ from configparser import ConfigParser
 
 from core.telebot import TeleBotMod
 from telebot.types import Message
-
-from sqlalchemy.orm import Session
-from sqlalchemy import insert
-
-from tables import SaleInvoicesInProgress
-
-from connect import engine
 
 
 def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: int, message: Message, label):
@@ -93,16 +84,3 @@ def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: i
             reply_markup=keyboard
         )
 
-
-def add_sale_invoice(label: str, user_id: int, server_id: int, month_count: int, chat_id: int, message_id: int) -> None:
-    with Session(engine) as session:
-        query = insert(SaleInvoicesInProgress).values(
-            telegram_id=user_id,
-            label=label,
-            server_id=server_id,
-            month_count=month_count,
-            chat_id=chat_id,
-            message_id=message_id
-        )
-        session.execute(query)
-        session.commit()

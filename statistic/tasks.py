@@ -2,7 +2,7 @@ from threading import Thread
 
 from servers.methods import get_server_list
 
-from tables import ServersTable
+from database import ServersTable
 
 from statistic.methods import get_statistics_by_server
 

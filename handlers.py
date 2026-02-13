@@ -1,7 +1,7 @@
 
 import config, os, utils, managment_user, keyboards
 
-from connect import db, logging
+from connect import logging
 
 from telebot import types
 
@@ -9,8 +9,6 @@ from managment_user import UserList, data_user, delete_not_subscription
 
 from filters import onlyAdminChat
 
-from psycopg2.extras import DictCursor
-                  
 from servers.server_list import Servers
 from servers.methods import get_very_free_server
 
@@ -28,14 +26,11 @@ from giftUsers import checkGiftCode
 
 from messageForUser import successfully_paid
 
-from tables import User
-
-from users.methods import get_user_by_id
+from database import User, get_user_by_id, delete_user, check_user_has_active_subscription, get_all_telegram_ids, get_active_users_by_server, update_user_server_and_link
 
 from sqlalchemy import func
 
 from statistic.tasks import start_statistic
-
 
 from network_service import controllerFastApi
 
@@ -110,9 +105,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
 
         """Удаляет текущего пользователя. Для теста"""
 
-        with db.cursor() as cursor:
-            cursor.execute("DELETE FROM users_subscription WHERE telegram_id = " + str(message.from_user.id))
-            db.commit()
+        delete_user(message.from_user.id)
 
 
     @bot.message_handler(commands=["log", "лог"], func=onlyAdminChat())
@@ -137,12 +130,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
             arrStartMessageText = message.text.split(" ")
             if len(arrStartMessageText) == 2:
                 if arrStartMessageText[1].isdigit():
-                    with db.cursor() as cursor:
-                        cursor.execute(
-                            "SELECT EXISTS(SELECT 1 FROM users_subscription WHERE action = true AND telegram_id = " + str(arrStartMessageText[1]) + ")"
-                        )
-                        invited = cursor.fetchall()
-                        if len(invited) > 0:
+                    if check_user_has_active_subscription(int(arrStartMessageText[1])):
                             jsonIdInvited: str = ', "invitedId": ' + str(arrStartMessageText[1])
                             message.text = arrStartMessageText[1]
                 elif checkGiftCode(message):
@@ -192,18 +180,16 @@ def register_message_handlers(bot: TeleBotMod) -> None:
             row_width=1
         )
 
-        with db.cursor(cursor_factory=DictCursor) as cursor:
-            cursor.execute("SELECT telegram_id FROM users_subscription")
-            for item in cursor.fetchall():
-                try:
-                    bot.send_photo(
-                        chat_id=item,
+        for telegram_id in get_all_telegram_ids():
+            try:
+                bot.send_photo(
+                    chat_id=telegram_id,
                         photo=open("image/gift.png", "rb"),
-                        caption=config.TextsMessages.giftSpamCaption.value,
-                        reply_markup=key
-                    )
-                except Exception:
-                    logging.error("Не удалось отправить spam сообщение пользователю")
+                    caption=config.TextsMessages.giftSpamCaption.value,
+                    reply_markup=key
+                )
+            except Exception:
+                logging.error("Не удалось отправить spam сообщение пользователю")
             
             
     @bot.message_handler(
@@ -244,20 +230,16 @@ def register_message_handlers(bot: TeleBotMod) -> None:
     @bot.message_handler(commands=[Comands.resubusa.value])
     def _(message: types.Message):
         bot.send_message(config.ADMINCHAT, "выполняется процесс...")
-        with db.cursor(cursor_factory=DictCursor) as cursor:
-            cursor.execute("SELECT telegram_id, name FROM users_subscription WHERE action = True" +
-                            " AND server_id = " + str(Servers.niderlands.value))
-            users = cursor.fetchall()
-            for i in users:
-                link = controllerFastApi.add_vpn_user(i['telegram_id'], Servers.niderlands2.value)
-    
-                cursor.execute("UPDATE users_subscription" + 
-                            "\nSET server_link='" + link +
-                            "\n, server_id = " + str(Servers.niderlands2.value) +
-                            ", protocol=" + str(config.DEFAULTPROTOCOL) + 
-                            "'\n WHERE telegram_id=" + str(i['telegram_id']))
-            db.commit()
-            for i in users:
+        users = get_active_users_by_server(Servers.niderlands.value)
+        for i in users:
+            link = controllerFastApi.add_vpn_user(i['telegram_id'], Servers.niderlands2.value)
+            update_user_server_and_link(
+                i['telegram_id'],
+                link,
+                Servers.niderlands2.value,
+                config.DEFAULTPROTOCOL
+            )
+        for i in users:
                 try:
                     successfully_paid(i['telegram_id'], optionText="НЕОБХОДИМО ОБНОВИТЬ КОНФИГУРАЦИЮ\. СТАРАЯ КОНФИГУРАЦИЯ БОЛЬШЕ НЕ РАБОТАЕТ\.")
                 except Exception as e:

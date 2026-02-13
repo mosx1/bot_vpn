@@ -1,37 +1,17 @@
-from connect import db
-from telebot import types
 from managment_user import add_user
 
-
-def genGiftCode(month: int):
-
-    with db.cursor() as cursor:
-        cursor.execute(
-            "INSERT INTO gift_codes (code, month) VALUES (md5(random()::text), {}) RETURNING code".format(month)
-        )
-        hash = cursor.fetchone()[0]
-
-        db.commit()
-        
-        return hash
+from database import gen_gift_code, check_and_consume_gift_code
 
 
+def genGiftCode(month: int) -> str:
+    """Создаёт подарочный код. Обёртка для обратной совместимости."""
+    return gen_gift_code(month)
 
-def checkGiftCode(message: types.Message):
 
-    with db.cursor() as cursor:
-        cursor.execute("SELECT month FROM gift_codes WHERE code = '{}'".format(message.text))
-        giftData = cursor.fetchone()
-        if giftData:
-            month = giftData[0]
-            if month:
-                add_user(
-                    message.from_user.id,
-                    month
-                )
-                cursor.execute("DELETE FROM gift_codes WHERE code = '{}'".format(message.text))
-
-                db.commit
-
-                return True
+def checkGiftCode(message) -> bool:
+    """Проверяет подарочный код, при успехе активирует и возвращает True."""
+    month = check_and_consume_gift_code(message.text)
+    if month:
+        add_user(message.from_user.id, month)
+        return True
     return False

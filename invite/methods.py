@@ -1,10 +1,8 @@
-from connect import db, bot
+from connect import bot
 
 from managment_user import add_user
 
-from tables import User
-
-from users.methods import get_user_by_id
+from database import User, get_user_by_id, write_invited, increment_balance, reset_to_zero_balance
 
 from utils import replaceMonthOnRuText
 
@@ -13,23 +11,14 @@ from configparser import ConfigParser
 from enums.parse_mode import ParseMode
 
 
-
 def writeInvited(userId: str, userInvitedId: str):
-    """
-        Записывает отношение приглашенного к пригласившему
-    """
-    with db.cursor() as cursor:
-        cursor.execute(
-            "UPDATE users_subscription SET invited = {} WHERE telegram_id = {}".format(userInvitedId, userId)
-        )
-        db.commit()
+    """Записывает отношение приглашенного к пригласившему."""
+    write_invited(userId, userInvitedId)
     
 
 
 def addInvitedBonus(userId):
-    """
-        Добавляет бонус-подписку за инвайт пользователя
-    """
+    """Добавляет бонус-подписку за инвайт пользователя."""
     add_user(userId, 1)
     user: User = get_user_by_id(userId)
     bot.send_photo(
@@ -43,32 +32,13 @@ def addInvitedBonus(userId):
 
 def incrementBalance(userId: str, month=None, summ=None):
     """
-        Добавляет сумму к балансу пользователя либо на основании кол-ва месяцев оплаченных пользователем, либо на основании кол-ва денег
-        В метод передается id пользователя который оплатил, а начисляется тому, кто пригласил
+    Добавляет сумму к балансу пользователя.
+    Начисляется тому, кто пригласил.
     """
-    conf = ConfigParser()
-    conf.read('config.ini')
-    
-    if month:
-        summ = conf['Price'].getint('RUB') * month
-    
-    with db.cursor() as cursor:
-        cursor.execute(
-            "UPDATE users_subscription SET balance = balance + {} WHERE telegram_id = (SELECT invited FROM users_subscription WHERE telegram_id = {})".format(
-                summ,
-                userId
-            )
-        )
-        db.commit()
+    increment_balance(userId, month=month, summ=summ)
 
 
 
 def resetToZeroBalance(userId: str):
-    """
-        Обнуляет бонусный баланс клиента
-    """
-    with db.cursor() as cursor:
-        cursor.execute(
-            "UPDATE users_subscription SET balance = 0 WHERE telegram_id = {}".format(userId)
-        )
-        db.commit()
+    """Обнуляет бонусный баланс клиента."""
+    reset_to_zero_balance(userId)

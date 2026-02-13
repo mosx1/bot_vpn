@@ -1,6 +1,6 @@
 import config, string, secrets, utils, keyboards
 
-from connect import db, logging, bot, engine
+from connect import logging, bot
 
 from telebot.apihelper import ApiTelegramException
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
@@ -13,14 +13,17 @@ from protocols import getNameProtocolById
 
 from managers.subscription.renewal_of_subscription import renewalOfSubscription
 
-from sqlalchemy.orm import Session
-from sqlalchemy import insert, select, func, update, text
-
-from tables import User
-
-from users.methods import get_user_by_id, get_user_by
-
-from servers.methods import get_server_name_by_id, get_very_free_server
+from database import (
+    User,
+    get_user_by_id,
+    get_user_by,
+    get_server_name_by_id,
+    get_very_free_server,
+    insert_user,
+    update_user_extend_subscription,
+    update_user_deactivate,
+    get_inactive_users_by_server,
+)
 
 from configparser import ConfigParser
 
@@ -223,140 +226,84 @@ def add_user(
         else:
             server: int = get_very_free_server()
 
-    with Session(engine) as session:
+    if not user:
 
-        if not user:
+        logging.info("добавляю user: " + name_user)
 
-            logging.info("добавляю user: " + name_user)
-            
-            result_add_vpn_user: str | controllerFastApi.NetworkServiceError = controllerFastApi.add_vpn_user(user_id, server)
+        result_add_vpn_user: str | controllerFastApi.NetworkServiceError = controllerFastApi.add_vpn_user(user_id, server)
 
-            match result_add_vpn_user:
+        match result_add_vpn_user:
 
-                case str():
-                    
-                    session.execute(
-                        insert(User).values(
-                            telegram_id=str(user_id),
-                            name=str(name_user),
-                            exit_date=text(f"now() {intervalSql}"),
-                            action=True,
-                            server_link=result_add_vpn_user,
-                            server_id=str(server),
-                            protocol=str(config.DEFAULTPROTOCOL)
-                        )
-                    )
-                    session.commit()
-                    # cursor.execute(
-                    #     "INSERT INTO users_subscription (telegram_id, name, exit_date, action, server_link, server_id, protocol)" +
-                    #     "\nVALUES ('" + str(user_id) + "', '" + str(name_user) + "', now() " + str(intervalSql) + ", True, '" + result_add_vpn_user + "', '" + str(server) + "', " + str(config.DEFAULTPROTOCOL) + ");"
-                    # )
-
-                    # db.commit()
-
-                    bot.send_message(
-                        config.ADMINCHAT, 
-                        "new user: [" + utils.form_text_markdownv2(name_user) + "](tg://user?id\=" + str(user_id) + ")", 
-                        parse_mode=ParseMode.mdv2.value 
-                    )
-
-                    logging.info(name_user + " успешно добавлен")
-
-                    return config.AddUserMessage.extended
-
-                case controllerFastApi.NetworkServiceError():
-                    
-                    _text: str = f"{result_add_vpn_user.caption}\nОтвет сервера:\n{result_add_vpn_user.response}"
-
-                    bot.send_message(
-                        admin_chat_id,
-                        _text
-                    )
-                    logging.error(_text)
-                    
-                    return config.AddUserMessage.error
-
-        elif not user.action:
-            
-            renewalOfSubscription(user, intervalSql, serverNew=server)
-
-            if int(user.server_id) == int(server):
+            case str():
+                insert_user(
+                    telegram_id=user_id,
+                    name=name_user,
+                    exit_date_expr=f"now() {intervalSql}",
+                    server_link=result_add_vpn_user,
+                    server_id=server,
+                    protocol=config.DEFAULTPROTOCOL
+                )
+                bot.send_message(
+                    config.ADMINCHAT,
+                    "new user: [" + utils.form_text_markdownv2(name_user) + "](tg://user?id\=" + str(user_id) + ")",
+                    parse_mode=ParseMode.mdv2.value
+                )
+                logging.info(name_user + " успешно добавлен")
                 return config.AddUserMessage.extended
-            else:
+
+            case controllerFastApi.NetworkServiceError():
+                _text: str = f"{result_add_vpn_user.caption}\nОтвет сервера:\n{result_add_vpn_user.response}"
+                bot.send_message(admin_chat_id, _text)
+                logging.error(_text)
                 return config.AddUserMessage.error
 
-        elif user.action:
-            # servers: list[ServersTable] = get_server_list()
-            if server != user.server_id:
-                del_users(
-                    {user_id},
-                    user.server_id,
-                    no_update=True
-                )
-                add_user(user_id, month, server=server)
-
-                return config.AddUserMessage.extended
-
-            session.execute(
-                text(
-                    "UPDATE users_subscription" + 
-                    "\nSET exit_date= exit_date " + intervalSql + ", paid=True" +
-                    "\nWHERE telegram_id=" + str(user_id)
-                )
-            )
-            session.commit()
-            # cursor.execute(
-            #     "UPDATE users_subscription" + 
-            #     "\nSET exit_date= exit_date " + intervalSql + ", paid=True" +
-            #     "\nWHERE telegram_id=" + str(user_id)
-            # )
-            # db.commit()
-            
+    elif not user.action:
+        renewalOfSubscription(user, intervalSql, serverNew=server)
+        if int(user.server_id) == int(server):
             return config.AddUserMessage.extended
+        else:
+            return config.AddUserMessage.error
+
+    elif user.action:
+        if server != user.server_id:
+            del_users({user_id}, user.server_id, no_update=True)
+            add_user(user_id, month, server=server)
+            return config.AddUserMessage.extended
+
+        update_user_extend_subscription(user_id, intervalSql)
+        return config.AddUserMessage.extended
     
 
 
 def del_users(
-    user_ids: set[int], 
-    server_id: int, 
-    no_update: bool = False, 
+    user_ids: set[int],
+    server_id: int,
+    no_update: bool = False,
     no_message: bool = False
 ) -> bool | NetworkServiceError:
 
-    with Session(engine) as session:
-        query = update(User).where(User.telegram_id.in_(user_ids)).values(action=False)
-        session.execute(query)
+    update_user_deactivate(user_ids, commit=not no_update)
 
-        if not no_update:
+    if not no_update and not no_message:
+        for user_id in user_ids:
+            try:
+                bot.send_message(
+                    user_id,
+                    "Подписка окончена.",
+                    reply_markup=keyboards.getInlineExtend()
+                )
+            except ApiTelegramException as e:
+                conf = ConfigParser()
+                conf.read('config.ini')
+                bot.send_message(
+                    conf['Telegram'].getint('admin_chat'),
+                    str(e) + " id:" + str(user_id)
+                )
 
-            session.commit()
-
-            if not no_message:
-                for user_id in user_ids:
-
-                    try:
-
-                        bot.send_message(
-                            user_id, 
-                            "Подписка окончена.", 
-                            reply_markup=keyboards.getInlineExtend()
-                        )
-                    except ApiTelegramException as e:
-
-                        conf = ConfigParser()
-                        conf.read('config.ini')
-
-                        bot.send_message(
-                            conf['Telegram'].getint('admin_chat'), 
-                            str(e) + " id:" + str(user_id)
-                        )
-        else:
-            session.rollback()
-
-        return controllerFastApi.del_users(
-            user_ids, 
-            server_id
-        )
+    return controllerFastApi.del_users(
+        user_ids,
+        server_id
+    )
 
 
 def generate_alphanum_crypt_string():
@@ -441,18 +388,9 @@ def delete_not_subscription() -> None:
     conf.read('config.ini')
     admin_chat_id: int = conf['Telegram'].getint('admin_chat')
 
-    with Session(engine) as session:
-        query = select(
-            func.json_agg(User.telegram_id).label('user_ids'),
-            User.server_id
-        ).where(
-            User.action == False
-        ).group_by(
-            User.server_id
-        )
-        data = session.execute(query).all()
-        
-        for item in data:
+    data = get_inactive_users_by_server()
+
+    for item in data:
 
             server_name: str = get_server_name_by_id(item.server_id)
             
