@@ -39,7 +39,8 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
         ),
         InlineKeyboardButton(
             text="Сменить сервер",
-            callback_data='{"key": "' + KeyCall.transfer_other_server.value + '"}'
+            callback_data='{"key": "' + KeyCall.transfer_other_server.value + '"}',
+            style="success"
         )
     )
     keyboard.add(
