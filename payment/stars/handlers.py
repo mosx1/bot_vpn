@@ -141,5 +141,4 @@ def handle_buy(message: Message, amount: int, server: int) -> None:
         currency="XTR",  # Валюта (Telegram Stars работают через USD/XTR)
         prices=[LabeledPrice(label="XTR", amount=amount)],  # 1000 = 10 Stars (1 Star = 100 единиц)
         start_parameter="start_param",  # Параметр для deep-linking
-        #photo_url=open("vpn_option.png", "rb"),  # Картинка товара (опционально)
     )

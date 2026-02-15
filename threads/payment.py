@@ -85,7 +85,7 @@ def check_payments() -> None:
                         try:
                             old_message: Message = bot.send_photo(
                                 user.telegram_id,
-                                photo=open("4rrr.jpg", "rb"),
+                                photo=open("static/logo_big.jpeg", "rb"),
                                 caption="Оплата получена, идет настройка конфигурации(это может занять несколько минут)..."
                             )
                         except Exception as e:

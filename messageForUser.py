@@ -39,8 +39,7 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
         ),
         InlineKeyboardButton(
             text="Сменить сервер",
-            callback_data='{"key": "' + KeyCall.transfer_other_server.value + '"}',
-            style="success"
+            callback_data='{"key": "' + KeyCall.transfer_other_server.value + '"}'
         )
     )
     keyboard.add(
@@ -61,7 +60,7 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
     )
     
     text_for_message: str = conf['MessagesTextMD'].get('successfully_subscription_automatic')
-
+    
     if not old_message:
         if user.paid:
             keyboard_ref = ReplyKeyboardMarkup(resize_keyboard=True)
@@ -79,7 +78,7 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
     
         if t := bot.send_photo(
                 chat_id=id,
-                photo=open("4rrr.jpg", "rb"),
+                photo=open("static/logo_big.jpeg", "rb"),
                 caption=optionText + text_for_message.format(
                     user.telegram_id,
                     utils.replaceMonthOnRuText(user.exit_date),

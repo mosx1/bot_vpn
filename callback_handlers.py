@@ -65,7 +65,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 bot.delete_message(call.message.chat.id, call.message.id)
                 oldMessage: types.Message = bot.send_photo(
                     chat_id=call.from_user.id, 
-                    photo=open("4rrr.jpg", "rb"),
+                    photo=open("static/logo_big.jpeg", "rb"),
                     caption="Идет формирование конфигурации. Это может занять несколько минут..."
                 )
                 add_user(
