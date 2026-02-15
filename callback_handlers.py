@@ -102,7 +102,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
 
                 bot.send_photo(
                     call.from_user.id,
-                    photo = open("vpn_option.png", "rb"),
+                    photo = open("static/logo_option.jpg", "rb"),
                     caption = utils.form_text_markdownv2(config.TextsMessages.select_country.value),
                     parse_mode=ParseMode.mdv2.value,
                     reply_markup=keyboards.get_inline_keyboard_list_countries(user.server_id)

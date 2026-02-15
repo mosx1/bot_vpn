@@ -230,7 +230,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
         )
         bot.send_photo(
             chat_id=message.from_user.id,
-            photo = open("vpn_option.png", "rb"),
+            photo = open("static/logo_option.jpg", "rb"),
             caption="Для оформления подарка нажмите кнопку ниже",
             reply_markup=key
         )
