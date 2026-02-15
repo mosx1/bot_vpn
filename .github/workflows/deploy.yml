@@ -1,54 +1,42 @@
 name: 🚀 Deploy to Server
 
-on:
-  workflow_dispatch:
-  push:
-    branches: [main]
 
-permissions:
-  contents: read
-  packages: write  # Для GitHub Container Registry
+on:
+  workflow_dispatch:  # Позволяет запускать вручную по кнопке в GitHub UI
+
 
 jobs:
   deploy:
+    name: Deploy via SSH
     runs-on: ubuntu-latest
-    
+
+
     steps:
-      - name: 🧩 Checkout
+      - name: 🧩 Checkout repository
         uses: actions/checkout@v4
-        
-      - name: 🐳 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        
-      - name: 🔐 Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: 📦 Build & Push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/bot_vpn:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          
-      - name: 🧰 Setup SSH
+
+
+      - name: 🧰 Set up SSH key
         uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          
+
+
+      - name: 🐳 Build Docker image
+        run: |
+          docker build -t bot_vpn:latest .
       - name: 🚀 Deploy to server
         env:
-          REGISTRY: ghcr.io/${{ github.repository_owner }}/bot_vpn:latest
+          HOST: ${{ secrets.SERVER_HOST }}
+          USER: ${{ secrets.SERVER_USER }}
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << EOF
+          ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
+            cd /root/bot_vpn || mkdir -p /root/bot_vpn
             docker stop bot_vpn || true
             docker rm bot_vpn || true
-            docker pull $REGISTRY
-            docker run -d --name bot_vpn --restart always $REGISTRY
+            docker image rm bot_vpn:latest || true
+            cd /root/bot_vpn
+            git pull || true
+            docker build -t bot_vpn:latest .
+            docker run -d --name bot_vpn --restart always bot_vpn:latest
           EOF
