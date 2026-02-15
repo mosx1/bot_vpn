@@ -1,3 +1,5 @@
+import utils
+
 from telebot.types import InlineKeyboardMarkup
 from telebot.util import quick_markup
 
@@ -68,6 +70,7 @@ def get_inline_transfer_for_nid() -> InlineKeyboardMarkup:
 def get_inline_back_to_main(user_id: int | str) -> InlineKeyboardMarkup:
     return quick_markup(
         {
+            "Смена ключа на роутере": {"callback_data": utils.callBackBilder(KeyCall.get_settings_vpn_router)},
             "<<<Назад": {"callback_data": '{"key": "backmanualSettings", "id": "' + str(user_id) +'"}'}
         },
         row_width=1

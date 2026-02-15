@@ -18,6 +18,7 @@ class KeyCall(Enum):
     get_link_payment: str = "getLinkPayment"
     transfer_other_server: str = "transfer_other_server"
     pay_router: str = "pay_router"
+    get_settings_vpn_router: str = "get_settings_vpn_router"
 
 
 class ReduceTime(Enum):

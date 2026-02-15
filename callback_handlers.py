@@ -566,6 +566,15 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     conf['MessagesText'].get('pay_router_message'),
                     reply_markup=keyboards.get_inline_back_to_main(call.from_user.id)
                 )
+            case KeyCall.get_settings_vpn_router.value:
+
+                bot.send_video(
+                    call.from_user.id,
+                    open("static/settings_vpn_config.mov", "rb"),
+                    width=1920,
+                    height=1080,
+                    timeout=60
+                )
             case _:
 
                 bot.answer_callback_query(
