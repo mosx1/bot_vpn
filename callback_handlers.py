@@ -1,4 +1,3 @@
-import enums.invite
 import enums.keyCall
 import json, config, utils, managment_user, invite, enums, keyboards, uuid
 
@@ -8,7 +7,7 @@ import invite.methods
 
 from telebot import types
 
-from managment_user import add_user, del_users, UserList, data_user
+from managment_user import add_user, del_users, data_user
 
 from psycopg2.extras import DictCursor
                   
@@ -46,7 +45,8 @@ from managers.subscription.renewal_of_subscription import renewalOfSubscription
 from threads.payment import polling_info_last_payment_gift
 
 
-def register_callback_handlers(bot: TeleBotMod) -> None:     
+def register_callback_handlers(bot: TeleBotMod) -> None:
+
     @bot.callback_query_handler(func=lambda call: call.data and isinstance(call.data, str) and call.data.startswith('{"key":'))
     def _(call: types.CallbackQuery):
 
@@ -253,7 +253,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 bot.edit_message_reply_markup(
                     chat_id = call.message.chat.id, 
                     message_id = call.message.id, 
-                    reply_markup = UserList.addButtonKeyForUsersList(user)
+                    reply_markup = keyboards.get_inline_for_users_list(user)
                 )
                 return
             
@@ -263,7 +263,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 bot.edit_message_reply_markup(
                     chat_id = call.message.chat.id, 
                     message_id = call.message.id, 
-                    reply_markup = UserList.addButtonKeyForUsersList(user)
+                    reply_markup = keyboards.get_inline_for_users_list(user)
                 )
                 return
             
@@ -302,7 +302,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     call.message,
                     text,
                     parse_mode=ParseMode.mdv2,
-                    reply_markup = UserList.addButtonKeyForUsersList(user)
+                    reply_markup = keyboards.get_inline_for_users_list(user)
                 )
 
             case KeyCall.deaction.name:
@@ -355,7 +355,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
 
                 managment_user.manager_users_list.back_page(call.message)
 
-            case KeyCall.data_user.name:
+            case KeyCall.data_user.value:
 
                 data_user(
                     call_data['id'],
@@ -398,7 +398,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 if successfully_paid(call_data['id']):
                     bot.answer_callback_query(callback_query_id=call.id, text='Отправлено', show_alert=True)
 
-            case enums.invite.CallbackKeys.resetToZeroBalance.value:
+            case KeyCall.reset_to_zero_balance.value:
 
                 invite.methods.resetToZeroBalance(call_data['userId'])
                 bot.delete_message(
@@ -568,13 +568,21 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 )
             case KeyCall.get_settings_vpn_router.value:
 
-                bot.send_video(
+                with open("static/settings_vpn_config.mov", "rb") as video_file:
+                    bot.send_video(
+                        call.from_user.id,
+                        video_file,
+                        width=1920,
+                        height=1080,
+                        timeout=60
+                    )
+            case KeyCall.send_sale_invoice.value:
+
+                msg = bot.send_message(
                     call.from_user.id,
-                    open("static/settings_vpn_config.mov", "rb"),
-                    width=1920,
-                    height=1080,
-                    timeout=60
+                    "Введите количество месяцев для отправки счета:"
                 )
+                # bot.register_next_step_handler(msg, , int(call_data['user_id']))
             case _:
 
                 bot.answer_callback_query(

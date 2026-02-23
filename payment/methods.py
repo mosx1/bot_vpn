@@ -105,4 +105,4 @@ def add_sale_invoice(label: str, user_id: int, server_id: int, month_count: int,
             message_id=message_id
         )
         session.execute(query)
-        session.commit()
+        session.commit()    

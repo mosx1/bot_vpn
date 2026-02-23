@@ -19,6 +19,8 @@ class KeyCall(Enum):
     transfer_other_server: str = "transfer_other_server"
     pay_router: str = "pay_router"
     get_settings_vpn_router: str = "get_settings_vpn_router"
+    send_sale_invoice: str = "send_sale_invoice"
+    reset_to_zero_balance: str = "resetToZeroBalance"
 
 
 class ReduceTime(Enum):

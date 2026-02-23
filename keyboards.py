@@ -1,6 +1,6 @@
 import utils
 
-from telebot.types import InlineKeyboardMarkup
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from telebot.util import quick_markup
 
 from servers.server_list import Country
@@ -8,7 +8,12 @@ from servers.methods import get_very_free_server
 
 from enum import Enum
 
-from enums.keyCall import KeyCall
+from enums.keyCall import KeyCall, ReduceTime
+
+from tables import User
+
+from configparser import ConfigParser
+
 
 
 class KeyboardForUser(Enum):
@@ -74,4 +79,97 @@ def get_inline_back_to_main(user_id: int | str) -> InlineKeyboardMarkup:
             "<<<Назад": {"callback_data": '{"key": "backmanualSettings", "id": "' + str(user_id) +'"}'}
         },
         row_width=1
+    )
+
+def get_inline_for_users_list(user: User | None = None, a: int = 0, buttonNav: list = None, textKeyWhere: str = None) -> InlineKeyboardMarkup:
+
+    config = ConfigParser()
+    config.read('config.ini')
+
+    keyboard_offer_one = InlineKeyboardMarkup()
+
+    if user:
+        if user.action:
+
+            inlineKeyConnect = InlineKeyboardButton(
+                    text="+",
+                    callback_data='{"key": "connect", "id": ' + str(user.telegram_id) + ', "serverId": ' + str(user.server_id) + '}'
+                )
+
+            keyboard_offer_one.add(
+                inlineKeyConnect,
+                InlineKeyboardButton(
+                    text="-",
+                    callback_data=utils.callBackBilder(
+                        ReduceTime.timing,
+                        id=user.telegram_id
+                    )
+                ),
+                InlineKeyboardButton(
+                    text="Отключить", 
+                    callback_data='{"key": "deaction", "id": "' + str(user.telegram_id) + '"}'
+                ),
+                InlineKeyboardButton(
+                    text="Данные", 
+                    callback_data='{"key": "data_user", "id": "' + str(user.telegram_id) + '"}'
+                ),
+                InlineKeyboardButton(
+                    text="Отправить конфиг", 
+                    callback_data='{"key": "sendConf", "id": "' + str(user.telegram_id) + '"}'
+                )
+            )
+            
+        else:
+
+            keyboard_offer_one.add(
+                InlineKeyboardButton(
+                    text="Выбрать сервер", 
+                    callback_data='{"key": "' + KeyCall.list_servers_for_admin.name + '", "user_id": ' + str(user.telegram_id) + '}'
+                ),
+                InlineKeyboardButton(
+                    text="Данные", 
+                    callback_data='{"key": "data_user", "id": "' + str(user.telegram_id) + '"}'
+                ),
+                InlineKeyboardButton(
+                    text="Отправить кнопку продления",
+                    callback_data='{"key": "' + KeyCall.send_message_for_extension.name + '", "user_id": "' + str(user.telegram_id) + '"}'
+                ),
+                row_width=2
+            )
+    if a == config['BaseConfig'].getint('count_page') - 1:
+        keyboard_offer_one.row(*buttonNav)
+        keyboard_offer_one.add(InlineKeyboardButton(text=textKeyWhere, callback_data='{"key": "option_where"}'))
+    return keyboard_offer_one
+
+
+def get_inline_for_full_user_info(user: User):
+
+    keyboard: InlineKeyboardMarkup = get_inline_for_users_list(user)
+
+    keyboard.add(
+        InlineKeyboardButton(
+            text = "Обнулить баланс",
+            callback_data = utils.callBackBilder(
+                KeyCall.reset_to_zero_balance,
+                userId = id
+            )
+        )
+    )
+    keyboard.add(
+        InlineKeyboardButton(
+            text=KeyCall.refreshtoken.value,
+            callback_data=utils.callBackBilder(
+                KeyCall.refreshtoken,
+                user_id = user.telegram_id
+            )
+        )
+    )
+    keyboard.add(
+        InlineKeyboardButton(
+            text="Отправить счет",
+            callback_data=utils.callBackBilder(
+                KeyCall.send_sale_invoice,
+                user_id = user.telegram_id
+            )
+        )
     )

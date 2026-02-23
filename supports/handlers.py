@@ -1,4 +1,4 @@
-import config, utils
+import config, utils, keyboards
 
 from enums.content_types import ContentTypes
 from enums.parse_mode import ParseMode
@@ -82,7 +82,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                     utils.form_text_markdownv2(message.text) +
                     "\nid:" + str(message.from_user.id),
                     parse_mode=ParseMode.mdv2.value,
-                    reply_markup=UserList.addButtonKeyForUsersList(user)
+                    reply_markup=keyboards.get_inline_for_users_list(user)
                 )
                 return bot.reply_to(
                     message,
@@ -109,7 +109,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
             config.ADMINCHAT, 
             document=message.document.file_id,
             caption="server: " + utils.form_text_markdownv2(str(user.server_desired)) + "user: [" + utils.form_text_markdownv2(message.from_user.full_name) + "](tg://user?id\=" + str(message.from_user.id) + ")\nid:" + str(message.from_user.id),
-            reply_markup=UserList.addButtonKeyForUsersList(user),
+            reply_markup=keyboards.get_inline_for_users_list(user),
             parse_mode=ParseMode.mdv2.value
         )
         
@@ -135,7 +135,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                 photo=message.photo[0].file_id,
                 caption="server: " + utils.form_text_markdownv2(str(user.server_desired)) +
                 "\nuser: [" + utils.form_text_markdownv2(message.from_user.full_name) + "](tg://user?id\=" + str(message.from_user.id) + ") \n\nid:" + str(message.from_user.id),
-                reply_markup=UserList.addButtonKeyForUsersList(user),
+                reply_markup=keyboards.get_inline_for_users_list(user),
                 parse_mode=ParseMode.mdv2.value
             )
         except Exception as e:

@@ -1,12 +1,10 @@
 import config, string, secrets, utils, keyboards
 
-from connect import db, logging, bot, engine
+from connect import logging, bot, engine
 
 from telebot.apihelper import ApiTelegramException
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
-from enums.invite import CallbackKeys
-from enums.keyCall import KeyCall, ReduceTime
 from enums.parse_mode import ParseMode
 
 from protocols import getNameProtocolById
@@ -101,7 +99,7 @@ class UserList:
             statistic = '\-'
             keyboard_offer_one = None
 
-            keyboard_offer_one: InlineKeyboardMarkup = self.addButtonKeyForUsersList(
+            keyboard_offer_one: InlineKeyboardMarkup = keyboards.get_inline_for_users_list(
                 user,
                 a, 
                 button_nav, 
@@ -139,63 +137,6 @@ class UserList:
                     parse_mode="MarkdownV2",
                     reply_markup=keyboard_offer_one
                 )
-
-        
-    @classmethod
-    def addButtonKeyForUsersList(cls, user: User | None = None, a: int = 0, buttonNav: list = None, textKeyWhere: str = None) -> InlineKeyboardMarkup:
-        keyboard_offer_one = InlineKeyboardMarkup()
-        if user:
-            if user.action:
-
-                inlineKeyConnect = InlineKeyboardButton(
-                        text="+",
-                        callback_data='{"key": "connect", "id": ' + str(user.telegram_id) + ', "serverId": ' + str(user.server_id) + '}'
-                    )
-
-                keyboard_offer_one.add(
-                    inlineKeyConnect,
-                    InlineKeyboardButton(
-                        text="-",
-                        callback_data=utils.callBackBilder(
-                            ReduceTime.timing,
-                            id=user.telegram_id
-                        )
-                    ),
-                    InlineKeyboardButton(
-                        text="Отключить", 
-                        callback_data='{"key": "deaction", "id": "' + str(user.telegram_id) + '"}'
-                    ),
-                    InlineKeyboardButton(
-                        text="Данные", 
-                        callback_data='{"key": "data_user", "id": "' + str(user.telegram_id) + '"}'
-                    ),
-                    InlineKeyboardButton(
-                        text="Отправить конфиг", 
-                        callback_data='{"key": "sendConf", "id": "' + str(user.telegram_id) + '"}'
-                    )
-                )
-                
-            else:
-
-                keyboard_offer_one.add(
-                    InlineKeyboardButton(
-                        text="Выбрать сервер", 
-                        callback_data='{"key": "' + KeyCall.list_servers_for_admin.name + '", "user_id": ' + str(user.telegram_id) + '}'
-                    ),
-                    InlineKeyboardButton(
-                        text="Данные", 
-                        callback_data='{"key": "data_user", "id": "' + str(user.telegram_id) + '"}'
-                    ),
-                    InlineKeyboardButton(
-                        text="Отправить кнопку продления",
-                        callback_data='{"key": "' + KeyCall.send_message_for_extension.name + '", "user_id": "' + str(user.telegram_id) + '"}'
-                    ),
-                    row_width=2
-                )
-        if a == config.COUNT_PAGE - 1:
-            keyboard_offer_one.row(*buttonNav)
-            keyboard_offer_one.add(InlineKeyboardButton(text=textKeyWhere, callback_data='{"key": "option_where"}'))
-        return keyboard_offer_one
 
 
 def add_user(
@@ -247,12 +188,6 @@ def add_user(
                         )
                     )
                     session.commit()
-                    # cursor.execute(
-                    #     "INSERT INTO users_subscription (telegram_id, name, exit_date, action, server_link, server_id, protocol)" +
-                    #     "\nVALUES ('" + str(user_id) + "', '" + str(name_user) + "', now() " + str(intervalSql) + ", True, '" + result_add_vpn_user + "', '" + str(server) + "', " + str(config.DEFAULTPROTOCOL) + ");"
-                    # )
-
-                    # db.commit()
 
                     bot.send_message(
                         config.ADMINCHAT, 
@@ -305,12 +240,6 @@ def add_user(
                 )
             )
             session.commit()
-            # cursor.execute(
-            #     "UPDATE users_subscription" + 
-            #     "\nSET exit_date= exit_date " + intervalSql + ", paid=True" +
-            #     "\nWHERE telegram_id=" + str(user_id)
-            # )
-            # db.commit()
             
             return config.AddUserMessage.extended
     
@@ -390,27 +319,6 @@ def data_user(id: int, old_message: Message | None = None) -> Message:
             text= "Пользователь незарегистрирован"
         )
     
-    keyboard: InlineKeyboardMarkup = UserList.addButtonKeyForUsersList(user)
-
-    keyboard.add(
-        InlineKeyboardButton(
-            text = "Обнулить баланс",
-            callback_data = utils.callBackBilder(
-                CallbackKeys.resetToZeroBalance,
-                userId = id
-            )
-        )
-    )
-    keyboard.add(
-        InlineKeyboardButton(
-            text=KeyCall.refreshtoken.value,
-            callback_data=utils.callBackBilder(
-                KeyCall.refreshtoken,
-                user_id = id
-            )
-        )
-    )
-    
     return bot.edit_message_text_or_caption(
         message,
         paidCheckActive(user.paid) + utils.bool_in_circle_for_text(user.action) +
@@ -425,7 +333,7 @@ def data_user(id: int, old_message: Message | None = None) -> Message:
         "\nбаланс: " + utils.form_text_markdownv2(str(user.balance)) +
         "\nid:" + str(user.telegram_id),
         parse_mode=ParseMode.mdv2,
-        reply_markup=keyboard
+        reply_markup=keyboards.get_inline_for_full_user_info(user)
     )  
     
 
