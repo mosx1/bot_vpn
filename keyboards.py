@@ -142,7 +142,7 @@ def get_inline_for_users_list(user: User | None = None, a: int = 0, buttonNav: l
     return keyboard_offer_one
 
 
-def get_inline_for_full_user_info(user: User):
+def get_inline_for_full_user_info(user: User) -> InlineKeyboardMarkup:
 
     keyboard: InlineKeyboardMarkup = get_inline_for_users_list(user)
 
@@ -173,3 +173,5 @@ def get_inline_for_full_user_info(user: User):
             )
         )
     )
+
+    return keyboard
