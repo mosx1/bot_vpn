@@ -105,7 +105,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
             config.ADMINCHAT, 
             document=message.document.file_id,
             caption="server: " + utils.form_text_markdownv2(str(user.server_desired)) + 
-            f"\nСообщение от пользователя: {message.caption}" +
+            f"\nСообщение от пользователя: {utils.form_text_markdownv2(message.caption)}" +
             "user: [" + utils.form_text_markdownv2(message.from_user.full_name) + "](tg://user?id\=" + str(message.from_user.id) + ")\nid:" + str(message.from_user.id),
             reply_markup=keyboards.get_inline_for_users_list(user),
             parse_mode=ParseMode.mdv2.value
@@ -132,7 +132,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                 config.ADMINCHAT, 
                 photo=message.photo[0].file_id,
                 caption="server: " + utils.form_text_markdownv2(str(user.server_desired)) +
-                f"\nСообщение от пользователя: {message.caption}" +
+                f"\nСообщение от пользователя: {utils.form_text_markdownv2(message.caption)}" +
                 "\nuser: [" + utils.form_text_markdownv2(message.from_user.full_name) + "](tg://user?id\=" + str(message.from_user.id) + ") \n\nid:" + str(message.from_user.id),
                 reply_markup=keyboards.get_inline_for_users_list(user),
                 parse_mode=ParseMode.mdv2.value
@@ -168,7 +168,11 @@ def register_message_handlers(bot: TeleBotMod) -> None:
             user_id: str | int = str(message.reply_to_message.caption).split('id:', -1)[1]
         
         try:
-            bot.copy_message(chat_id=user_id, from_chat_id=config.ADMINCHAT, message_id=message.id)
+            bot.copy_message(
+                chat_id=user_id, 
+                from_chat_id=config.ADMINCHAT, 
+                message_id=message.id
+            )
         except Exception as e:
             bot.send_message(
                 config.ADMINCHAT,
