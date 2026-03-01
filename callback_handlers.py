@@ -53,6 +53,9 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
         call_data = json.loads(call.data)
         username: str = call.from_user.full_name
 
+        conf = ConfigParser()
+        conf.read('config.ini')
+
         logging.info("user_id: " + str(call.from_user.id) + ", user_name:" + str(username) + " нажата кнопка с ключем " + call_data['key'])
         
         match call_data['key']:
@@ -119,28 +122,27 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 )
 
             case KeyCall.pollCountMonth.value:
-
-                conf = ConfigParser()
-                conf.read('config.ini')
-
-                server_id: int = get_very_free_server()
-
-                if "gift" in call_data:
-                    key = "getGiftCode"
-                else:
-                    key = "getLinkPayment"
-
-                keyboard = quick_markup(
-                    {
-                        '1 мес.| ' + conf['Price'].get('RUB') + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(server_id) + ', "month": 1}'},
-                        '3 мес.| ' + str(conf['Price'].getint('RUB') * 3) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(server_id) + ', "month": 3}'},
-                        '6 мес.| ' + str(conf['Price'].getint('RUB') * 6) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(server_id) + ', "month": 6}'},
-                        '12 мес.| ' + str(conf['Price'].getint('RUB') * 12) + " руб.": {'callback_data': '{"key": "' + key + '", "server": ' + str(server_id) + ', "month": 12}'},
-                        '◀️ назад': {'callback_data': '{"key": "' + KeyCall.backmanual_settings.value + '"}'}
-                    },
-                    row_width=2
+                
+                curr_user: User = get_user_by_id(call.from_user.id)
+                bot.edit_message_text_or_caption(
+                    call.message, 
+                    "На какой срок?", 
+                    reply_markup=keyboards.get_inline_for_count_month(
+                        KeyCall.get_link_payment, 
+                        curr_user.server_id
+                    )
                 )
-                bot.edit_message_text_or_caption(call.message, "На какой срок?", reply_markup=keyboard)
+            
+            case KeyCall.poll_count_month_gift.value:
+                
+                bot.edit_message_text_or_caption(
+                    call.message, 
+                    "На какой срок?", 
+                    reply_markup=keyboards.get_inline_for_count_month(
+                        KeyCall.get_gift_code, 
+                        call_data['server']
+                    )
+                )
             
             case "getGiftCode":
 

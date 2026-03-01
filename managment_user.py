@@ -319,7 +319,7 @@ def data_user(id: int, old_message: Message | None = None) -> Message:
             text= "Пользователь незарегистрирован"
         )
     
-    return bot.edit_message_text_or_caption(
+    return bot.reply_to(
         message,
         paidCheckActive(user.paid) + utils.bool_in_circle_for_text(user.action) +
         " [" + utils.form_text_markdownv2(user.name) + "](tg://user?id\=" + str(user.telegram_id) +
@@ -332,7 +332,7 @@ def data_user(id: int, old_message: Message | None = None) -> Message:
         "\nstat: " + utils.form_text_markdownv2(str(user.statistic)) +
         "\nбаланс: " + utils.form_text_markdownv2(str(user.balance)) +
         "\nid:" + str(user.telegram_id),
-        parse_mode=ParseMode.mdv2,
+        parse_mode=ParseMode.mdv2.value,
         reply_markup=keyboards.get_inline_for_full_user_info(user)
     )  
     

@@ -6,11 +6,8 @@ from enums.chat_types import ChatTypes
 from enums.keyCall import KeyCall
 
 from telebot import types
-from telebot.util import quick_markup
 
 from giftUsers import checkGiftCode
-
-from managment_user import UserList
 
 from messageForUser import successfully_paid
 
@@ -58,19 +55,18 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                 )
             
             case KeyboardForUser.buy.value:
-                server_id: int = get_very_free_server()
+                
+                curr_user: User = get_user_by_id(message.from_user.id)
+                server_id: int = curr_user.server_id
 
-                keyboard = quick_markup(
-                    {
-                        '1 мес.| ' + conf['Price'].get('RUB') + " руб.": {'callback_data': '{"key": "' + KeyCall.get_link_payment.value + '", "server": ' + str(server_id) + ', "month": 1}'},
-                        '3 мес.| ' + str(conf['Price'].getint('RUB') * 3) + " руб.": {'callback_data': '{"key": "' + KeyCall.get_link_payment.value + '", "server": ' + str(server_id) + ', "month": 3}'},
-                        '6 мес.| ' + str(conf['Price'].getint('RUB') * 6) + " руб.": {'callback_data': '{"key": "' + KeyCall.get_link_payment.value + '", "server": ' + str(server_id) + ', "month": 6}'},
-                        '12 мес.| ' + str(conf['Price'].getint('RUB') * 12) + " руб.": {'callback_data': '{"key": "' + KeyCall.get_link_payment.value + '", "server": ' + str(server_id) + ', "month": 12}'},
-                        '◀️ назад': {'callback_data': '{"key": "' + KeyCall.backmanual_settings.value + '"}'}
-                    },
-                    row_width=2
+                if not curr_user.action:
+                    server_id: int = get_very_free_server()
+
+                bot.reply_to(
+                    message, 
+                    "На какой срок?", 
+                    reply_markup=keyboards.get_inline_for_count_month(KeyCall.get_link_payment, server_id)
                 )
-                bot.reply_to(message, "На какой срок?", reply_markup=keyboard)
             
             case _:
 
@@ -108,7 +104,9 @@ def register_message_handlers(bot: TeleBotMod) -> None:
         bot.send_document(
             config.ADMINCHAT, 
             document=message.document.file_id,
-            caption="server: " + utils.form_text_markdownv2(str(user.server_desired)) + "user: [" + utils.form_text_markdownv2(message.from_user.full_name) + "](tg://user?id\=" + str(message.from_user.id) + ")\nid:" + str(message.from_user.id),
+            caption="server: " + utils.form_text_markdownv2(str(user.server_desired)) + 
+            f"\nСообщение от пользователя: {message.caption}" +
+            "user: [" + utils.form_text_markdownv2(message.from_user.full_name) + "](tg://user?id\=" + str(message.from_user.id) + ")\nid:" + str(message.from_user.id),
             reply_markup=keyboards.get_inline_for_users_list(user),
             parse_mode=ParseMode.mdv2.value
         )
@@ -134,6 +132,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                 config.ADMINCHAT, 
                 photo=message.photo[0].file_id,
                 caption="server: " + utils.form_text_markdownv2(str(user.server_desired)) +
+                f"\nСообщение от пользователя: {message.caption}" +
                 "\nuser: [" + utils.form_text_markdownv2(message.from_user.full_name) + "](tg://user?id\=" + str(message.from_user.id) + ") \n\nid:" + str(message.from_user.id),
                 reply_markup=keyboards.get_inline_for_users_list(user),
                 parse_mode=ParseMode.mdv2.value

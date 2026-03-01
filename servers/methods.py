@@ -11,9 +11,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import Row, Sequence, select, func, and_, text, update
 from sqlalchemy.sql.elements import BinaryExpression
 
-from tables import ServersTable, CountryTable, User
+from tables import ServersTable, CountryTable, User, MTProxyConfigs
 
-from servers.server_list import Country, Servers
+from servers.server_list import Country
 
 from configparser import ConfigParser
 
@@ -173,8 +173,15 @@ def health_check_and_update_answers(server: ServersTable):
 def check_answers_servers():
     servers: Sequence[ServersTable] = get_server_list()
     gevent.joinall([gevent.spawn(health_check_and_update_answers, server) for server in servers])
-        
 
+
+def get_url_mtproto(server_id: int) -> str:
+    with Session(engine) as session:
+        mtproxyconfig = session.execute(
+            select(MTProxyConfigs).where(MTProxyConfigs.server_id == server_id)
+        ).scalar_one()
+        
+        return mtproxyconfig.url
 
 if __name__ == "__main__":
     health_check('http://de8.kuzmos.ru:8081/config')

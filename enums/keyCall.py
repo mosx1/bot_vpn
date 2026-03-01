@@ -3,6 +3,7 @@ from enum import Enum
 class KeyCall(Enum):
     
     pollCountMonth: int = "1"
+    poll_count_month_gift: int = "2"
     sale: str = "sale"
     tryServers: str = "tryServers"
     refreshtoken: str = "refreshtoken"
@@ -21,6 +22,7 @@ class KeyCall(Enum):
     get_settings_vpn_router: str = "get_settings_vpn_router"
     send_sale_invoice: str = "send_sale_invoice"
     reset_to_zero_balance: str = "resetToZeroBalance"
+    get_gift_code: str = "getGiftCode"
 
 
 class ReduceTime(Enum):

@@ -110,4 +110,16 @@ class SaleInvoicesInProgress(Base):
         ForeignKeyConstraint(['server_id'], ['servers.id'])
     )
 
+class MTProxyConfigs(Base):
+
+    __tablename__: str = 'mtproxy_configs'
+
+    id = Column(BIGINT, primary_key=True)
+    server_id = Column(BIGINT, nullable=False)
+    url = Column(TEXT, nullable=False)
+
+    __table_agrs___ = (
+        ForeignKeyConstraint(['server_id'], ['servers.id'])
+    )
+
 Base.metadata.create_all(engine)

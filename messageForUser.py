@@ -13,7 +13,7 @@ from configparser import ConfigParser
 
 from keyboards import KeyboardForUser, get_inline_loading
 
-from servers.methods import get_very_free_server
+from servers.methods import get_very_free_server, get_url_mtproto
 
 from network_service.controller_flask_api import get_subscription_link
 
@@ -27,6 +27,11 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
     keyboard = InlineKeyboardMarkup()
 
     keyboard.add(
+        InlineKeyboardButton(
+            text="Прокси для ТГ",
+            url=get_url_mtproto(user.server_id),
+            style="primary"
+        ),
         InlineKeyboardButton(
             text="Авто вкл/выкл на iPhone", 
             callback_data='{"key": "comands_video"}'
@@ -55,7 +60,7 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
         ),
         InlineKeyboardButton(
             text=KeyboardForUser.gift.value,
-            callback_data='{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(get_very_free_server()) + ', "gift": true}'
+            callback_data='{"key": "' + KeyCall.poll_count_month_gift.value + '", "server": '+ str(get_very_free_server()) + '}'
         )
     )
     

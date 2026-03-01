@@ -187,7 +187,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
 
         key = quick_markup(
             {
-                keyboards.KeyboardForUser.gift.value: {'callback_data': '{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(get_very_free_server()) + ', "gift": true}'}
+                keyboards.KeyboardForUser.gift.value: {'callback_data': '{"key": "' + KeyCall.poll_count_month_gift.value + '", "server": '+ str(get_very_free_server()) + '}'}
             },
             row_width=1
         )
@@ -224,7 +224,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
     def _(message: types.Message):
         key = quick_markup(
             {
-                keyboards.KeyboardForUser.gift.value: {'callback_data': '{"key": "' + KeyCall.pollCountMonth.value + '", "server": '+ str(get_very_free_server()) + ', "gift": true}'}
+                keyboards.KeyboardForUser.gift.value: {'callback_data': '{"key": "' + KeyCall.poll_count_month_gift.value + '", "server": '+ str(get_very_free_server()) + '}'}
             },
             row_width=1
         )
