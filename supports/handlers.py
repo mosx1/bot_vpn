@@ -13,7 +13,7 @@ from messageForUser import successfully_paid
 
 from tables import User
 
-from filters import only_user_chat, only_user_chat_and_text
+from filters import only_user_chat, only_user_chat_and_text, only_admin_chat_reply
 
 from keyboards import KeyboardForUser
 
@@ -157,11 +157,10 @@ def register_message_handlers(bot: TeleBotMod) -> None:
 
 
     @bot.message_handler(
-        func= lambda message: message.chat.id == config.ADMINCHAT and
-        message.reply_to_message and message.text[0] != "/"
+        func=only_admin_chat_reply()
     )
     def _(message: types.Message) -> None:
-
+        
         if message.reply_to_message.text:
             user_id: str | int = str(message.reply_to_message.text).split('id:', -1)[1]
         else:
