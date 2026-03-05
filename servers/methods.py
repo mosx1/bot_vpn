@@ -166,8 +166,6 @@ def health_check_and_update_answers(server: ServersTable):
     code = health_check(f"http://{server.links}/config")
     answers = bool(code == 200)
     update_answers_servers(server.id, answers)
-    logging.info(f"health_chech_server: {str(server.name)} value: {answers}")
-    print(f"health_chech_server: {str(server.name)} value: {answers}")
 
 
 def check_answers_servers():

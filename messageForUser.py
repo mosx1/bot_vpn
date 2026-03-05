@@ -17,8 +17,6 @@ from servers.methods import get_very_free_server, get_url_mtproto
 
 from network_service.controller_flask_api import get_subscription_link
 
-import time
-
 def successfully_paid(id, old_message: Message | None =None, optionText="") -> Message | bool:
 
     conf = ConfigParser()
