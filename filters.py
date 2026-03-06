@@ -17,6 +17,4 @@ def only_admin_chat_reply():
     return lambda message: (
         message.chat.id == config.ADMINCHAT
         and message.reply_to_message
-        and (not message.text or message.text[0] != "/")
-        and (not message.caption or message.caption[0] != "/")
     )
