@@ -161,8 +161,11 @@ def register_message_handlers(bot: TeleBotMod) -> None:
     )
     def _(message: types.Message) -> None:
         
+        text_arr: list[str] = str(message.reply_to_message.text).split('id:', -1)
+        if not isinstance(text_arr[-1], int):
+            return
         if message.reply_to_message.content_type == "text":
-            user_id: str | int = str(message.reply_to_message.text).split('id:', -1)[1]
+            user_id: str | int = [1]
         else:
             user_id: str | int = str(message.reply_to_message.caption).split('id:', -1)[1]
         
