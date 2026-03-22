@@ -141,9 +141,10 @@ class UserList:
 
 def add_user(
         user_id,
-        month,
+        month=None,
         name_user=None,
-        server=None
+        server=None,
+        week: int | None =None
 ) -> config.AddUserMessage:
     
     conf = ConfigParser()
@@ -151,7 +152,10 @@ def add_user(
 
     admin_chat_id: int = conf['Telegram'].getint('admin_chat')
     
-    intervalSql = " + INTERVAL '" + str(month) + " months'"
+    if month:
+        intervalSql = f" + INTERVAL '{month} months'"
+    elif week:
+        intervalSql = f" + INTERVAL '{week} week'"
     
     if not name_user:
         name_user = str(user_id)
@@ -184,7 +188,7 @@ def add_user(
                             action=True,
                             server_link=result_add_vpn_user,
                             server_id=str(server),
-                            protocol=str(config.DEFAULTPROTOCOL)
+                            protocol=conf['BaseConfig'].getint('default_protocol')
                         )
                     )
                     session.commit()

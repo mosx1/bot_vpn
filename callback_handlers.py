@@ -61,9 +61,6 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
         match call_data['key']:
 
             case "try":
-                
-                conf = ConfigParser()
-                conf.read('config.ini')
 
                 bot.delete_message(call.message.chat.id, call.message.id)
                 oldMessage: types.Message = bot.send_photo(
@@ -73,7 +70,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 )
                 add_user(
                     call.from_user.id,
-                    conf['BaseConfig'].getint('first_start_duration_month'),
+                    week=conf['BaseConfig'].getint('first_start_duration_week'),
                     name_user=utils.form_text_markdownv2(username, delete=True),
                     server=get_very_free_server()
                 )

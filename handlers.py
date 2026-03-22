@@ -1,7 +1,8 @@
 
+from sqlalchemy.orm import Session
 import config, os, utils, managment_user, keyboards
 
-from connect import db, logging
+from connect import db, logging, engine
 
 from telebot import types
 
@@ -32,7 +33,7 @@ from tables import User
 
 from users.methods import get_user_by_id
 
-from sqlalchemy import func
+from sqlalchemy import func, delete
 
 from statistic.tasks import start_statistic
 
@@ -110,9 +111,9 @@ def register_message_handlers(bot: TeleBotMod) -> None:
 
         """Удаляет текущего пользователя. Для теста"""
 
-        with db.cursor() as cursor:
-            cursor.execute("DELETE FROM users_subscription WHERE telegram_id = " + str(message.from_user.id))
-            db.commit()
+        with Session(engine) as session:
+            session.execute(delete(User).where(User.telegram_id == message.from_user.id))
+            session.commit()
 
 
     @bot.message_handler(commands=["log", "лог"], func=onlyAdminChat())
