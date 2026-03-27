@@ -75,7 +75,7 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
         ).scalar()
     token: str = jwt.encode(
         {"telegram_id": id},
-        hash_code, 
+        hash_code.hash, 
         algorithm=conf['JWT'].get('algoritm')
     )
     
@@ -144,11 +144,19 @@ def manual_successfully_paid(id: int, old_message: Message) -> bool:
     caption_for_message: str = conf['MessagesTextMD'].get('successfully_subscription')
 
     user: User = get_user_by_id(id)
-
+    with Session(engine) as session:
+        hash_code = session.execute(
+            select(SecurityHashs).limit(1)
+        ).scalar()
+    token: str = jwt.encode(
+        {"telegram_id": id},
+        hash_code.hash, 
+        algorithm=conf['JWT'].get('algoritm')
+    )
     bot.edit_message_text_or_caption(
         old_message,
         caption_for_message.format(
-            get_subscription_link(id),
+            f"https://kuzmos.ru/sub?jwt={token}",
             utils.form_text_markdownv2(user.server_link)
         ),
         reply_markup=keyboards.get_inline_back_to_main(id), 
