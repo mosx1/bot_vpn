@@ -82,7 +82,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                 )
                 return bot.reply_to(
                     message,
-                    conf['MessagesText'].get('reply_to_messageе')
+                    conf['MessagesText'].get('reply_to_message')
                 )
             
 
