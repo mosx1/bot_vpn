@@ -73,16 +73,17 @@ def check_payments() -> None:
                             )
                         )
 
-                        try:
-                            bot.delete_message(
-                                user.telegram_id,
-                                invoice.message_id
-                            )
-                        except Exception as e:
-                            bot.send_message(
-                                config['Telegram']['admin_chat'],
-                                f'Не удалено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id)
-                            )
+                        if invoice.message_id:
+                            try:
+                                bot.delete_message(
+                                    user.telegram_id,
+                                    invoice.message_id
+                                )
+                            except Exception as e:
+                                bot.send_message(
+                                    config['Telegram']['admin_chat'],
+                                    f'Не удалено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id)
+                                )
 
                         try:
                             old_message: Message = bot.send_photo(

@@ -101,8 +101,8 @@ class SaleInvoicesInProgress(Base):
     label: Column = Column(TEXT, nullable=False)
     server_id: Column = Column(BIGINT, nullable=False)
     month_count: Column = Column(SMALLINT, nullable=False)
-    message_id: Column = Column(BIGINT, nullable=False)
-    chat_id: Column = Column(BIGINT, nullable=False)
+    message_id: Column = Column(BIGINT, nullable=True)
+    chat_id: Column = Column(BIGINT, nullable=True)
     create_date: Column = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
     __table_agrs___ = (
