@@ -176,6 +176,7 @@ def register_message_handlers(bot: TeleBot) -> None:
             token = get_jwt_by_id(user.telegram_id)
             try:
                 message_web_app: Message = bot.send_message(
+                    user.telegram_id,
                     'Если телеграм не работает, оформить подписку можно через веб интерфейс или воспользовавшись прокси для телеграм.',
                     reply_markup=get_inline_web_page(token)
                 )
