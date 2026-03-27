@@ -1,13 +1,14 @@
-import utils, keyboards
+import utils, keyboards, jwt
 
-from connect import bot
+from connect import bot, engine
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 
 from enums.parse_mode import ParseMode
 from enums.keyCall import KeyCall
 
 from users.methods import get_user_by_id
-from tables import User
+
+from tables import User, SecurityHashs
 
 from configparser import ConfigParser
 
@@ -16,6 +17,9 @@ from keyboards import KeyboardForUser, get_inline_loading
 from servers.methods import get_very_free_server, get_url_mtproto
 
 from network_service.controller_flask_api import get_subscription_link
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 def successfully_paid(id, old_message: Message | None =None, optionText="") -> Message | bool:
 
@@ -65,6 +69,16 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
     
     text_for_message: str = conf['MessagesTextMD'].get('successfully_subscription_automatic')
     
+    with Session(engine) as session:
+        hash_code = session.execute(
+            select(SecurityHashs).limit(1)
+        ).scalar()
+    token: str = jwt.encode(
+        {"telegram_id": id},
+        hash_code.hash, 
+        algorithm=conf['JWT'].get('algoritm')
+    )
+    
     if not old_message:
         if user.paid:
             keyboard_ref = ReplyKeyboardMarkup(resize_keyboard=True)
@@ -79,12 +93,12 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
                 reply_markup=keyboard_ref,
                 parse_mode= ParseMode.mdv2.value
             )
-    
+        
         if t := bot.send_photo(
                 chat_id=id,
                 photo=open("static/logo_big.jpeg", "rb"),
                 caption=optionText + text_for_message.format(
-                    user.telegram_id,
+                    token,
                     utils.replaceMonthOnRuText(user.exit_date),
                     utils.form_text_markdownv2(
                         utils.get_server_name_by_id(user.server_id)
@@ -102,7 +116,7 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
         return bot.edit_message_text_or_caption(
             old_message,
             optionText + text_for_message.format(
-                user.telegram_id,
+                token,
                 utils.replaceMonthOnRuText(user.exit_date),
                 utils.form_text_markdownv2(
                     utils.get_server_name_by_id(user.server_id)
@@ -130,11 +144,19 @@ def manual_successfully_paid(id: int, old_message: Message) -> bool:
     caption_for_message: str = conf['MessagesTextMD'].get('successfully_subscription')
 
     user: User = get_user_by_id(id)
-
+    with Session(engine) as session:
+        hash_code = session.execute(
+            select(SecurityHashs).limit(1)
+        ).scalar()
+    token: str = jwt.encode(
+        {"telegram_id": id},
+        hash_code.hash, 
+        algorithm=conf['JWT'].get('algoritm')
+    )
     bot.edit_message_text_or_caption(
         old_message,
         caption_for_message.format(
-            get_subscription_link(id),
+            f"https://kuzmos.ru/sub?jwt={token}",
             utils.form_text_markdownv2(user.server_link)
         ),
         reply_markup=keyboards.get_inline_back_to_main(id), 
