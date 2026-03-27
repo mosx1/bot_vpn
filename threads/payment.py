@@ -29,6 +29,8 @@ from datetime import datetime, timedelta
 
 from giftUsers import genGiftCode
 
+from servers.methods import get_url_mtproto
+
 
 def check_payments() -> None:
 
@@ -180,11 +182,18 @@ def polling_info_last_payment_gift(*args) -> dict:
                 message.chat.id, 
                 message.id
             )
+            
+            cur_user = get_user_by_id(userId)
+            mtproto = get_url_mtproto(cur_user.server_id)
 
             photoMessage: Message = bot.send_photo(
                 chat_id=userId,
                 photo=open("image/gift.png", "rb"),
-                caption=config['MessagesTextMD'].get('gift_postcard').format(code=hash, date=month),
+                caption=config['MessagesTextMD'].get('gift_postcard').format(
+                    code=hash, 
+                    date=month,
+                    mtproto=mtproto
+                ),
                 parse_mode=ParseMode.mdv2.value
             )
 
