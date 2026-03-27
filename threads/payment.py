@@ -196,7 +196,7 @@ def polling_info_last_payment_gift(*args) -> dict:
                 ),
                 parse_mode=ParseMode.mdv2.value
             )
-            
+             
             bot.reply_to(photoMessage, "Перешлите это сообщение другу в качестве подарка. Спасибо что помогаете нам делать интернет доступнее.")
 
             return res
