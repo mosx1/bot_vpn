@@ -16,8 +16,6 @@ from keyboards import KeyboardForUser, get_inline_loading
 
 from servers.methods import get_very_free_server, get_url_mtproto
 
-from network_service.controller_flask_api import get_subscription_link
-
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
