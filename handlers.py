@@ -62,13 +62,6 @@ def register_message_handlers(bot: TeleBotMod) -> None:
         )
         bot.send_message(message.from_user.id, "add_key", reply_markup=keyboard)
 
-    @bot.message_handler(commands=[Comands.web_app.value])
-    def _(message: Message) -> None:
-        def test(user_id):
-            jwt_token = get_jwt_by_id(user_id)
-            return f"https://kuzmos.ru/sub/home?token={jwt_token}"
-        test(message.from_user.id)
-
     @bot.message_handler(commands=[Comands.checkSubscription.value], func=onlyAdminChat())
     def _(message: Message) -> None:
         treadCheckUsersSubscription = Thread(target=delete_not_subscription)
