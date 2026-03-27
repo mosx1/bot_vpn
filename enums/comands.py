@@ -8,3 +8,4 @@ class Comands(Enum):
     actionUsersCount: str = "action_users_count"
     start: str = "start"
     checkSubscription: str = 'checkSubscription'
+    web_app: str = 'web_app'

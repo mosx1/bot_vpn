@@ -1,5 +1,5 @@
-from email.policy import default
 from telebot import types, TeleBot
+from telebot.types import Message
 
 from filters import onlyAdminChat
 from spam.methods import spamMessage
@@ -10,13 +10,15 @@ from servers.methods import get_server_list
 from enums.spam import MessageTextRu
 from enums.parse_mode import ParseMode
 
-from users.methods import get_user_by, get_user_by_country
+from users.methods import get_user_by, get_user_by_country, get_jwt_by_id
 
 from tables import User, ServersTable
 
 from connect import logging
 
 from messageForUser import successfully_paid
+
+from keyboards import get_inline_web_page
 
 
 
@@ -158,3 +160,21 @@ def register_message_handlers(bot: TeleBot) -> None:
                 )
             except Exception as e:
                 logging.error(f"Не удалось отправить сообщение пользователю id: {user.telegram_id} name: {user.name}")
+
+    @bot.message_handler(commands=['webapp'])
+    def _(message: Message) -> None:
+        users: list[User] = get_user_by()
+
+        for user in users:
+
+            token = get_jwt_by_id(user.telegram_id)
+
+            message_web_app: Message = bot.send_message(
+                'Если телеграм не работает, оформить подписку можно через веб интерфейс или воспользовавшись прокси для телеграм.',
+                reply_markup=get_inline_web_page(token)
+            )
+            bot.pin_chat_message(
+                message_web_app.chat.id,
+                message_web_app.id,
+                disable_notification=True
+            )

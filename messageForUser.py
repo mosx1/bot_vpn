@@ -6,13 +6,13 @@ from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, R
 from enums.parse_mode import ParseMode
 from enums.keyCall import KeyCall
 
-from users.methods import get_user_by_id
+from users.methods import get_user_by_id, get_jwt_by_id
 
 from tables import User, SecurityHashs
 
 from configparser import ConfigParser
 
-from keyboards import KeyboardForUser, get_inline_loading
+from keyboards import KeyboardForUser, get_inline_loading, get_inline_web_page
 
 from servers.methods import get_very_free_server, get_url_mtproto
 
@@ -26,6 +26,18 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
 
     user: User = get_user_by_id(id)
     keyboard = InlineKeyboardMarkup()
+
+    token = get_jwt_by_id(user.telegram_id)
+
+    message_web_app: Message = bot.send_message(
+        'Если телеграм не работает, оформить подписку можно через веб интерфейс или воспользовавшись прокси для телеграм.',
+        reply_markup=get_inline_web_page(token)
+    )
+    bot.pin_chat_message(
+        message_web_app.chat.id,
+        message_web_app.id,
+        disable_notification=True
+    )
 
     keyboard.add(
         InlineKeyboardButton(
@@ -66,16 +78,6 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
     )
     
     text_for_message: str = conf['MessagesTextMD'].get('successfully_subscription_automatic')
-    
-    with Session(engine) as session:
-        hash_code = session.execute(
-            select(SecurityHashs).limit(1)
-        ).scalar()
-    token: str = jwt.encode(
-        {"telegram_id": id},
-        hash_code.hash, 
-        algorithm=conf['JWT'].get('algoritm')
-    )
     
     if not old_message:
         if user.paid:

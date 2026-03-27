@@ -1,3 +1,5 @@
+import jwt
+
 from typing import Iterable
 
 from connect import engine
@@ -6,9 +8,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, and_, insert, update, text
 from sqlalchemy.sql.elements import BinaryExpression
 
-from tables import User, ServersTable, UserToSubscription
+from tables import User, ServersTable, UserToSubscription, SecurityHashs
 
 from servers.server_list import Country
+
+from configparser import ConfigParser
 
 
 def get_user_by_id(telegram_id: int) -> User | None:
@@ -93,3 +97,19 @@ def reduce_time_by(user: User, month: int) -> None:
             )
         )
         session.commit()
+
+
+def get_jwt_by_id(user_id: int):
+
+    conf = ConfigParser()
+    conf.read('config.ini')
+
+    with Session(engine) as session:
+        hash_code = session.execute(
+            select(SecurityHashs).limit(1)
+        ).scalar()
+    return jwt.encode(
+        {"telegram_id": id},
+        hash_code.hash, 
+        algorithm=conf['JWT'].get('algoritm')
+    )

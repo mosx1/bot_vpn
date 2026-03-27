@@ -1,10 +1,12 @@
 
 from sqlalchemy.orm import Session
+from enums import comands
 import config, os, utils, managment_user, keyboards
 
 from connect import db, logging, engine
 
 from telebot import types
+from telebot.types import Message
 
 from managment_user import UserList, data_user, delete_not_subscription
 
@@ -60,9 +62,15 @@ def register_message_handlers(bot: TeleBotMod) -> None:
         )
         bot.send_message(message.from_user.id, "add_key", reply_markup=keyboard)
 
+    @bot.message_handler(commands=[Comands.web_app.value])
+    def _(message: Message) -> None:
+        def test(user_id):
+            jwt_token = get_jwt_by_id(user_id)
+            return f"https://kuzmos.ru/sub/home?token={jwt_token}"
+        test(message.from_user.id)
 
     @bot.message_handler(commands=[Comands.checkSubscription.value], func=onlyAdminChat())
-    def _(message: types.Message) -> None:
+    def _(message: Message) -> None:
         treadCheckUsersSubscription = Thread(target=delete_not_subscription)
         treadCheckUsersSubscription.start()
 
@@ -73,7 +81,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
         managment_user.manager_users_list = UserList(message)
     
     @bot.message_handler(commands=['te'], func=onlyAdminChat())
-    def _(message: types.Message):
+    def _(message: Message):
         keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
         keyboard.add(types.KeyboardButton('test', web_app=WebAppInfo('https://gidcolor.ru')))
         bot.send_message(message.chat.id, 'test',reply_markup=keyboard)
