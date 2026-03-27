@@ -168,13 +168,15 @@ def register_message_handlers(bot: TeleBot) -> None:
         for user in users:
 
             token = get_jwt_by_id(user.telegram_id)
-
-            message_web_app: Message = bot.send_message(
-                'Если телеграм не работает, оформить подписку можно через веб интерфейс или воспользовавшись прокси для телеграм.',
-                reply_markup=get_inline_web_page(token)
-            )
-            bot.pin_chat_message(
-                message_web_app.chat.id,
-                message_web_app.id,
-                disable_notification=True
-            )
+            try:
+                message_web_app: Message = bot.send_message(
+                    'Если телеграм не работает, оформить подписку можно через веб интерфейс или воспользовавшись прокси для телеграм.',
+                    reply_markup=get_inline_web_page(token)
+                )
+                bot.pin_chat_message(
+                    message_web_app.chat.id,
+                    message_web_app.id,
+                    disable_notification=True
+                )
+            except Exception:
+                pass
