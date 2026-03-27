@@ -109,7 +109,7 @@ def get_jwt_by_id(user_id: int):
             select(SecurityHashs).limit(1)
         ).scalar()
     return jwt.encode(
-        {"telegram_id": id},
+        {"telegram_id": user_id},
         hash_code.hash, 
         algorithm=conf['JWT'].get('algoritm')
     )
