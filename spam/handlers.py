@@ -163,6 +163,12 @@ def register_message_handlers(bot: TeleBot) -> None:
 
     @bot.message_handler(commands=['webapp'])
     def _(message: Message) -> None:
+        
+        old_message: Message = bot.reply_to(
+            message, 
+            'Начата рассылка'
+        )
+
         users: list[User] = get_user_by()
 
         for user in users:
@@ -180,3 +186,8 @@ def register_message_handlers(bot: TeleBot) -> None:
                 )
             except Exception:
                 pass
+        bot.edit_message_text(
+            'Рассылка окончена',
+            old_message.chat.id,
+            old_message.id
+        )
