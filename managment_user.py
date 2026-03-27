@@ -152,11 +152,15 @@ def add_user(
 
     admin_chat_id: int = conf['Telegram'].getint('admin_chat')
     
+    intervalSql = None
+    
     if month:
         intervalSql = f" + INTERVAL '{month} months'"
     elif week:
         intervalSql = f" + INTERVAL '{week} week'"
-    
+    if not intervalSql:
+        intervalSql = " + INTERVAL '1 months'"
+        
     if not name_user:
         name_user = str(user_id)
 
