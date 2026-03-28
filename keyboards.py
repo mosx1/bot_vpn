@@ -184,10 +184,10 @@ def get_inline_for_count_month(key: Enum, server_id: str, coefficient = 1) -> In
 
     return quick_markup(
         {
-            '1 мес.| ' + config['Price'].get('RUB') + " руб.": {'callback_data': '{"key": "' + key.value + '", "server": ' + str(server_id) + ', "month": 1}'},
-            '3 мес.| ' + str(config['Price'].getint('RUB') * 3) + " руб.": {'callback_data': '{"key": "' + key.value + '", "server": ' + str(server_id) + ', "month": 3}'},
-            '6 мес.| ' + str(config['Price'].getint('RUB') * 6) + " руб.": {'callback_data': '{"key": "' + key.value + '", "server": ' + str(server_id) + ', "month": 6}'},
-            '12 мес.| ' + str(config['Price'].getint('RUB') * 12) + " руб.": {'callback_data': '{"key": "' + key.value + '", "server": ' + str(server_id) + ', "month": 12}'},
+            '1 мес.| ' + str(config['Price'].getint('RUB') * coefficient) + " руб.": {'callback_data': '{"key": "' + key.value + '", "server": ' + str(server_id) + ', "month": 1}'},
+            '3 мес.| ' + str(config['Price'].getint('RUB') * 3 * coefficient) + " руб.": {'callback_data': '{"key": "' + key.value + '", "server": ' + str(server_id) + ', "month": 3}'},
+            '6 мес.| ' + str(config['Price'].getint('RUB') * 6 * coefficient) + " руб.": {'callback_data': '{"key": "' + key.value + '", "server": ' + str(server_id) + ', "month": 6}'},
+            '12 мес.| ' + str(config['Price'].getint('RUB') * 12 * coefficient) + " руб.": {'callback_data': '{"key": "' + key.value + '", "server": ' + str(server_id) + ', "month": 12}'},
             '◀️ назад': {'callback_data': '{"key": "' + KeyCall.backmanual_settings.value + '"}'}
         },
         row_width=2

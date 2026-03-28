@@ -115,6 +115,11 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 )
 
             case KeyCall.pollCountMonth.value:
+
+                coefficient = 1
+                server: ServersTable = get_server_by_id(int(call_data['server']))
+                if server.is_wl:
+                    coefficient = 2
                 
                 curr_user: User = get_user_by_id(call.from_user.id)
                 bot.edit_message_text_or_caption(
@@ -122,7 +127,8 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     "На какой срок?", 
                     reply_markup=keyboards.get_inline_for_count_month(
                         KeyCall.get_link_payment, 
-                        curr_user.server_id
+                        curr_user.server_id,
+                        coefficient
                     )
                 )
             
