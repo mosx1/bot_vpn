@@ -29,17 +29,6 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
 
     token = get_jwt_by_id(user.telegram_id)
 
-    message_web_app: Message = bot.send_message(
-        id,
-        'Если телеграм не работает, оформить подписку можно через веб интерфейс или воспользовавшись прокси для телеграм.',
-        reply_markup=get_inline_web_page(token)
-    )
-    bot.pin_chat_message(
-        message_web_app.chat.id,
-        message_web_app.id,
-        disable_notification=True
-    )
-
     keyboard.add(
         InlineKeyboardButton(
             text="Прокси для ТГ",
@@ -81,6 +70,16 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
     text_for_message: str = conf['MessagesTextMD'].get('successfully_subscription_automatic')
     
     if not old_message:
+        message_web_app: Message = bot.send_message(
+            id,
+            'Если телеграм не работает, оформить подписку можно через веб интерфейс или воспользовавшись прокси для телеграм.',
+            reply_markup=get_inline_web_page(token)
+        )
+        bot.pin_chat_message(
+            message_web_app.chat.id,
+            message_web_app.id,
+            disable_notification=True
+        )
         if user.paid:
             keyboard_ref = ReplyKeyboardMarkup(resize_keyboard=True)
             keyboard_ref.add(KeyboardButton(text=KeyboardForUser.balanceTime.value))
