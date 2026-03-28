@@ -62,7 +62,7 @@ def check_payments() -> None:
                     
                     if info_last_payment and invoice.server_id:
                         success_payment(invoice, config)
-                    if invoice.telegram_id == config['Telegram'].getint('admin_chat') or (info_last_payment and not invoice.server_id):
+                    if invoice.is_gift and (invoice.telegram_id == config['Telegram'].getint('admin_chat') or (info_last_payment and not invoice.server_id)):
                         success_payment_gift(invoice, config)
 
                     if (
