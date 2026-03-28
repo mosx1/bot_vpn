@@ -44,14 +44,14 @@ def get_server_name_by_id(server_id: int) -> str:
             return data.name
         return "Неизвестное наименование сервера"
 
-def get_server_by_id(server_id: int) -> str:
+def get_server_by_id(server_id: int) -> ServersTable:
     
     query = select(ServersTable).filter(ServersTable.id == server_id)
 
     with Session(engine) as session:
         data: ServersTable | None = session.execute(query).scalar()
         if data:
-            return data.name
+            return data
         return "Неизвестное наименование сервера"
     
 

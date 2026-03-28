@@ -177,7 +177,7 @@ def get_inline_for_full_user_info(user: User) -> InlineKeyboardMarkup:
     return keyboard
 
 
-def get_inline_for_count_month(key: Enum, server_id: str) -> InlineKeyboardMarkup:
+def get_inline_for_count_month(key: Enum, server_id: str, coefficient = 1) -> InlineKeyboardMarkup:
 
     config = ConfigParser()
     config.read('config.ini')
