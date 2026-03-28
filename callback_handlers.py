@@ -12,20 +12,18 @@ from managment_user import add_user, del_users, data_user
 from psycopg2.extras import DictCursor
                   
 from servers.server_list import Country
-from servers.methods import get_server_list, get_very_free_server
+from servers.methods import get_server_list, get_very_free_server, get_server_by_id
 
 from yoomoneyMethods import getLinkPayment
 
 from telebot.util import quick_markup
-
-from threading import Thread
 
 from enums.parse_mode import ParseMode
 from enums.keyCall import KeyCall, ReduceTime
 
 from messageForUser import successfully_paid, manual_successfully_paid
 
-from tables import User
+from tables import User, ServersTable
 
 from users.methods import get_user_by_id, reduce_time_by
 
@@ -41,8 +39,6 @@ from network_service.entity import NetworkServiceError
 from core.telebot import TeleBotMod
 
 from managers.subscription.renewal_of_subscription import renewalOfSubscription
-
-from threads.payment import polling_info_last_payment_gift
 
 
 def register_callback_handlers(bot: TeleBotMod) -> None:
@@ -190,6 +186,11 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
 
             case KeyCall.get_link_payment.value:
                 
+                coefficient = 1
+                server: ServersTable = get_server_by_id(int(call_data['server']))
+                if server.is_wl:
+                    coefficient = 2
+                
                 label = uuid.uuid4()
 
                 add_sale_invoice(
@@ -206,7 +207,8 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     call_data['server'], 
                     call_data['month'], 
                     call.message, 
-                    label
+                    label,
+                    coefficient
                 )
 
             case "connect":
