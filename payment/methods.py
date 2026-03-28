@@ -1,12 +1,12 @@
 import json, enums, keyboards, enums.keyCall
 
-from servers.methods import get_very_free_server
+from servers.methods import get_very_free_server, get_server_by_id
 
 from yoomoneyMethods import getLinkPayment
 
 from telebot.util import quick_markup
 
-from tables import User
+from tables import ServersTable, User
 
 from users.methods import get_user_by_id
 
@@ -25,7 +25,7 @@ from tables import SaleInvoicesInProgress
 from connect import engine
 
 
-def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: int, message: Message, label):
+def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: int, message: Message, label, coefficient: int = 1):
 
     conf = ConfigParser()
     conf.read('config.ini')
@@ -43,7 +43,7 @@ def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: i
     else:
         server_id = get_very_free_server()
 
-    data = crypto_pay.create_invoice(month)
+    data = crypto_pay.create_invoice(month, coefficient)
     crypto_pay.ids[data['invoice_id']] = PayingUser(
         user_id,
         month,
@@ -52,7 +52,7 @@ def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: i
         TypeOfPurchase.yourself
     )
 
-    link_payment: str = getLinkPayment(label, month)
+    link_payment: str = getLinkPayment(label, month, coefficient)
 
     keyboard: keyboards.InlineKeyboardMarkup = quick_markup(
         {
@@ -62,7 +62,7 @@ def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: i
                 "callback_data": json.dumps(
                     {
                         "key": enums.keyCall.KeyCall.payment_stars.name, 
-                        "amount": conf['Price'].getint('star') * int(month), 
+                        "amount": conf['Price'].getint('star') * int(month) * coefficient, 
                         "server": server_id
                     }
                 )
@@ -94,7 +94,15 @@ def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: i
         )
 
 
-def add_sale_invoice(label: str, user_id: int, server_id: int, month_count: int, chat_id: int, message_id: int) -> None:
+def add_sale_invoice(
+    label: str, 
+    user_id: int, 
+    server_id: int, 
+    month_count: int, 
+    chat_id: int, 
+    message_id: int,
+    is_gift: bool = False
+) -> None:
     with Session(engine) as session:
         query = insert(SaleInvoicesInProgress).values(
             telegram_id=user_id,
@@ -102,7 +110,8 @@ def add_sale_invoice(label: str, user_id: int, server_id: int, month_count: int,
             server_id=server_id,
             month_count=month_count,
             chat_id=chat_id,
-            message_id=message_id
+            message_id=message_id,
+            is_gift=is_gift
         )
         session.execute(query)
         session.commit()    

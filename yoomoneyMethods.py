@@ -42,7 +42,7 @@ def getInfoLastPayment(label: str) -> dict:
         # print("\tAmount     -->", operation.amount)
 
 
-def getLinkPayment(label: str, month: int) -> str:
+def getLinkPayment(label: str, month: int, coefficient: int = 1) -> str:
     """
         Создает ссылку на платеж
     """
@@ -54,7 +54,7 @@ def getLinkPayment(label: str, month: int) -> str:
         quickpay_form="shop",
         targets="Оплата VPN",
         paymentType="SB",
-        sum=conf['Price'].getint('RUB') * month,
+        sum=conf['Price'].getint('RUB') * month * coefficient,
         label=label
     )
 

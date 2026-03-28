@@ -110,10 +110,10 @@ class CryptoPay:
         }
 
 
-    def create_invoice(self, month: float) -> dict | None:
+    def create_invoice(self, month: float, coefficient: int = 1) -> dict | None:
         
         data = {
-            "amount": month,
+            "amount": month * coefficient,
             "asset": "USDT"
         }
         data_json: str = json.dumps(data)

@@ -43,9 +43,19 @@ def get_server_name_by_id(server_id: int) -> str:
         if data:
             return data.name
         return "Неизвестное наименование сервера"
+
+def get_server_by_id(server_id: int) -> str:
+    
+    query = select(ServersTable).filter(ServersTable.id == server_id)
+
+    with Session(engine) as session:
+        data: ServersTable | None = session.execute(query).scalar()
+        if data:
+            return data.name
+        return "Неизвестное наименование сервера"
     
 
-def get_very_free_server(country: Country | None = None, exclude_server_id: int | None = None) -> int:
+def get_very_free_server(country: Country | None = None, exclude_server_id: int | None = None, wl: bool = False) -> int:
     """
         Возвращает менее загруженный сервер по стране
         Если страна не передана - ищет по всем странам
@@ -72,7 +82,8 @@ def get_very_free_server(country: Country | None = None, exclude_server_id: int 
                 isouter=True
             )
             .filter(
-                ServersTable.answers == True
+                ServersTable.answers == True,
+                ServersTable.is_wl == wl
             )
         )
         

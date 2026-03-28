@@ -40,6 +40,7 @@ class ServersTable(Base):
     name: Column = Column(TEXT, nullable=False)
     speed: Column = Column(INTEGER)
     answers: Column = Column(BOOLEAN, nullable=False, server_default=text("true"))
+    is_wl = Column(BOOLEAN, nullable=False, server_default=text("false"))
 
 
 class CountryTable(Base):
@@ -74,7 +75,7 @@ class UserToSubscription(Base):
     server_link: Column = Column(TEXT, primary_key=True)
     server_id: Column = Column(BIGINT, nullable=False)
 
-    __table_agrs___ = (
+    __table_agrs__ = (
         ForeignKeyConstraint(['telegram_id'], ['users_subscription.telegram_id']),
         ForeignKeyConstraint(['server_id'], ['servers.id'])
     )
@@ -87,7 +88,7 @@ class ConfigsServers(Base):
     server_id = Column(BIGINT, nullable=False)
     config = Column(JSONB)
 
-    __table_agrs___ = (
+    __table_agrs__ = (
         ForeignKeyConstraint(['server_id'], ['servers.id'])
     )
     
@@ -99,13 +100,14 @@ class SaleInvoicesInProgress(Base):
     id: Column = Column(BIGINT, primary_key=True)
     telegram_id: Column = Column(BIGINT, nullable=False)
     label: Column = Column(TEXT, nullable=False)
-    server_id: Column = Column(BIGINT, nullable=False)
+    server_id: Column = Column(BIGINT, nullable=True)
     month_count: Column = Column(SMALLINT, nullable=False)
     message_id: Column = Column(BIGINT, nullable=True)
     chat_id: Column = Column(BIGINT, nullable=True)
     create_date: Column = Column(TIMESTAMP, nullable=False, server_default=func.now())
+    is_gift = Column(BOOLEAN, nullable=False, server_default=text("false"))
 
-    __table_agrs___ = (
+    __table_agrs__ = (
         ForeignKeyConstraint(['telegram_id'], ['users_subscription.telegram_id']),
         ForeignKeyConstraint(['server_id'], ['servers.id'])
     )
@@ -118,7 +120,7 @@ class MTProxyConfigs(Base):
     server_id = Column(BIGINT, nullable=False)
     url = Column(TEXT, nullable=False)
 
-    __table_agrs___ = (
+    __table_agrs__ = (
         ForeignKeyConstraint(['server_id'], ['servers.id'])
     )
 

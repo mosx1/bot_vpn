@@ -141,8 +141,20 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     )
                 )
             
-            case "getGiftCode":
+            case KeyCall.get_gift_code.value:
+                
+                label = uuid.uuid4()
 
+                add_sale_invoice(
+                    label,
+                    call.from_user.id,
+                    None,
+                    call_data['month'],
+                    call.message.chat.id,
+                    call.message.id,
+                    True
+                )
+                
                 data = crypto_pay.create_invoice(call_data['month'])
                 crypto_pay.ids[data['invoice_id']] = PayingUser(
                     call.from_user.id,
@@ -162,17 +174,17 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     row_width=1
                 )
                 
-                checkPayment = Thread(
-                    target=polling_info_last_payment_gift, 
-                    args=(
-                        label, 
-                        call_data['month'], 
-                        call.from_user.id, 
-                        call.message, 
-                        call.from_user.full_name
-                    )
-                )
-                checkPayment.start()
+                # checkPayment = Thread(
+                #     target=polling_info_last_payment_gift, 
+                #     args=(
+                #         label, 
+                #         call_data['month'], 
+                #         call.from_user.id, 
+                #         call.message, 
+                #         call.from_user.full_name
+                #     )
+                # )
+                # checkPayment.start()
 
                 bot.edit_message_text_or_caption(call.message, config.TextsMessages.giftPay.value, reply_markup=keyboard)
 
