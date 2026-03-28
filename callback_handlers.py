@@ -115,13 +115,13 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                 )
 
             case KeyCall.pollCountMonth.value:
-
-                coefficient = 1
-                server: ServersTable = get_server_by_id(int(call_data['server']))
-                if server.is_wl:
-                    coefficient = 2
                 
                 curr_user: User = get_user_by_id(call.from_user.id)
+                coefficient = 1
+                server: ServersTable = get_server_by_id(curr_user.server_id)
+                if server.is_wl:
+                    coefficient = 2
+
                 bot.edit_message_text_or_caption(
                     call.message, 
                     "На какой срок?", 
