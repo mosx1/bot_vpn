@@ -169,18 +169,6 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     },
                     row_width=1
                 )
-                
-                # checkPayment = Thread(
-                #     target=polling_info_last_payment_gift, 
-                #     args=(
-                #         label, 
-                #         call_data['month'], 
-                #         call.from_user.id, 
-                #         call.message, 
-                #         call.from_user.full_name
-                #     )
-                # )
-                # checkPayment.start()
 
                 bot.edit_message_text_or_caption(call.message, config.TextsMessages.giftPay.value, reply_markup=keyboard)
 
