@@ -157,50 +157,53 @@ def polling_info_last_payment_gift(*args) -> dict:
 
         time.sleep(3)
         currentDateTime = datetime.now(pytz.timezone('Europe/Moscow'))
-        res = getInfoLastPayment(label)
+        try:
+            res = getInfoLastPayment(label)
 
-        config = ConfigParser()
-        config.read('config.ini')
+            config = ConfigParser()
+            config.read('config.ini')
 
-        if res or userId == config['Telegram'].getint('admin_chat'):
+            if res or userId == config['Telegram'].getint('admin_chat'):
 
-            logging.info(
-                "user_id: {}; user_name:{}; Оплата подарочной подписки {} мес.".format(
-                    userId,
-                    userName,
-                    month
+                logging.info(
+                    "user_id: {}; user_name:{}; Оплата подарочной подписки {} мес.".format(
+                        userId,
+                        userName,
+                        month
+                    )
                 )
-            )
 
-            hash = genGiftCode(month)
+                hash = genGiftCode(month)
 
-            bot.send_message(
-                config['Telegram'].getint('admin_chat'),
-                "[{}](tg://user?id\={}) оплатил подарочную подписку".format(utils.form_text_markdownv2(userName), userId),
-                parse_mode=ParseMode.mdv2.value
-            )
-            bot.delete_message(
-                message.chat.id, 
-                message.id
-            )
-            
-            cur_user = get_user_by_id(userId)
-            mtproto = get_url_mtproto(cur_user.server_id)
+                bot.send_message(
+                    config['Telegram'].getint('admin_chat'),
+                    "[{}](tg://user?id\={}) оплатил подарочную подписку".format(utils.form_text_markdownv2(userName), userId),
+                    parse_mode=ParseMode.mdv2.value
+                )
+                bot.delete_message(
+                    message.chat.id, 
+                    message.id
+                )
+                
+                cur_user = get_user_by_id(userId)
+                mtproto = get_url_mtproto(cur_user.server_id)
 
-            photoMessage: Message = bot.send_photo(
-                chat_id=userId,
-                photo=open("image/gift.png", "rb"),
-                caption=config['MessagesTextMD'].get('gift_postcard').format(
-                    code=hash, 
-                    date=month,
-                    mtproto=mtproto
-                ),
-                parse_mode=ParseMode.mdv2.value
-            )
-             
-            bot.reply_to(photoMessage, "Перешлите это сообщение другу в качестве подарка. Спасибо что помогаете нам делать интернет доступнее.")
+                photoMessage: Message = bot.send_photo(
+                    chat_id=userId,
+                    photo=open("image/gift.png", "rb"),
+                    caption=config['MessagesTextMD'].get('gift_postcard').format(
+                        code=hash, 
+                        date=month,
+                        mtproto=mtproto
+                    ),
+                    parse_mode=ParseMode.mdv2.value
+                )
+                
+                bot.reply_to(photoMessage, "Перешлите это сообщение другу в качестве подарка. Спасибо что помогаете нам делать интернет доступнее.")
 
-            return res
+                return res
+        except Exception:
+            pass
         
         if currentDateTime > stopDateTime:
             return 
