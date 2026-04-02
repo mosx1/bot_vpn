@@ -166,7 +166,6 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     TypeOfPurchase.gift
                 )
 
-                label = uuid.uuid4()
                 keyboard = quick_markup(
                     {
                         'Оплата рублями': {'url': getLinkPayment(label, call_data['month'])},
