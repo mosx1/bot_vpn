@@ -1,4 +1,4 @@
-import gevent.monkey
+import gevent.monkey, utils
 gevent.monkey.patch_socket()
 
 import requests, gevent
@@ -192,5 +192,10 @@ def get_url_mtproto(server_id: int) -> str:
         
         return mtproxyconfig.url
 
-if __name__ == "__main__":
-    health_check('http://de8.kuzmos.ru:8081/config')
+
+def run_backup_server_config(url: int) -> None:
+    token = utils.get_token()
+    try:
+        requests.get(f"http://{url}/backup_config?token={token}")
+    except Exception as e:
+        logging.error(f"Ошибка при выполнении запроса на резервное копирование конфигурации сервера {url}: {e}")
