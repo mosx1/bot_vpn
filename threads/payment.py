@@ -182,6 +182,12 @@ def success_payment_gift(invoice: SaleInvoicesInProgress, config: ConfigParser):
         "Перешлите это сообщение другу в качестве подарка. Спасибо что помогаете нам делать интернет доступнее."
     )
 
+    bot.send_message(
+        config['Telegram']['admin_chat'],
+        "[" + utils.form_text_markdownv2(user.name) + "](tg://user?id\=" + str(user.telegram_id) + ") оплатил подарочную подписку",
+        parse_mode=ParseMode.mdv2.value
+    )
+
 
 def del_invoice(invoice: SaleInvoicesInProgress):
     with Session(engine) as session:
