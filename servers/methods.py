@@ -199,3 +199,10 @@ def run_backup_server_config(url: int) -> None:
         requests.get(f"http://{url}/backup_config?token={token}")
     except Exception as e:
         logging.error(f"Ошибка при выполнении запроса на резервное копирование конфигурации сервера {url}: {e}")
+
+
+def get_coefficient_price_server(server_id: int) -> int:
+    server: ServersTable = get_server_by_id(server_id)
+    if server.is_wl:
+        return 2
+    return 1

@@ -14,7 +14,7 @@ from configparser import ConfigParser
 
 from keyboards import KeyboardForUser, get_inline_loading, get_inline_web_page
 
-from servers.methods import get_very_free_server, get_url_mtproto
+from servers.methods import get_very_free_server, get_url_mtproto, get_server_by_id
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -40,15 +40,21 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
             callback_data='{"key": "comands_video"}'
         )
     )
+
+    button_transfer_other_server = None
+    current_server = get_server_by_id(user.server_id)
+    if current_server.is_wl:
+        button_transfer_other_server = InlineKeyboardButton(
+            text="Сменить сервер",
+            callback_data='{"key": "' + KeyCall.transfer_other_server.value + '"}'
+        )
+
     keyboard.add(
         InlineKeyboardButton(
             text="Ручная настройка", 
             callback_data='{"key": "manualSettings", "id": "' + str(id) + '"}'
         ),
-        InlineKeyboardButton(
-            text="Сменить сервер",
-            callback_data='{"key": "' + KeyCall.transfer_other_server.value + '"}'
-        )
+        button_transfer_other_server
     )
     keyboard.add(
         InlineKeyboardButton(

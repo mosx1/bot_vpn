@@ -12,7 +12,7 @@ from managment_user import add_user, del_users, data_user
 from psycopg2.extras import DictCursor
                   
 from servers.server_list import Country
-from servers.methods import get_server_list, get_very_free_server, get_server_by_id
+from servers.methods import get_server_list, get_very_free_server, get_server_by_id, get_coefficient_price_server
 
 from yoomoneyMethods import getLinkPayment
 
@@ -179,10 +179,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
 
             case KeyCall.get_link_payment.value:
                 
-                coefficient = 1
-                server: ServersTable = get_server_by_id(int(call_data['server']))
-                if server.is_wl:
-                    coefficient = 2
+                coefficient = get_coefficient_price_server(int(call_data['server']))
                 
                 label = uuid.uuid4()
 
