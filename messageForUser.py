@@ -41,21 +41,24 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
         )
     )
 
-    button_transfer_other_server = None
     current_server = get_server_by_id(user.server_id)
-    if current_server.is_wl:
-        button_transfer_other_server = InlineKeyboardButton(
-            text="Сменить сервер",
-            callback_data='{"key": "' + KeyCall.transfer_other_server.value + '"}'
-        )
-
-    keyboard.add(
-        InlineKeyboardButton(
-            text="Ручная настройка", 
-            callback_data='{"key": "manualSettings", "id": "' + str(id) + '"}'
-        ),
-        button_transfer_other_server
+    button_manual_settings = InlineKeyboardButton(
+        text="Ручная настройка", 
+        callback_data='{"key": "manualSettings", "id": "' + str(id) + '"}'
     )
+    if current_server.is_wl:
+        keyboard.add(button_manual_settings)
+    else:
+        keyboard.add(
+            button_manual_settings,
+            InlineKeyboardButton(
+                text="Сменить сервер",
+                callback_data='{"key": "' + KeyCall.transfer_other_server.value + '"}'
+            )
+        )
+        
+
+    
     keyboard.add(
         InlineKeyboardButton(
             text="Купить роутер с этим сервисом.",
