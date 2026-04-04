@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import logging
 import warnings
+import time
 import payment.stars
 import payment.stars.handlers
 import supports
@@ -25,4 +27,10 @@ game.handlers.register_handlers(bot, storage)
 managers.handlers.register_message_handlers(bot)
 
 print('БОТ ЗАПУЩЕН')
-bot.infinity_polling()
+
+while True:
+    try:
+        bot.infinity_polling()
+    except Exception as e:
+        logging.error(e)
+        time.sleep(5)
