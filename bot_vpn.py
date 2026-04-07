@@ -26,11 +26,10 @@ payment.stars.handlers.register_message_handlers(bot)
 game.handlers.register_handlers(bot, storage)
 managers.handlers.register_message_handlers(bot)
 
-print('БОТ ЗАПУЩЕН')
 
-while True:
-    try:
-        bot.infinity_polling()
-    except Exception as e:
-        logging.error(e)
-        time.sleep(5)
+print('БОТ ЗАПУЩЕН')
+bot.polling(
+    non_stop=True,
+    timeout=10,
+    long_polling_timeout=10
+)
