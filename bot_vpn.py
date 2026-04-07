@@ -26,14 +26,9 @@ payment.stars.handlers.register_message_handlers(bot)
 game.handlers.register_handlers(bot, storage)
 managers.handlers.register_message_handlers(bot)
 
-while True:
-    try:
-        print('БОТ ЗАПУЩЕН')
-        bot.polling(
-            non_stop=True,
-            timeout=10,
-            long_polling_timeout=10
-        )
-    except Exception as e:
-        logging.error(str(e))
-        time.sleep(5)
+
+bot.polling(
+    non_stop=True,
+    timeout=10,
+    long_polling_timeout=10
+)
