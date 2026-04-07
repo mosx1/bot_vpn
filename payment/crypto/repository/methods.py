@@ -2,7 +2,7 @@ import requests
 import json
 import time
 import pytz
-import invite
+import invite.methods
 
 from configparser import ConfigParser
 
