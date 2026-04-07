@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 import warnings
 import payment.stars
 import payment.stars.handlers
@@ -22,5 +23,5 @@ payment.stars.handlers.register_message_handlers(bot)
 game.handlers.register_handlers(bot, storage)
 managers.handlers.register_message_handlers(bot)
 
-
+logging.info("бот запущен")
 bot.infinity_polling()

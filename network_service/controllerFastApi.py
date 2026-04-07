@@ -1,4 +1,4 @@
-import requests, utils, json, time
+import requests, utils, json
 
 from connect import logging
 
