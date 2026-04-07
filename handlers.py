@@ -83,12 +83,6 @@ def register_message_handlers(bot: TeleBotMod) -> None:
         #     user = select(User).filter(User.telegram_id == message.from_user.id)
         #     data: User | None = session.scalar(user)
         #     print(data.server_link)
-            
-
-
-    @bot.message_handler(commands=[Comands.restart.value], func=onlyAdminChat())
-    def restart(message):
-        os.system("systemctl restart bot_vpn.service")
 
 
     @bot.message_handler(

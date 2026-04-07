@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-import logging
 import warnings
-import time
 import payment.stars
 import payment.stars.handlers
 import supports
@@ -15,8 +13,6 @@ import callback_handlers
 import threads
 from connect import bot, storage
 
-bot.remove_webhook()
-
 warnings.filterwarnings("ignore", category=SyntaxWarning)
 callback_handlers.register_callback_handlers(bot)
 spam.handlers.register_message_handlers(bot)
@@ -27,8 +23,4 @@ game.handlers.register_handlers(bot, storage)
 managers.handlers.register_message_handlers(bot)
 
 
-bot.polling(
-    non_stop=True,
-    timeout=10,
-    long_polling_timeout=10
-)
+bot.infinity_polling()
