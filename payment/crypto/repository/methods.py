@@ -168,7 +168,12 @@ class CryptoPay:
                 continue
 
             stop_datetime: datetime = datetime.now(pytz.timezone('Europe/Moscow')) - timedelta(hours=1)
-            invoices: list = self.get_invoices()
+
+            try:
+                invoices: list = self.get_invoices()
+            except Exception as e:
+                logging.error(str(e))
+                continue
 
             for invoice in invoices:
                 
