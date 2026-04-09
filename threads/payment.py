@@ -34,9 +34,10 @@ from servers.methods import get_url_mtproto
 
 def check_payments() -> None:
 
+    config = ConfigParser()
+    config.read('config.ini')
+
     while True:
-        config = ConfigParser()
-        config.read('config.ini')
         
         with Session(engine) as session:
             query = select(
@@ -234,25 +235,18 @@ def success_payment_gift(invoice: SaleInvoicesInProgress, config: ConfigParser):
 
     # Step 5: Send gift photo with proper file handle management
     photoMessage: Message | None = None
-    try:
-        with open("image/gift.png", "rb") as photo:
-            photoMessage = bot.send_photo(
-                chat_id=user.telegram_id,
-                photo=photo,
-                caption=config['MessagesTextMD'].get('gift_postcard').format(
-                    code=hash,
-                    date=invoice.month_count,
-                    mtproto=mtproto
-                ),
-                parse_mode=ParseMode.mdv2.value
-            )
-    except Exception as e:
-        logging.error(f'Failed to send gift photo to {user.telegram_id}: {str(e)}')
-        bot.send_message(
-            config['Telegram']['admin_chat'],
-            f'Не отправлено подарочное сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id)
+
+    with open("static/logo_big.png", "rb") as photo:
+        photoMessage = bot.send_photo(
+            chat_id=user.telegram_id,
+            photo=photo,
+            caption=config['MessagesTextMD'].get('gift_postcard').format(
+                code=hash,
+                date=invoice.month_count,
+                mtproto=mtproto
+            ),
+            parse_mode=ParseMode.mdv2.value
         )
-        return
 
     # Step 6: Send reply message
     try:
