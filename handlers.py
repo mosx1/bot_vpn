@@ -194,7 +194,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                 try:
                     bot.send_photo(
                         chat_id=item,
-                        photo=open("image/gift.png", "rb"),
+                        photo=open("static/logo_big.png", "rb"),
                         caption=config.TextsMessages.giftSpamCaption.value,
                         reply_markup=key
                     )
