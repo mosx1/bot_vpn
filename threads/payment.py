@@ -236,7 +236,7 @@ def success_payment_gift(invoice: SaleInvoicesInProgress, config: ConfigParser):
     # Step 5: Send gift photo with proper file handle management
     photoMessage: Message | None = None
 
-    with open("static/logo_big.png", "rb") as photo:
+    with open("static/logo_big.jpeg", "rb") as photo:
         photoMessage = bot.send_photo(
             chat_id=user.telegram_id,
             photo=photo,

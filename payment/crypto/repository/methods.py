@@ -230,7 +230,7 @@ class CryptoPay:
 
                                 photoMessage = bot.send_photo(
                                     chat_id=user.telegram_id,
-                                    photo=open("static/logo_big.png", "rb"),
+                                    photo=open("static/logo_big.jpeg", "rb"),
                                     caption=TextsMessages.giftPostcard.format(code=hash, date=paying_user.count_month),
                                     parse_mode=ParseMode.mdv2.value
                                 )

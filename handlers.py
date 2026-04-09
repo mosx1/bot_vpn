@@ -1,6 +1,5 @@
 
 from sqlalchemy.orm import Session
-from enums import comands
 import config, os, utils, managment_user, keyboards
 
 from connect import db, logging, engine
@@ -194,7 +193,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                 try:
                     bot.send_photo(
                         chat_id=item,
-                        photo=open("static/logo_big.png", "rb"),
+                        photo=open("static/logo_big.jpeg", "rb"),
                         caption=config.TextsMessages.giftSpamCaption.value,
                         reply_markup=key
                     )
@@ -244,13 +243,17 @@ def register_message_handlers(bot: TeleBotMod) -> None:
             cursor.execute("SELECT telegram_id, name FROM users_subscription WHERE action = True" +
                             " AND server_id = " + str(Servers.niderlands.value))
             users = cursor.fetchall()
+
+            conf = ConfigParser()
+            conf.read('config.ini')
+
             for i in users:
                 link = controllerFastApi.add_vpn_user(i['telegram_id'], Servers.niderlands2.value)
-    
+
                 cursor.execute("UPDATE users_subscription" + 
                             "\nSET server_link='" + link +
-                            "\n, server_id = " + str(Servers.niderlands2.value) +
-                            ", protocol=" + str(config.DEFAULTPROTOCOL) + 
+                            "'\n, server_id = " + str(Servers.niderlands2.value) +
+                            f", protocol={conf['BaseConfig'].get('default_protocol')}" + 
                             "'\n WHERE telegram_id=" + str(i['telegram_id']))
             db.commit()
             for i in users:
@@ -266,7 +269,7 @@ def register_message_handlers(bot: TeleBotMod) -> None:
 
 
     @bot.message_handler(
-        func=lambda message: message.forward_from is not None and onlyAdminChat()
+        func=lambda message: message.forward_from is not None and message.chat.id == config.ADMINCHAT
     )
     def _(message: types.Message):
         data_user(message.forward_from.id)

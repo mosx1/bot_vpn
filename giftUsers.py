@@ -31,7 +31,7 @@ def checkGiftCode(message: types.Message):
                 )
                 cursor.execute("DELETE FROM gift_codes WHERE code = '{}'".format(message.text))
 
-                db.commit
+                db.commit()
 
                 return True
     return False
