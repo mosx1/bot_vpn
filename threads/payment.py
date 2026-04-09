@@ -35,47 +35,43 @@ from servers.methods import get_url_mtproto
 def check_payments() -> None:
 
     while True:
-        try:
-            config = ConfigParser()
-            config.read('config.ini')
+        config = ConfigParser()
+        config.read('config.ini')
+        
+        with Session(engine) as session:
+            query = select(
+                SaleInvoicesInProgress, 
+                (SaleInvoicesInProgress.create_date + text("INTERVAL '1 hour'")).label("stop_date_time"),
+                func.now().label("current_date_time")
+            )
+            result: Result = session.execute(query)
+            invoices = result.fetchall()
             
-            with Session(engine) as session:
-                query = select(
-                    SaleInvoicesInProgress, 
-                    (SaleInvoicesInProgress.create_date + text("INTERVAL '1 hour'")).label("stop_date_time"),
-                    func.now().label("current_date_time")
-                )
-                result: Result = session.execute(query)
-                invoices = result.fetchall()
+            for invoice_item in invoices:
                 
-                for invoice_item in invoices:
-                    
-                    invoice: SaleInvoicesInProgress = invoice_item[0]
-                    stop_date_time = invoice_item[1]
-                    current_date_time = invoice_item[2]
+                invoice: SaleInvoicesInProgress = invoice_item[0]
+                stop_date_time = invoice_item[1]
+                current_date_time = invoice_item[2]
 
-                    try:
-                        info_last_payment: dict | None = getInfoLastPayment(invoice.label)
-                    except Exception as e:
-                        print(str(e))
-                        continue
-                    
-                    if not invoice.is_gift and info_last_payment and invoice.server_id:
-                        success_payment(invoice, config)
-                    if invoice.is_gift and (invoice.telegram_id == config['Telegram'].getint('admin_chat') or (info_last_payment and not invoice.server_id)):
-                        success_payment_gift(invoice, config)
+                try:
+                    info_last_payment: dict | None = getInfoLastPayment(invoice.label)
+                except Exception as e:
+                    print(str(e))
+                    continue
+                
+                if not invoice.is_gift and info_last_payment and invoice.server_id:
+                    success_payment(invoice, config)
+                if invoice.is_gift and (invoice.telegram_id == config['Telegram'].getint('admin_chat') or (info_last_payment and not invoice.server_id)):
+                    success_payment_gift(invoice, config)
 
-                    if (
-                        current_date_time.strftime("%Y-%m-%d %H:%M:%S") > stop_date_time.strftime("%Y-%m-%d %H:%M:%S")
-                        ) or info_last_payment or (
-                            invoice.telegram_id == config['Telegram'].getint('admin_chat') and invoice.is_gift
-                        ):
-                        del_invoice(invoice)
+                if (
+                    current_date_time.strftime("%Y-%m-%d %H:%M:%S") > stop_date_time.strftime("%Y-%m-%d %H:%M:%S")
+                    ) or info_last_payment or (
+                        invoice.telegram_id == config['Telegram'].getint('admin_chat') and invoice.is_gift
+                    ):
+                    del_invoice(invoice)
 
-                time.sleep(2)
-
-        except Exception as e:
-            logging.error(str(e))
+            time.sleep(2)
 
 
 def success_payment(invoice: SaleInvoicesInProgress, config: ConfigParser):
