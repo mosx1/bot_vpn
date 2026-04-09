@@ -419,7 +419,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     text='Баланс обнулен'
                 )
             
-            case enums.keyCall.KeyCall.refreshtoken.name:
+            case KeyCall.refreshtoken.name:
                 
                 with db.cursor(cursor_factory=DictCursor) as cursor:
                     
