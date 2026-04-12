@@ -1,16 +1,15 @@
 import utils, keyboards, jwt
 
-from connect import bot, engine
+from connect import bot, engine, logging, conf
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 
 from enums.parse_mode import ParseMode
 from enums.keyCall import KeyCall
+from protocols import Protocol
 
 from users.methods import get_user_by_id, get_jwt_by_id
 
 from tables import User, SecurityHashs
-
-from configparser import ConfigParser
 
 from keyboards import KeyboardForUser, get_inline_loading, get_inline_web_page
 
@@ -21,14 +20,17 @@ from sqlalchemy.orm import Session
 
 def successfully_paid(id, old_message: Message | None =None, optionText="") -> Message | bool:
 
-    conf = ConfigParser()
-    conf.read('config.ini')
-
     user: User = get_user_by_id(id)
-    keyboard = InlineKeyboardMarkup()
-
     token = get_jwt_by_id(user.telegram_id)
+    
+    if user.protocol == Protocol.amneziawg.value:
+        return bot.send_message(
+            id,
+            'У вас установлен протокол AmneziaWG, для управления подпиской используйте веб приложение.',
+            reply_markup=get_inline_web_page(token)
+        )
 
+    keyboard = InlineKeyboardMarkup()
     keyboard.add(
         InlineKeyboardButton(
             text="Прокси для ТГ",
@@ -56,9 +58,6 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
                 callback_data='{"key": "' + KeyCall.transfer_other_server.value + '"}'
             )
         )
-        
-
-    
     keyboard.add(
         InlineKeyboardButton(
             text="Купить роутер с этим сервисом.",
@@ -103,24 +102,25 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
                 parse_mode= ParseMode.mdv2.value
             )
         
-        if t := bot.send_photo(
-                chat_id=id,
-                photo=open("static/logo_big.jpeg", "rb"),
-                caption=optionText + text_for_message.format(
-                    token,
-                    utils.replaceMonthOnRuText(user.exit_date),
-                    utils.form_text_markdownv2(
-                        utils.get_server_name_by_id(user.server_id)
+        with open("static/logo_big.jpeg", "rb") as logo_big:
+            if t := bot.send_photo(
+                    chat_id=id,
+                    photo=logo_big,
+                    caption=optionText + text_for_message.format(
+                        token,
+                        utils.replaceMonthOnRuText(user.exit_date),
+                        utils.form_text_markdownv2(
+                            utils.get_server_name_by_id(user.server_id)
+                        ),
+                        id
                     ),
-                    id
-                ),
-                reply_markup=keyboard, 
-                parse_mode=ParseMode.mdv2.value
-            ):
+                    reply_markup=keyboard, 
+                    parse_mode=ParseMode.mdv2.value
+                ):
 
-            return True
-        else:
-            return False
+                return True
+            else:
+                return False
     else:
         return bot.edit_message_text_or_caption(
             old_message,
@@ -137,7 +137,7 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
         )
 
 
-def manual_successfully_paid(id: int, old_message: Message) -> bool:
+def manual_successfully_paid(id: int, old_message: Message) -> None:
     """
         отправляет сообщение для ручной настройки
     """
@@ -146,17 +146,19 @@ def manual_successfully_paid(id: int, old_message: Message) -> bool:
         old_message.id,
         reply_markup=get_inline_loading()
     )
-
-    conf = ConfigParser()
-    conf.read('config.ini')
-
     caption_for_message: str = conf['MessagesTextMD'].get('successfully_subscription')
-
     user: User = get_user_by_id(id)
     with Session(engine) as session:
         hash_code = session.execute(
             select(SecurityHashs).limit(1)
         ).scalar()
+    if not hash_code:
+        bot.send_message(
+            conf['Telegram'].getint('admin_chat'),
+            f"Не удалось получить hash_code для пользователя id: {id}"
+        )
+        logging.error(f"Не удалось получить hash_code для пользователя id: {id}")
+        return
     token: str = jwt.encode(
         {"telegram_id": id},
         hash_code.hash, 

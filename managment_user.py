@@ -1,13 +1,13 @@
 import config, string, secrets, utils, keyboards
 
-from connect import logging, bot, engine
+from connect import logging, bot, engine, conf
 
 from telebot.apihelper import ApiTelegramException
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
 from enums.parse_mode import ParseMode
 
-from protocols import getNameProtocolById
+from protocols import Protocol
 
 from managers.subscription.renewal_of_subscription import renewalOfSubscription
 
@@ -20,17 +20,12 @@ from users.methods import get_user_by_id, get_user_by
 
 from servers.methods import get_server_name_by_id, get_very_free_server
 
-from configparser import ConfigParser
-
 from network_service import controllerFastApi
 from network_service.entity import NetworkServiceError
 
 class UserList:
     
     def __init__(self, message = None, filter = None) -> None:
-
-        conf = ConfigParser()
-        conf.read('config.ini')
 
         self.config = conf['UserList']
         self.mes_arr = []
@@ -45,7 +40,7 @@ class UserList:
     def __del__(self):
         if len(self.mes_arr) != 0:
             for item in self.mes_arr:
-                bot.delete_message(config.ADMINCHAT, item)
+                bot.delete_message(conf['Telegram'].getint('admin_chat'), item)
 
     
     def next_page(self, message) -> None:
@@ -146,9 +141,6 @@ def add_user(
         server=None,
         week: int | None =None
 ) -> config.AddUserMessage:
-    
-    conf = ConfigParser()
-    conf.read("config.ini")
 
     admin_chat_id: int = conf['Telegram'].getint('admin_chat')
     
@@ -198,7 +190,7 @@ def add_user(
                     session.commit()
 
                     bot.send_message(
-                        config.ADMINCHAT, 
+                        conf['Telegram'].getint('admin_chat'), 
                         "new user: [" + utils.form_text_markdownv2(name_user) + "](tg://user?id\=" + str(user_id) + ")", 
                         parse_mode=ParseMode.mdv2.value 
                     )
@@ -279,10 +271,6 @@ def del_users(
                             reply_markup=keyboards.getInlineExtend()
                         )
                     except ApiTelegramException as e:
-
-                        conf = ConfigParser()
-                        conf.read('config.ini')
-
                         bot.send_message(
                             conf['Telegram'].getint('admin_chat'), 
                             str(e) + " id:" + str(user_id)
@@ -314,7 +302,7 @@ def data_user(id: int, old_message: Message | None = None) -> Message:
         )
     else:
         message: Message = bot.send_message(
-            config.ADMINCHAT, 
+            conf['Telegram'].getint('admin_chat'), 
             "Загрузка..."
         )
 
@@ -336,7 +324,7 @@ def data_user(id: int, old_message: Message | None = None) -> Message:
         "`\nСервер: " + utils.form_text_markdownv2(
             get_server_name_by_id(user.server_id)
         ) +
-        "\nprotocol: " + str(getNameProtocolById(user.protocol)) +
+        f"\nprotocol: {Protocol(user.protocol).name}" +
         "\nstat: " + utils.form_text_markdownv2(str(user.statistic)) +
         "\nбаланс: " + utils.form_text_markdownv2(str(user.balance)) +
         "\nid:" + str(user.telegram_id),
@@ -353,8 +341,6 @@ def paidCheckActive(item: bool) -> str:
 
 def delete_not_subscription() -> None:
 
-    conf = ConfigParser()
-    conf.read('config.ini')
     admin_chat_id: int = conf['Telegram'].getint('admin_chat')
 
     with Session(engine) as session:
