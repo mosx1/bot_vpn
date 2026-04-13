@@ -13,3 +13,7 @@ class Country(Enum):
     deutsche: int = 2
 
 
+class Strategy(Enum):
+
+    easy_xray: str = 1
+    x_ui: str = 2
