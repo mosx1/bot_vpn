@@ -22,8 +22,8 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
 
     user: User = get_user_by_id(id)
     token = get_jwt_by_id(user.telegram_id)
-    
-    if user.protocol != Protocol.xray.value:
+    server = get_server_by_id(user.server_id)
+    if user.protocol == Protocol.amneziawg.value or server.panel_xray != 0:
         return bot.send_message(
             id,
             'Для управления подпиской используйте веб приложение.',
