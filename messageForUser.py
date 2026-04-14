@@ -23,10 +23,10 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
     user: User = get_user_by_id(id)
     token = get_jwt_by_id(user.telegram_id)
     
-    if user.protocol == Protocol.amneziawg.value:
+    if user.protocol != Protocol.xray.value:
         return bot.send_message(
             id,
-            'У вас установлен протокол AmneziaWG, для управления подпиской используйте веб приложение.',
+            'Для управления подпиской используйте веб приложение.',
             reply_markup=get_inline_web_page(token)
         )
 
