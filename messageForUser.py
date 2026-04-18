@@ -24,10 +24,15 @@ def successfully_paid(id, old_message: Message | None =None, optionText="") -> M
     token = get_jwt_by_id(user.telegram_id)
     # server = get_server_by_id(user.server_id)
     #if user.protocol == Protocol.amneziawg.value or server.panel_xray != 0:
-    return bot.send_message(
+    message_web_app = bot.send_message(
         id,
         'Для управления подпиской используйте веб приложение.',
         reply_markup=get_inline_web_page(token)
+    )
+    return bot.pin_chat_message(
+        message_web_app.chat.id,
+        message_web_app.id,
+        disable_notification=True
     )
 
     keyboard = InlineKeyboardMarkup()
