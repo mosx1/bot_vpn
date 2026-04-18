@@ -197,6 +197,6 @@ def get_inline_for_count_month(key: Enum, server_id: str, coefficient = 1) -> In
 def get_inline_web_page(token: str) -> InlineKeyboardButton:
     return quick_markup(
         {
-            'веб приложение': {'url': f'https://kuzmos.ru/sub/home?token={token}'}
+            'Личный кабинет': {'url': f'https://kuzmos.ru/sub/home?token={token}'}
         }
     )
