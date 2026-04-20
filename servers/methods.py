@@ -81,10 +81,6 @@ def get_very_free_server(country: Country | None = None, exclude_server_id: int 
                 ), 
                 isouter=True
             )
-            .filter(
-                ServersTable.answers == True,
-                ServersTable.is_wl == wl
-            )
         )
         
         if country:
