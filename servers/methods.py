@@ -77,7 +77,8 @@ def get_very_free_server(country: Country | None = None, exclude_server_id: int 
                 User,
                 and_(
                     User.server_id == ServersTable.id,
-                    User.action == True
+                    User.action == True,
+                    ServersTable.panel_xray == 0
                 ), 
                 isouter=True
             )
