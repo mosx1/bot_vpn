@@ -16,7 +16,7 @@ from sqlalchemy import insert, select, func, update, text
 
 from tables import User
 
-from users.methods import get_user_by_id, get_user_by
+from users.methods import get_user_by_id, get_user_by, get_jwt_by_id
 
 from servers.methods import get_server_name_by_id, get_very_free_server
 
@@ -327,6 +327,7 @@ def data_user(id: int, old_message: Message | None = None) -> Message:
         f"\nprotocol: {Protocol(user.protocol).name}" +
         "\nstat: " + utils.form_text_markdownv2(str(user.statistic)) +
         "\nбаланс: " + utils.form_text_markdownv2(str(user.balance)) +
+        f"\njwt: `{get_jwt_by_id(user.telegram_id)}`" +
         "\nid:" + str(user.telegram_id),
         parse_mode=ParseMode.mdv2.value,
         reply_markup=keyboards.get_inline_for_full_user_info(user)
