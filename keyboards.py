@@ -6,6 +6,8 @@ from telebot.util import quick_markup
 from servers.server_list import Country
 from servers.methods import get_very_free_server
 
+from users.methods import get_jwt_by_id
+
 from enum import Enum
 
 from enums.keyCall import KeyCall, ReduceTime
@@ -162,6 +164,12 @@ def get_inline_for_full_user_info(user: User) -> InlineKeyboardMarkup:
                 KeyCall.send_sale_invoice,
                 user_id = user.telegram_id
             )
+        )
+    )
+    keyboard.add(
+        InlineKeyboardButton(
+            text="ЛК",
+            url=f"https://kuzmos.ru/sub/home?token={get_jwt_by_id(user.telegram_id)}"
         )
     )
 
