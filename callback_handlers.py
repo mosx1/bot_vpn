@@ -418,26 +418,6 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     callback_query_id=call.id,
                     text='Баланс обнулен'
                 )
-            
-            case KeyCall.refreshtoken.name:
-                
-                with db.cursor(cursor_factory=DictCursor) as cursor:
-                    
-                    user: User = get_user_by_id(call_data['user_id'])
-                    controllerFastApi.del_users({user.telegram_id}, user.server_id)
-                    link = controllerFastApi.add_vpn_user(user.telegram_id, user.server_id)
-
-                    cursor.execute(
-                        "UPDATE users_subscription" + 
-                        "\nSET server_link='" + str(link) + "'" +
-                        f"\nWHERE telegram_id={user.telegram_id}"
-                    )
-                    db.commit()
-
-                bot.answer_callback_query(
-                    callback_query_id=call.id,
-                    text='Готово'
-                )
 
             case enums.keyCall.KeyCall.create_cryptio_pay.name:
 

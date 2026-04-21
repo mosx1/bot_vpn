@@ -31,25 +31,6 @@ def check_subscription():
 
     while True:
         try:
-            # with Session(engine) as session:
-            #     data = session.execute(
-            #         text(
-            #             "SELECT server_id, array_agg(DISTINCT telegram_id) as telegram_ids" +
-            #             "\nFROM users_subscription" +
-            #             "\nWHERE action = True AND exit_date < now()" +
-            #             "\nGROUP BY server_id"
-            #         )
-            #     )
-            #     server_to_users_for_delete = data.fetchall()
-
-            #     for server_to_users_for_delete_item in server_to_users_for_delete:
-
-            #         del_users(
-            #             set(server_to_users_for_delete_item.telegram_ids),
-            #             int(server_to_users_for_delete_item.server_id)
-            #         )
-
-            # Process all notification intervals from schedule
             for interval, message_text in NOTIFICATION_SCHEDULE:
                 users: list[User] = get_user_by(
                     and_(
@@ -67,8 +48,8 @@ def check_subscription():
                     )
 
             time.sleep(60)
-        except Exception as e:
-            logging.error('thread check_subscription error: ' + str(e))
+        except Exception:
+            pass
 
 
 def delete_not_subscription_tasks() -> None:

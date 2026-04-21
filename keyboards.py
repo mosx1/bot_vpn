@@ -157,15 +157,6 @@ def get_inline_for_full_user_info(user: User) -> InlineKeyboardMarkup:
     )
     keyboard.add(
         InlineKeyboardButton(
-            text=KeyCall.refreshtoken.value,
-            callback_data=utils.callBackBilder(
-                KeyCall.refreshtoken,
-                user_id = user.telegram_id
-            )
-        )
-    )
-    keyboard.add(
-        InlineKeyboardButton(
             text="Отправить счет",
             callback_data=utils.callBackBilder(
                 KeyCall.send_sale_invoice,

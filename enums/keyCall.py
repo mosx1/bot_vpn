@@ -6,7 +6,6 @@ class KeyCall(Enum):
     poll_count_month_gift: int = "2"
     sale: str = "sale"
     tryServers: str = "tryServers"
-    refreshtoken: str = "refreshtoken"
     create_cryptio_pay: str = "create_cryptio_pay"
     payment_stars: str = "payment_stars"
     list_servers_for_admin: str = "list_servers_for_admin"

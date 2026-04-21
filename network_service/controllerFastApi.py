@@ -25,10 +25,14 @@ def add_vpn_user(
                     userId,
                     token
                ),
-               timeout=20
+               timeout=30
           )
      except Exception as e:
           logging.error(str(e))
+          return NetworkServiceError(
+               caption="Ошибка в запросе на добавление пользователя",
+               response=str(e)
+          )
 
      response = response.json()
      if response["success"]:

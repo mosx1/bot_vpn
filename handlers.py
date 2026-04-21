@@ -235,39 +235,6 @@ def register_message_handlers(bot: TeleBotMod) -> None:
     def _(message: types.Message) -> None:
         start_statistic()
 
-
-    @bot.message_handler(commands=[Comands.resubusa.value])
-    def _(message: types.Message):
-        bot.send_message(config.ADMINCHAT, "выполняется процесс...")
-        with db.cursor(cursor_factory=DictCursor) as cursor:
-            cursor.execute("SELECT telegram_id, name FROM users_subscription WHERE action = True" +
-                            " AND server_id = " + str(Servers.niderlands.value))
-            users = cursor.fetchall()
-
-            conf = ConfigParser()
-            conf.read('config.ini')
-
-            for i in users:
-                link = controllerFastApi.add_vpn_user(i['telegram_id'], Servers.niderlands2.value)
-
-                cursor.execute("UPDATE users_subscription" + 
-                            "\nSET server_link='" + link +
-                            "'\n, server_id = " + str(Servers.niderlands2.value) +
-                            f", protocol={conf['BaseConfig'].get('default_protocol')}" + 
-                            "'\n WHERE telegram_id=" + str(i['telegram_id']))
-            db.commit()
-            for i in users:
-                try:
-                    successfully_paid(i['telegram_id'], optionText="НЕОБХОДИМО ОБНОВИТЬ КОНФИГУРАЦИЮ\. СТАРАЯ КОНФИГУРАЦИЯ БОЛЬШЕ НЕ РАБОТАЕТ\.")
-                except Exception as e:
-                    bot.send_message(
-                        config.ADMINCHAT, 
-                        "error sendmessage [" + str(i['name']) + "](tg://user?id\=" + str(i['telegram_id']) + ") " + utils.form_text_markdownv2(str(e)),
-                        parse_mode=ParseMode.mdv2.value)
-        bot.send_message(config.ADMINCHAT, "commit")
-
-
-
     @bot.message_handler(
         func=lambda message: message.forward_from is not None and message.chat.id == config.ADMINCHAT
     )
