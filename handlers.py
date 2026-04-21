@@ -5,15 +5,14 @@ import config, os, utils, managment_user, keyboards
 from connect import db, logging, engine
 
 from telebot import types
-from telebot.types import Message
+from telebot.types import InlineKeyboardButton, Message
 
 from managment_user import UserList, data_user, delete_not_subscription
 
 from filters import onlyAdminChat
 
 from psycopg2.extras import DictCursor
-                  
-from servers.server_list import Servers
+
 from servers.methods import get_very_free_server
 
 from telebot.util import quick_markup
@@ -32,18 +31,17 @@ from messageForUser import successfully_paid
 
 from tables import User
 
-from users.methods import get_user_by_id
+from users.methods import get_user_by_id, get_jwt_by_id
 
 from sqlalchemy import func, delete
 
 from statistic.tasks import start_statistic
 
-
-from network_service import controllerFastApi
-
 from core.telebot import TeleBotMod
 
 from configparser import ConfigParser
+
+from keyboards import get_inline_web_page
 
 
 def register_message_handlers(bot: TeleBotMod) -> None:
@@ -122,8 +120,6 @@ def register_message_handlers(bot: TeleBotMod) -> None:
     )
     def start(message: types.Message):
 
-        jsonIdInvited = ""
-
         user: User | None = get_user_by_id(message.from_user.id)
 
         keyboard = types.InlineKeyboardMarkup()
@@ -138,35 +134,30 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                         )
                         invited = cursor.fetchall()
                         if len(invited) > 0:
-                            jsonIdInvited: str = ', "invitedId": ' + str(arrStartMessageText[1])
                             message.text = arrStartMessageText[1]
                 elif checkGiftCode(message):
                     return successfully_paid(message.from_user.id, optionText="Подарок активирован\n")
-            # else:
 
-            #     bot.send_message(message.chat.id, "Привет! Давай сыграем в крестики-нолики. Используй /game чтобы начать игру.")
-            #     return
-            
-            keyboard.add(types.InlineKeyboardButton(text="Попробовать", callback_data='{"key": "try"' + jsonIdInvited + '}'))
-            keyboard.add(types.InlineKeyboardButton(text="Политика по обработке персональных данных", callback_data='{"key": "pppd"}'))
-            keyboard.add(types.InlineKeyboardButton(text="Условия использования", callback_data='{"key": "termsOfUse"}'))
-            option_text = "\n\n_Нажимая кнопку \"Попробовать\", Вы соглашаетесь с политикой обработки персональных данных и условиями использования сервиса\._" 
-        
-        elif user.action == False:
             keyboard.add(
-                types.InlineKeyboardButton(
-                    text="Возобновить", 
-                    callback_data='{"key": "' + KeyCall.pollCountMonth.value + '"}'
+                InlineKeyboardButton(
+                    text="Перейти к регистрации",
+                    url="https://kuzmos.ru/auth/"
                 )
             )
-            option_text = ""
+        elif user.action == False:
+            token = get_jwt_by_id(user.telegram_id)
+            bot.send_message(
+                user.telegram_id,
+                'Для управления подпиской используйте веб приложение.',
+                reply_markup=get_inline_web_page(token)
+            )
         elif user.action:
             successfully_paid(message.from_user.id)
             return
-        
+
         bot.send_message(
             message.chat.id, 
-            "*Приветствую Вас в сервисе VPN для свободного интернета без границ\.*" + option_text,
+            "*Приветствую Вас в сервисе VPN для свободного интернета без границ\.*",
             reply_markup=keyboard, 
             parse_mode=ParseMode.mdv2.value
         )
