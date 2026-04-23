@@ -125,21 +125,21 @@ def success_payment(invoice: SaleInvoicesInProgress, config: ConfigParser):
             f'Не отправлено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id)
         )
 
-    # # Step 3: Add/extend user subscription (critical operation)
-    # try:
-    #     userMessage = add_user(
-    #         user.telegram_id,
-    #         invoice.month_count,
-    #         server=invoice.server_id
-    #     )
-    # except Exception as e:
-    #     logging.error(f'Failed to add user subscription for {user.telegram_id}: {str(e)}')
-    #     bot.send_message(
-    #         config['Telegram']['admin_chat'],
-    #         f'Ошибка при активации подписки\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id)
-    #     )
-    #     # Don't delete invoice - allow retry
-    #     return
+    # Step 3: Add/extend user subscription (critical operation)
+    try:
+        userMessage = add_user(
+            user.telegram_id,
+            invoice.month_count,
+            server=invoice.server_id
+        )
+    except Exception as e:
+        logging.error(f'Failed to add user subscription for {user.telegram_id}: {str(e)}')
+        bot.send_message(
+            config['Telegram']['admin_chat'],
+            f'Ошибка при активации подписки\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id)
+        )
+        # Don't delete invoice - allow retry
+        return
 
     # Step 4: Notify admin
     try:
@@ -151,20 +151,21 @@ def success_payment(invoice: SaleInvoicesInProgress, config: ConfigParser):
     except Exception as e:
         logging.error(f'Failed to notify admin about payment from {user.telegram_id}: {str(e)}')
 
-    # # Step 5: Increment referral balance (non-critical)
-    # try:
-    #     invite.methods.incrementBalance(
-    #         user.telegram_id,
-    #         month=invoice.month_count
-    #     )
-    # except Exception as e:
-    #     logging.error(f'Failed to increment balance for {user.telegram_id}: {str(e)}')
+    # Step 5: Increment referral balance (non-critical)
+    try:
+        invite.methods.incrementBalance(
+            user.telegram_id,
+            month=invoice.month_count
+        )
+    except Exception as e:
+        logging.error(f'Failed to increment balance for {user.telegram_id}: {str(e)}')
 
     # Step 6: Send success message (only delete invoice if this succeeds)
     try:
         successfully_paid(
             user.telegram_id,
-            old_message
+            old_message,
+            optionText=str(userMessage.value)
         )
         # Only delete invoice after successful completion
         del_invoice(invoice)
