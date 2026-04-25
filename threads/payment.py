@@ -62,8 +62,8 @@ def check_payments() -> None:
                 
                 if not invoice.is_gift and info_last_payment and invoice.server_id:
                     success_payment(invoice, config)
-                if invoice.is_gift and (invoice.telegram_id == config['Telegram'].getint('admin_chat') or (info_last_payment and not invoice.server_id)):
-                    success_payment_gift(invoice, config)
+                # if invoice.is_gift and (invoice.telegram_id == config['Telegram'].getint('admin_chat') or (info_last_payment and not invoice.server_id)):
+                #     success_payment_gift(invoice, config)
 
                 if (
                     current_date_time.strftime("%Y-%m-%d %H:%M:%S") > stop_date_time.strftime("%Y-%m-%d %H:%M:%S")
