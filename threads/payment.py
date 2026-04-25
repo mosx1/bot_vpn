@@ -72,7 +72,7 @@ def check_payments() -> None:
                     ):
                     del_invoice(invoice)
 
-            time.sleep(2)
+        time.sleep(3)
 
 
 def success_payment(invoice: SaleInvoicesInProgress, config: ConfigParser):
