@@ -25,8 +25,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, delete, text, func
 from sqlalchemy.engine import Result
 
-from datetime import datetime, timedelta
-
 from giftUsers import genGiftCode
 
 from servers.methods import get_url_mtproto
@@ -51,8 +49,6 @@ def check_payments() -> None:
             for invoice_item in invoices:
                 
                 invoice: SaleInvoicesInProgress = invoice_item[0]
-                stop_date_time = invoice_item[1]
-                current_date_time = invoice_item[2]
 
                 try:
                     info_last_payment: dict | None = getInfoLastPayment(invoice.label)
@@ -62,16 +58,8 @@ def check_payments() -> None:
                 
                 if not invoice.is_gift and info_last_payment and invoice.server_id:
                     success_payment(invoice, config)
-                # if invoice.is_gift and (invoice.telegram_id == config['Telegram'].getint('admin_chat') or (info_last_payment and not invoice.server_id)):
-                #     success_payment_gift(invoice, config)
 
-                if (
-                    current_date_time.strftime("%Y-%m-%d %H:%M:%S") > stop_date_time.strftime("%Y-%m-%d %H:%M:%S")
-                    ) or info_last_payment or (
-                        invoice.telegram_id == config['Telegram'].getint('admin_chat') and invoice.is_gift
-                    ):
-                    del_invoice(invoice)
-
+            session.rollback()
         time.sleep(3)
 
 
