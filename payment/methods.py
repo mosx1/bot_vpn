@@ -1,12 +1,10 @@
 import json, enums, keyboards, enums.keyCall
 
-from servers.methods import get_very_free_server, get_server_by_id
-
-from yoomoneyMethods import getLinkPayment
+from servers.methods import get_very_free_server
 
 from telebot.util import quick_markup
 
-from tables import ServersTable, User
+from tables import User
 
 from users.methods import get_user_by_id
 
@@ -52,11 +50,8 @@ def send_message_for_pay(bot: TeleBotMod, user_id: int, server_id: int, month: i
         TypeOfPurchase.yourself
     )
 
-    link_payment: str = getLinkPayment(label, month, coefficient)
-
     keyboard: keyboards.InlineKeyboardMarkup = quick_markup(
         {
-            'Оплата рублями': {'url': link_payment},
             "Оплата Crypto Bot": {"url": data['mini_app_invoice_url']},
             "Оплата звездами": {
                 "callback_data": json.dumps(

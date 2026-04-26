@@ -159,10 +159,10 @@ def success_payment(invoice: SaleInvoicesInProgress, config: ConfigParser):
         del_invoice(invoice)
     except Exception as e:
         logging.error(f'Failed to send success message for {user.telegram_id}: {str(e)}')
-        bot.send_message(
-            config['Telegram']['admin_chat'],
-            f'КРИТИЧЕСКАЯ ОШИБКА ОБНОВЛЕНИЯ ПОСЛЕ ОПЛАТЫ Не изменено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id)
-        )
+        # bot.send_message(
+        #     config['Telegram']['admin_chat'],
+        #     f'КРИТИЧЕСКАЯ ОШИБКА ОБНОВЛЕНИЯ ПОСЛЕ ОПЛАТЫ Не изменено сообщение\nпоток: check_payments\nerror: ```' + utils.form_text_markdownv2(str(e)) + "``` id:" + str(user.telegram_id)
+        # )
         # Don't delete invoice - will retry on next cycle
 
 

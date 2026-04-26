@@ -1,20 +1,16 @@
 import enums.keyCall
-import json, config, utils, managment_user, invite, enums, keyboards, uuid
+import json, config, utils, managment_user, invite, enums, keyboards
 
-from connect import db, logging
+from connect import logging
 
 import invite.methods
 
 from telebot import types
 
 from managment_user import add_user, del_users, data_user
-
-from psycopg2.extras import DictCursor
                   
 from servers.server_list import Country
-from servers.methods import get_server_list, get_very_free_server, get_server_by_id, get_coefficient_price_server
-
-from yoomoneyMethods import getLinkPayment
+from servers.methods import get_server_list, get_very_free_server, get_server_by_id
 
 from telebot.util import quick_markup
 
@@ -27,13 +23,11 @@ from tables import User, ServersTable
 
 from users.methods import get_user_by_id, reduce_time_by
 
-from payment.crypto.repository.methods import crypto_pay, PayingUser, TypeOfPurchase
+from payment.crypto.repository.methods import crypto_pay, PayingUser
 from payment.stars.handlers import handle_buy
-from payment.methods import send_message_for_pay, add_sale_invoice
 
 from configparser import ConfigParser
 
-from network_service import controllerFastApi
 from network_service.entity import NetworkServiceError
 
 from core.telebot import TeleBotMod
@@ -141,64 +135,6 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                         KeyCall.get_gift_code, 
                         call_data['server']
                     )
-                )
-            
-            case KeyCall.get_gift_code.value:
-                
-                label = uuid.uuid4()
-
-                add_sale_invoice(
-                    label,
-                    call.from_user.id,
-                    None,
-                    call_data['month'],
-                    call.message.chat.id,
-                    call.message.id,
-                    True
-                )
-                
-                data = crypto_pay.create_invoice(call_data['month'])
-                crypto_pay.ids[data['invoice_id']] = PayingUser(
-                    call.from_user.id,
-                    call_data['month'],
-                    call_data['server'],
-                    call.message.id,
-                    TypeOfPurchase.gift
-                )
-
-                keyboard = quick_markup(
-                    {
-                        'Оплата рублями': {'url': getLinkPayment(label, call_data['month'])},
-                        "Оплата Crypto Bot": {"url": data['mini_app_invoice_url']},
-                        '<<< назад': {'callback_data': '{"key": "pollCountMonth", "server": ' + str(call_data['server']) + ', "gift": true}'}
-                    },
-                    row_width=1
-                )
-
-                bot.edit_message_text_or_caption(call.message, config.TextsMessages.giftPay.value, reply_markup=keyboard)
-
-            case KeyCall.get_link_payment.value:
-                
-                coefficient = get_coefficient_price_server(int(call_data['server']))
-                
-                label = uuid.uuid4()
-
-                add_sale_invoice(
-                    label,
-                    call.from_user.id,
-                    call_data['server'],
-                    call_data['month'],
-                    call.message.chat.id,
-                    call.message.id
-                )
-                send_message_for_pay(
-                    bot, 
-                    call.from_user.id, 
-                    call_data['server'], 
-                    call_data['month'], 
-                    call.message, 
-                    label,
-                    coefficient
                 )
 
             case "connect":
