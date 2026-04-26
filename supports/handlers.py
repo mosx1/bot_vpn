@@ -69,7 +69,11 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                 )
             
             case _:
-
+                if message.text.lower().find('не работает') != -1:
+                    bot.reply_to(
+                        message,
+                        "Поробуйте сменить сервер или протокол в личном кабинете."
+                    )
                 bot.send_message(
                     config.ADMINCHAT,
                     "[" + utils.form_text_markdownv2(str(message.from_user.full_name)) +
