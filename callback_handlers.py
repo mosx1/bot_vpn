@@ -430,51 +430,6 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     callback_query_id=call.id,
                     text='Идет загрузка, ожидайте.'
                 )
-
-            case KeyCall.transfer_from_nid.value:
-
-                bot.edit_message_reply_markup(
-                    call.message.chat.id,
-                    call.message.id,
-                    reply_markup=keyboards.get_inline_loading()
-                )
-                user: User = get_user_by_id(call.from_user.id)
-                renewalOfSubscription(user, "", get_very_free_server())
-                successfully_paid(
-                    user.telegram_id,
-                    call.message,
-                    "ПЕРЕНАСТРОЙТЕ ПРИЛОЖЕНИЕ!!!"
-                )
-            case KeyCall.transfer_other_server.value:
-                
-                bot.edit_message_reply_markup(
-                    call.message.chat.id,
-                    call.message.id,
-                    reply_markup=keyboards.get_inline_loading()
-                )
-                user: User = get_user_by_id(call.from_user.id)
-                server_id = get_very_free_server(exclude_server_id=user.server_id)
-                res: bool | NetworkServiceError = del_users(
-                    {user.telegram_id}, 
-                    user.server_id, 
-                    no_message=True
-                )
-                add_user(
-                    user.telegram_id, 
-                    0, 
-                    name_user=user.name, 
-                    server=server_id
-                )
-                successfully_paid(
-                    user.telegram_id,
-                    optionText="Сервер изменен",
-                    old_message=call.message
-                )
-                bot.answer_callback_query(
-                    callback_query_id=call.id,
-                    text='Сервер успешно изменен',
-                    show_alert=False
-                )
             case KeyCall.pay_router.value:
                 
                 conf = ConfigParser()
