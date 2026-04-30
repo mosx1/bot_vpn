@@ -41,11 +41,12 @@ def check_subscription():
                 )
 
                 for user in users:
-                    bot.send_message(
-                        user.telegram_id,
-                        message_text,
-                        reply_markup=keyboards.getInlineExtend()
-                    )
+                    if user.telegram_id > 0:
+                        bot.send_message(
+                            user.telegram_id,
+                            message_text,
+                            reply_markup=keyboards.getInlineExtend()
+                        )
 
             time.sleep(60)
         except Exception:
