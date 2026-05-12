@@ -3,27 +3,20 @@ import config, utils, keyboards
 from enums.content_types import ContentTypes
 from enums.parse_mode import ParseMode
 from enums.chat_types import ChatTypes
-from enums.keyCall import KeyCall
 
 from telebot import types
-
-from giftUsers import checkGiftCode
-
-from messageForUser import successfully_paid
 
 from tables import User
 
 from filters import only_user_chat, only_user_chat_and_text, only_admin_chat_reply
 
-from keyboards import KeyboardForUser
+from keyboards import get_inline_web_page
 
-from users.methods import get_user_by_id
+from users.methods import get_user_by_id, get_jwt_by_id
 
 from core.telebot import TeleBotMod
 
 from configparser import ConfigParser
-
-from servers.methods import get_very_free_server
 
 
 
@@ -40,54 +33,30 @@ def register_message_handlers(bot: TeleBotMod) -> None:
         conf.read('config.ini')
         user: User = get_user_by_id(message.from_user.id)
 
-        if checkGiftCode(message):
-            return successfully_paid(message.from_user.id, optionText="Подарок активирован")
-
-        match message.text:
-
-            case KeyboardForUser.gift.value:
-
-                return bot.send_message(
-                    message.from_user.id,
-                    "Вы можете пригласить нового пользователя и получить за это 1 мес\. подписки бесплатно\. Для того чтоб использовать такую возможность, отправьте вашу пригласительную ссылку другу\(для копирования достаточно нажать на ссылку\)\n\n Персональная ссылка:\n`https://t.me/open_vpn_sale_bot?start=" + 
-                    str(message.from_user.id) + "`",
-                    parse_mode = ParseMode.mdv2.value
+        if message.text.lower().find('не работает') != -1:
+            bot.reply_to(
+                message,
+                "Поробуйте сменить сервер или протокол в личном кабинете."
+            )
+        bot.send_message(
+            config.ADMINCHAT,
+            "[" + utils.form_text_markdownv2(str(message.from_user.full_name)) +
+            "](tg://user?id\=" + str(message.from_user.id) +
+            "):\n" +
+            utils.form_text_markdownv2(message.text) +
+            "\nid:" + str(message.from_user.id),
+            parse_mode=ParseMode.mdv2.value,
+            reply_markup=keyboards.get_inline_for_users_list(user)
+        )
+        return bot.reply_to(
+            message,
+            conf['MessagesText'].get('reply_to_message'),
+            reply_markup=get_inline_web_page(
+                get_jwt_by_id(
+                    user.telegram_id
                 )
-            
-            case KeyboardForUser.buy.value:
-                
-                curr_user: User = get_user_by_id(message.from_user.id)
-                server_id: int = curr_user.server_id
-
-                if not curr_user.action:
-                    server_id: int = get_very_free_server()
-
-                bot.reply_to(
-                    message, 
-                    "На какой срок?", 
-                    reply_markup=keyboards.get_inline_for_count_month(KeyCall.get_link_payment, server_id)
-                )
-            
-            case _:
-                if message.text.lower().find('не работает') != -1:
-                    bot.reply_to(
-                        message,
-                        "Поробуйте сменить сервер или протокол в личном кабинете."
-                    )
-                bot.send_message(
-                    config.ADMINCHAT,
-                    "[" + utils.form_text_markdownv2(str(message.from_user.full_name)) +
-                    "](tg://user?id\=" + str(message.from_user.id) +
-                    "):\n" +
-                    utils.form_text_markdownv2(message.text) +
-                    "\nid:" + str(message.from_user.id),
-                    parse_mode=ParseMode.mdv2.value,
-                    reply_markup=keyboards.get_inline_for_users_list(user)
-                )
-                return bot.reply_to(
-                    message,
-                    conf['MessagesText'].get('reply_to_message')
-                )
+            )
+        )
             
 
 
@@ -161,14 +130,21 @@ def register_message_handlers(bot: TeleBotMod) -> None:
 
 
     @bot.message_handler(
-        func=only_admin_chat_reply()
+        func=only_admin_chat_reply(),
+        content_types=[
+            ContentTypes.text.value,
+            ContentTypes.photo.value,
+            ContentTypes.video.value,
+            ContentTypes.document.value,
+            ContentTypes.sticker.value
+        ]
     )
     def _(message: types.Message) -> None:
         
         if message.reply_to_message.content_type == "text":
-            user_id: str | int = str(message.reply_to_message.text).split('id:', -1)[1]
+            user_id: str | int = str(message.reply_to_message.text).split('id:', -1)[1].strip()
         else:
-            user_id: str | int = str(message.reply_to_message.caption).split('id:', -1)[1]
+            user_id: str | int = str(message.reply_to_message.caption).split('id:', -1)[1].strip()
         
         try:
             bot.copy_message(

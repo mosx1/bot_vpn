@@ -17,7 +17,7 @@ from telebot.util import quick_markup
 from enums.parse_mode import ParseMode
 from enums.keyCall import KeyCall, ReduceTime
 
-from messageForUser import successfully_paid, manual_successfully_paid
+from messageForUser import successfully_paid
 
 from tables import User, ServersTable
 
@@ -31,8 +31,6 @@ from configparser import ConfigParser
 from network_service.entity import NetworkServiceError
 
 from core.telebot import TeleBotMod
-
-from managers.subscription.renewal_of_subscription import renewalOfSubscription
 
 
 def register_callback_handlers(bot: TeleBotMod) -> None:
@@ -318,10 +316,6 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
             case "termsOfUse":
 
                 bot.send_message(call.message.chat.id, config.TextsMessages.TEXTTERMS.value)
-        
-            case "manualSettings":
-
-                manual_successfully_paid(call_data['id'], call.message)
 
             case KeyCall.backmanual_settings.value:
                 

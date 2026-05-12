@@ -53,10 +53,6 @@ def register_message_handlers(bot: TeleBotMod) -> None:
         keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
         keyboard.add(types.KeyboardButton(text=f'/{conf['BaseConfig'].get('admin_password')}'),
                     types.KeyboardButton(text=f'/{Comands.actionUsersCount.value}'))
-        keyboard.add(
-            types.KeyboardButton(text=f'/{Comands.statistic.value}'),
-            types.KeyboardButton(text=f'/{Comands.checkSubscription.value}')
-        )
         bot.send_message(message.from_user.id, "add_key", reply_markup=keyboard)
 
     @bot.message_handler(commands=[Comands.checkSubscription.value], func=onlyAdminChat())
