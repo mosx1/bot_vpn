@@ -16,7 +16,7 @@ from sqlalchemy import insert, select, func, update, text
 
 from tables import User
 
-from users.methods import get_user_by_id, get_user_by, get_jwt_by_id
+from users.methods import get_user_by_id, get_user_by
 
 from servers.methods import get_server_name_by_id, get_very_free_server
 

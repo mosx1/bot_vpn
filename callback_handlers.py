@@ -7,7 +7,7 @@ import invite.methods
 
 from telebot import types
 
-from managment_user import add_user, del_users, data_user
+from managment_user import data_user
                   
 from servers.server_list import Country
 from servers.methods import get_server_list, get_very_free_server, get_server_by_id
@@ -28,8 +28,6 @@ from payment.stars.handlers import handle_buy
 
 from configparser import ConfigParser
 
-from network_service.entity import NetworkServiceError
-
 from core.telebot import TeleBotMod
 
 
@@ -47,32 +45,6 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
         logging.info("user_id: " + str(call.from_user.id) + ", user_name:" + str(username) + " нажата кнопка с ключем " + call_data['key'])
         
         match call_data['key']:
-
-            case "try":
-
-                bot.delete_message(call.message.chat.id, call.message.id)
-                oldMessage: types.Message = bot.send_photo(
-                    chat_id=call.from_user.id, 
-                    photo=open("static/logo_big.jpeg", "rb"),
-                    caption="Идет формирование конфигурации. Это может занять несколько минут..."
-                )
-                add_user(
-                    call.from_user.id,
-                    week=conf['BaseConfig'].getint('first_start_duration_week'),
-                    name_user=utils.form_text_markdownv2(username, delete=True),
-                    server=get_very_free_server()
-                )
-                if 'invitedId' in call_data:
-                    invite.methods.addInvitedBonus(call_data['invitedId'])
-                    invite.methods.writeInvited(
-                        str(call.from_user.id), 
-                        str(call_data['invitedId'])
-                    )
-
-                successfully_paid(
-                    call.from_user.id, 
-                    oldMessage
-                )
             
             case KeyCall.sale.value:
                 
@@ -203,73 +175,6 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     reply_markup = keyboards.get_inline_for_users_list(user)
                 )
                 return
-            
-            case "action":
-
-                user: User = get_user_by_id(call_data['id'])
-
-                bot.edit_message_reply_markup(
-                    chat_id = call.message.chat.id,
-                    message_id= call.message.id,
-                    reply_markup = keyboards.get_inline_loading()
-                )
-
-                if call.message.chat.id == config.ADMINCHAT:
-                    try:
-                        username = str(call.message.caption).split(": ", 1)[1]
-                    except Exception:
-                        username = str(call.message.text).split(" ", -2)[0]
-                if "s" in call_data:
-                    add_user(call_data['id'], call_data["month"], name_user=username, server=call_data['s'])
-                else:
-                    add_user(call_data['id'], call_data["month"], name_user=username)
-                
-                text_arr: list[str] = utils.form_text_markdownv2(call.message.text_or_caption).split('id:')[:-1]
-
-                text: str = "id:".join(text_arr)
-
-                if successfully_paid(call_data['id']):
-                    text += "\n\n*Подписка активирована, сообщение пользователю отправлено*"
-                else:
-                    text += "\n\n*Подписка активирована, но сообщение не отправлено*"
-
-                text += "\n\nid:" + call_data['id']
-
-                bot.edit_message_text_or_caption(
-                    call.message,
-                    text,
-                    parse_mode=ParseMode.mdv2,
-                    reply_markup = keyboards.get_inline_for_users_list(user)
-                )
-
-            case KeyCall.deaction.name:
-
-                text = ""
-                user: User = get_user_by_id(call_data['id'])
-                res: bool | NetworkServiceError = del_users(
-                    {user.telegram_id}, 
-                    user.server_id, 
-                    no_message=True
-                )
-
-                if not isinstance(res, NetworkServiceError):
-
-                    data_user(
-                        call_data['id'],
-                        call.message
-                    )
-
-                    text = "Подписка отключена"
-
-                else:
-
-                    text = f"{res.caption} [{res.response}]"
-
-                return bot.answer_callback_query(
-                    callback_query_id=call.id,
-                    text=text,
-                    show_alert=True
-                )
                 
             case "not_action":
 
@@ -424,33 +329,7 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     callback_query_id=call.id,
                     text='Идет загрузка, ожидайте.'
                 )
-            case KeyCall.pay_router.value:
-                
-                conf = ConfigParser()
-                conf.read('config.ini')
-                
-                bot.edit_message_text_or_caption(
-                    call.message,
-                    conf['MessagesText'].get('pay_router_message'),
-                    reply_markup=keyboards.get_inline_back_to_main(call.from_user.id)
-                )
-            case KeyCall.get_settings_vpn_router.value:
 
-                with open("static/settings_vpn_config.mov", "rb") as video_file:
-                    bot.send_video(
-                        call.from_user.id,
-                        video_file,
-                        width=1920,
-                        height=1080,
-                        timeout=60
-                    )
-            case KeyCall.send_sale_invoice.value:
-
-                msg = bot.send_message(
-                    call.from_user.id,
-                    "Введите количество месяцев для отправки счета:"
-                )
-                # bot.register_next_step_handler(msg, , int(call_data['user_id']))
             case _:
 
                 bot.answer_callback_query(
