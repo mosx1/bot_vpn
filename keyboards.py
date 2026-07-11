@@ -1,6 +1,6 @@
 import utils
 
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from telebot.util import quick_markup
 
 from servers.server_list import Country
@@ -193,9 +193,9 @@ def get_inline_for_count_month(key: Enum, server_id: str, coefficient = 1) -> In
     )
 
 
-def get_inline_web_page(token: str) -> InlineKeyboardButton:
+def get_inline_web_page(token: str) -> InlineKeyboardMarkup:
     return quick_markup(
         {
-            'Личный кабинет': {'url': f'https://kuzmos.ru/sub/home?token={token}'}
+            'Личный кабинет': {'web_app': WebAppInfo(url=f'https://kuzmos.ru/sub/home?token={token}')}
         }
     )
