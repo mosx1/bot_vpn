@@ -92,25 +92,7 @@ def get_inline_for_users_list(user: User | None = None, a: int = 0, buttonNav: l
 
     if user:
         if user.action:
-
-            inlineKeyConnect = InlineKeyboardButton(
-                    text="+",
-                    callback_data='{"key": "connect", "id": ' + str(user.telegram_id) + ', "serverId": ' + str(user.server_id) + '}'
-                )
-
             keyboard_offer_one.add(
-                inlineKeyConnect,
-                InlineKeyboardButton(
-                    text="-",
-                    callback_data=utils.callBackBilder(
-                        ReduceTime.timing,
-                        id=user.telegram_id
-                    )
-                ),
-                InlineKeyboardButton(
-                    text="Отключить", 
-                    callback_data='{"key": "deaction", "id": "' + str(user.telegram_id) + '"}'
-                ),
                 InlineKeyboardButton(
                     text="Данные", 
                     callback_data='{"key": "data_user", "id": "' + str(user.telegram_id) + '"}'
@@ -124,10 +106,6 @@ def get_inline_for_users_list(user: User | None = None, a: int = 0, buttonNav: l
         else:
 
             keyboard_offer_one.add(
-                InlineKeyboardButton(
-                    text="Выбрать сервер", 
-                    callback_data='{"key": "' + KeyCall.list_servers_for_admin.name + '", "user_id": ' + str(user.telegram_id) + '}'
-                ),
                 InlineKeyboardButton(
                     text="Данные", 
                     callback_data='{"key": "data_user", "id": "' + str(user.telegram_id) + '"}'
@@ -147,25 +125,6 @@ def get_inline_for_users_list(user: User | None = None, a: int = 0, buttonNav: l
 def get_inline_for_full_user_info(user: User) -> InlineKeyboardMarkup:
 
     keyboard: InlineKeyboardMarkup = get_inline_for_users_list(user)
-
-    keyboard.add(
-        InlineKeyboardButton(
-            text = "Обнулить баланс",
-            callback_data = utils.callBackBilder(
-                KeyCall.reset_to_zero_balance,
-                userId = id
-            )
-        )
-    )
-    keyboard.add(
-        InlineKeyboardButton(
-            text="Отправить счет",
-            callback_data=utils.callBackBilder(
-                KeyCall.send_sale_invoice,
-                user_id = user.telegram_id
-            )
-        )
-    )
     keyboard.add(
         InlineKeyboardButton(
             text="ЛК",
