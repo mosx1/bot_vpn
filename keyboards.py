@@ -10,7 +10,7 @@ from users.methods import get_jwt_by_id
 
 from enum import Enum
 
-from enums.keyCall import KeyCall, ReduceTime
+from enums.keyCall import KeyCall
 
 from tables import User
 
@@ -109,10 +109,6 @@ def get_inline_for_users_list(user: User | None = None, a: int = 0, buttonNav: l
                 InlineKeyboardButton(
                     text="Данные", 
                     callback_data='{"key": "data_user", "id": "' + str(user.telegram_id) + '"}'
-                ),
-                InlineKeyboardButton(
-                    text="Отправить кнопку продления",
-                    callback_data='{"key": "' + KeyCall.send_message_for_extension.name + '", "user_id": "' + str(user.telegram_id) + '"}'
                 ),
                 row_width=2
             )
