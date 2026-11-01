@@ -20,13 +20,13 @@ from messageForUser import successfully_paid
 
 from tables import User
 
-from users.methods import get_user_by_id, get_jwt_by_id
+from users.methods import get_user_by_id
 
 from core.telebot import TeleBotMod
 
 from configparser import ConfigParser
 
-from keyboards import get_inline_web_page
+from subscription.messages import send_subscription_manage_message
 
 
 def register_message_handlers(bot: TeleBotMod) -> None:
@@ -76,23 +76,40 @@ def register_message_handlers(bot: TeleBotMod) -> None:
                     url="https://kuzmos.ru/auth/"
                 )
             )
-        elif user.action == False:
-            token = get_jwt_by_id(user.telegram_id)
             bot.send_message(
-                user.telegram_id,
-                'Для управления подпиской используйте веб приложение.',
-                reply_markup=get_inline_web_page(token)
+                message.chat.id,
+                "*Приветствую Вас в сервисе VPN для свободного интернета без границ\\.*",
+                reply_markup=keyboard,
+                parse_mode=ParseMode.mdv2.value,
             )
-        elif user.action:
-            successfully_paid(message.from_user.id)
             return
 
-        bot.send_message(
-            message.chat.id, 
-            "*Приветствую Вас в сервисе VPN для свободного интернета без границ\.*",
-            reply_markup=keyboard, 
-            parse_mode=ParseMode.mdv2.value
-        )
+        welcome = "*Приветствую Вас в сервисе VPN для свободного интернета без границ\\.*"
+        if user.action:
+            manage_text = (
+                f"{welcome}\n\n"
+                "Управление подпиской — кнопками ниже "
+                "(смена сервера, протокола, продление, статус)."
+            )
+            send_subscription_manage_message(
+                bot,
+                message.from_user.id,
+                manage_text,
+                parse_mode=ParseMode.mdv2.value,
+                pin=True,
+            )
+        else:
+            manage_text = (
+                f"{welcome}\n\n"
+                "Подписка приостановлена или не активна. Используйте кнопки ниже."
+            )
+            send_subscription_manage_message(
+                bot,
+                message.from_user.id,
+                manage_text,
+                parse_mode=ParseMode.mdv2.value,
+            )
+        return
 
     @bot.message_handler(
         func=lambda message: message.forward_from is not None and message.chat.id == config.ADMINCHAT

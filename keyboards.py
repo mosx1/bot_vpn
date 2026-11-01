@@ -1,3 +1,4 @@
+import datetime
 import utils
 
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
@@ -15,6 +16,12 @@ from enums.keyCall import KeyCall
 from tables import User
 
 from configparser import ConfigParser
+
+
+def _webapp_base_url() -> str:
+    config = ConfigParser()
+    config.read("config.ini")
+    return config["WebApp"].get("base_url", fallback="https://kuzmos.ru").strip().rstrip("/")
 
 
 
@@ -148,9 +155,92 @@ def get_inline_for_count_month(key: Enum, server_id: str, coefficient = 1) -> In
     )
 
 
-def get_inline_web_page(token: str) -> InlineKeyboardMarkup:
-    return quick_markup(
-        {
-            'Личный кабинет': {'web_app': WebAppInfo(url=f'https://kuzmos.ru/sub/home?token={token}')}
-        }
+def get_inline_web_page(token: str, user: User | None = None) -> InlineKeyboardMarkup:
+    """
+    Клавиатура управления подпиской: WebApp/URL и callback на /sub/* vpn-webapp.
+    """
+    base_url = _webapp_base_url()
+    keyboard = InlineKeyboardMarkup(row_width=1)
+    keyboard.add(
+        InlineKeyboardButton(
+            text="Личный кабинет",
+            web_app=WebAppInfo(url=f"{base_url}/sub/home?token={token}"),
+        )
     )
+
+    if not user:
+        return keyboard
+
+    if user.action:
+        keyboard.add(
+            InlineKeyboardButton(
+                text="Настроить приложение",
+                url=f"{base_url}/sub/mobile?token={token}",
+            )
+        )
+        keyboard.add(
+            InlineKeyboardButton(
+                text="Обновить подписку (смена сервера)",
+                callback_data=utils.callBackBilder(KeyCall.transfer_other_server),
+            )
+        )
+        keyboard.add(
+            InlineKeyboardButton(
+                text="Сменить протокол",
+                callback_data=utils.callBackBilder(KeyCall.transfer_protocol),
+            )
+        )
+        keyboard.add(
+            InlineKeyboardButton(
+                text="Статус подписки",
+                callback_data=utils.callBackBilder(KeyCall.subscription_info),
+            )
+        )
+        keyboard.add(
+            InlineKeyboardButton(
+                text="Продлить",
+                callback_data='{"key": "' + KeyCall.pollCountMonth.value + '"}',
+            )
+        )
+        return keyboard
+
+    if user.exit_date and user.exit_date > datetime.datetime.now():
+        keyboard.add(
+            InlineKeyboardButton(
+                text="Статус подписки",
+                callback_data=utils.callBackBilder(KeyCall.subscription_info),
+            )
+        )
+        keyboard.add(
+            InlineKeyboardButton(
+                text="Возобновить подписку",
+                callback_data=utils.callBackBilder(KeyCall.resume_subscription),
+            )
+        )
+        keyboard.add(
+            InlineKeyboardButton(
+                text="Оплатить (веб)",
+                url=f"{base_url}/sub/pay?token={token}&month=1",
+            )
+        )
+        return keyboard
+
+    keyboard.add(
+        InlineKeyboardButton(
+            text="Статус подписки",
+            callback_data=utils.callBackBilder(KeyCall.subscription_info),
+        )
+    )
+    keyboard.add(
+        InlineKeyboardButton(
+            text="Оплатить подписку",
+            callback_data='{"key": "' + KeyCall.pollCountMonth.value + '"}',
+        )
+    )
+    keyboard.add(
+        InlineKeyboardButton(
+            text="Оплатить (веб)",
+            url=f"{base_url}/sub/pay?token={token}&month=1",
+        )
+    )
+    return keyboard

@@ -52,9 +52,8 @@ def register_message_handlers(bot: TeleBotMod) -> None:
             message,
             conf['MessagesText'].get('reply_to_message'),
             reply_markup=get_inline_web_page(
-                get_jwt_by_id(
-                    user.telegram_id
-                )
+                get_jwt_by_id(user.telegram_id),
+                user,
             )
         )
             

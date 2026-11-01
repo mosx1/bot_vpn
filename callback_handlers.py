@@ -21,7 +21,7 @@ from messageForUser import successfully_paid
 
 from tables import User, ServersTable
 
-from users.methods import get_user_by_id, reduce_time_by
+from users.methods import get_user_by_id, get_jwt_by_id, reduce_time_by
 
 from payment.crypto.repository.methods import crypto_pay, PayingUser
 from payment.stars.handlers import handle_buy
@@ -29,6 +29,38 @@ from payment.stars.handlers import handle_buy
 from configparser import ConfigParser
 
 from core.telebot import TeleBotMod
+
+from network_service import vpn_webapp_api
+from network_service.vpn_webapp_api import VpnWebappApiError
+from keyboards import get_inline_web_page
+from subscription.messages import format_subscription_expire_line
+
+
+def _run_vpn_webapp_action(
+    bot: TeleBotMod,
+    call: types.CallbackQuery,
+    action,
+    progress_text: str,
+) -> None:
+    user: User | None = get_user_by_id(call.from_user.id)
+    if not user:
+        bot.answer_callback_query(call.id, "Сначала пройдите регистрацию на сайте.")
+        return
+
+    bot.answer_callback_query(call.id, progress_text)
+    try:
+        result = action(call.from_user.id)
+    except VpnWebappApiError as error:
+        bot.send_message(call.from_user.id, str(error))
+        return
+
+    token = get_jwt_by_id(call.from_user.id)
+    user = get_user_by_id(call.from_user.id)
+    bot.send_message(
+        call.from_user.id,
+        result.message,
+        reply_markup=get_inline_web_page(token, user),
+    )
 
 
 def register_callback_handlers(bot: TeleBotMod) -> None:
@@ -247,6 +279,60 @@ def register_callback_handlers(bot: TeleBotMod) -> None:
                     callback_query_id=call.id,
                     text='Идет загрузка, ожидайте.'
                 )
+
+            case KeyCall.transfer_other_server.value:
+                _run_vpn_webapp_action(
+                    bot,
+                    call,
+                    vpn_webapp_api.transfer_other_server,
+                    "Обновляем подписку на сервере…",
+                )
+                return
+
+            case KeyCall.transfer_protocol.value:
+                _run_vpn_webapp_action(
+                    bot,
+                    call,
+                    vpn_webapp_api.transfer_protocol,
+                    "Меняем протокол…",
+                )
+                return
+
+            case KeyCall.resume_subscription.value:
+                _run_vpn_webapp_action(
+                    bot,
+                    call,
+                    vpn_webapp_api.resume_subscription,
+                    "Возобновляем подписку…",
+                )
+                return
+
+            case KeyCall.subscription_info.value:
+                user = get_user_by_id(call.from_user.id)
+                if not user:
+                    bot.answer_callback_query(call.id, "Сначала пройдите регистрацию на сайте.")
+                    return
+                bot.answer_callback_query(call.id, "Запрашиваем данные…")
+                try:
+                    info = vpn_webapp_api.get_subscription_info(call.from_user.id)
+                except VpnWebappApiError as error:
+                    bot.send_message(call.from_user.id, str(error))
+                    return
+                lines = [format_subscription_expire_line(info.get("expire_timestamp"))]
+                if info.get("has_subscription_body"):
+                    lines.append("Конфигурация для приложения доступна в подписке.")
+                else:
+                    lines.append(
+                        "Конфигурация в подписке пока пуста — "
+                        "возобновите доступ или обновите сервер кнопками ниже."
+                    )
+                token = get_jwt_by_id(call.from_user.id)
+                bot.send_message(
+                    call.from_user.id,
+                    "\n".join(lines),
+                    reply_markup=get_inline_web_page(token, user),
+                )
+                return
 
             case _:
 
