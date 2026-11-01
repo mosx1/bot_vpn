@@ -80,8 +80,8 @@ def register_message_handlers(bot: TeleBotMod) -> None:
             token = get_jwt_by_id(user.telegram_id)
             bot.send_message(
                 user.telegram_id,
-                'Для управления подпиской используйте веб приложение.',
-                reply_markup=get_inline_web_page(token)
+                "Подписка приостановлена или не активна. Используйте кнопки ниже.",
+                reply_markup=get_inline_web_page(token, user),
             )
         elif user.action:
             successfully_paid(message.from_user.id)
