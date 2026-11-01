@@ -27,7 +27,7 @@ def send_subscription_manage_message(
     """
     Отправляет текст и клавиатуру с WebApp/URL и callback на эндпоинты vpn-webapp (/sub/*).
     """
-    resolved_user = user if user is not None else get_user_by_id(telegram_id)
+    resolved_user = get_user_by_id(telegram_id)
     if not resolved_user:
         return None
 
